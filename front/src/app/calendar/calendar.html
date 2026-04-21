@@ -1,0 +1,121 @@
+<section aria-labelledby="calendar-heading">
+  <h2 id="calendar-heading" class="sr-only" i18n="@@calendarHeading">Trip calendar</h2>
+
+  <!-- Calendar navigation -->
+  <nav aria-label="Calendar navigation" i18n-aria-label="@@calendarNavLabel" class="mb-4">
+    <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+      <!-- Previous / Next month buttons -->
+      <div class="flex items-center gap-1">
+        <button
+          type="button"
+          (click)="goToPreviousMonth()"
+          class="inline-flex items-center justify-center rounded-lg p-2.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+          i18n-aria-label="@@previousMonthLabel"
+          aria-label="Previous month"
+        >
+          <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          (click)="goToNextMonth()"
+          class="inline-flex items-center justify-center rounded-lg p-2.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+          i18n-aria-label="@@nextMonthLabel"
+          aria-label="Next month"
+        >
+          <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Month and year selectors -->
+      <div class="flex items-center gap-2">
+        <div>
+          <label for="month-select" class="sr-only" i18n="@@monthSelectLabel">Month</label>
+          <select
+            id="month-select"
+            [value]="currentMonth()"
+            (change)="onMonthChange($event)"
+            class="block rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          >
+            @for (name of monthNames(); track $index) {
+              <option [value]="$index" [selected]="$index === currentMonth()">{{ name }}</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label for="year-select" class="sr-only" i18n="@@yearSelectLabel">Year</label>
+          <select
+            id="year-select"
+            [value]="currentYear()"
+            (change)="onYearChange($event)"
+            class="block rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          >
+            @for (y of years(); track y) {
+              <option [value]="y" [selected]="y === currentYear()">{{ y }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Today button -->
+      <button
+        type="button"
+        (click)="goToToday()"
+        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+        i18n="@@todayButton"
+      >
+        Today
+      </button>
+    </div>
+  </nav>
+
+  <!-- Calendar grid -->
+  <div class="overflow-x-auto rounded-lg bg-white shadow-sm dark:bg-gray-800" role="grid" aria-labelledby="calendar-heading">
+    <table class="w-full text-sm">
+      <thead>
+        <tr role="row">
+          @for (dayName of dayOfWeekNames(); track $index) {
+            <th
+              scope="col"
+              role="columnheader"
+              class="border-b border-gray-200 px-2 py-3 text-center font-medium text-gray-500 dark:border-gray-700 dark:text-gray-400"
+              [attr.aria-label]="dayName"
+            >
+              {{ dayName }}
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (week of weeks(); track $index) {
+          <tr role="row" class="border-b border-gray-200 last:border-b-0 dark:border-gray-700">
+            @for (day of week.days; track trackByDay($index, day)) {
+              <td
+                role="gridcell"
+                class="h-12 px-2 py-1 text-center align-top md:h-24 md:px-3 md:py-2"
+                [class.text-gray-400]="!day.isCurrentMonth"
+                [class.dark:text-gray-500]="!day.isCurrentMonth"
+                [class.text-gray-900]="day.isCurrentMonth && !day.isToday"
+                [class.dark:text-white]="day.isCurrentMonth && !day.isToday"
+              >
+                <span
+                  class="inline-flex h-7 w-7 items-center justify-center rounded-full text-sm"
+                  [class.bg-blue-600]="day.isToday"
+                  [class.text-white]="day.isToday"
+                  [class.font-semibold]="day.isToday"
+                >
+                  {{ day.date }}
+                </span>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
