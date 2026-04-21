@@ -28,6 +28,7 @@
 #     parameters:
 #       artifactName: drop
 #       packageFileName: voyagevoyage-app.zip
+#       frontDistPath: front/dist/voyagevoyage-front/browser
 #       environmentName: production
 
 parameters:
@@ -37,6 +38,9 @@ parameters:
   - name: packageFileName
     type: string
     default: voyagevoyage-app.zip
+  - name: frontDistPath
+    type: string
+    default: front/dist/voyagevoyage-front/browser
   - name: environmentName
     type: string
     default: production
@@ -76,8 +80,12 @@ stages:
             displayName: Publish ASP.NET server
 
           - script: |
+              if [ ! -d "$(Build.SourcesDirectory)/${{ parameters.frontDistPath }}" ]; then
+                echo "Expected Angular build output was not found at $(Build.SourcesDirectory)/${{ parameters.frontDistPath }}"
+                exit 1
+              fi
               mkdir -p "$(Build.ArtifactStagingDirectory)/app/wwwroot"
-              cp -R "$(Build.SourcesDirectory)/front/dist/voyagevoyage-front/browser/." "$(Build.ArtifactStagingDirectory)/app/wwwroot/"
+              cp -R "$(Build.SourcesDirectory)/${{ parameters.frontDistPath }}/." "$(Build.ArtifactStagingDirectory)/app/wwwroot/"
             displayName: Ensure Angular build is present in published wwwroot
 
           - task: ArchiveFiles@2
