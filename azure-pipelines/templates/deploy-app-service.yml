@@ -3,7 +3,7 @@
 # Required parameters:
 # - azureSubscription: name of the Azure DevOps service connection
 # - appName: target Azure App Service name
-# - packagePath: package path/glob inside the downloaded artifact (for example: "$(Pipeline.Workspace)/drop/**/*.zip")
+# - packagePath: package path/glob inside the downloaded artifact (for example: "$(Pipeline.Workspace)/drop/drop/**/*.zip")
 #
 # Optional parameters:
 # - artifactName: name of the published build artifact to download (default: drop)
@@ -18,7 +18,7 @@
 #       azureSubscription: 'my-service-connection'
 #       appName: 'voyagevoyage-prod-app'
 #       artifactName: 'drop'
-#       packagePath: '$(Pipeline.Workspace)/drop/**/*.zip'
+#       packagePath: '$(Pipeline.Workspace)/drop/drop/**/*.zip'
 
 parameters:
   - name: azureSubscription
@@ -48,7 +48,7 @@ jobs:
               displayName: Download build artifact
               inputs:
                 artifact: ${{ parameters.artifactName }}
-                path: $(Pipeline.Workspace)
+                path: $(Pipeline.Workspace)/${{ parameters.artifactName }}
 
             - task: AzureWebApp@1
               displayName: Deploy package to App Service

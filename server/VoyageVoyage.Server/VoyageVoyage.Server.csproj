@@ -17,13 +17,6 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <TargetPath>wwwroot\%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
     </Content>
-    <Content Include="..\..\front\dist\voyagevoyage-front\**\*"
-             Exclude="..\..\front\dist\voyagevoyage-front\browser\**\*"
-             Condition="Exists('..\..\front\dist\voyagevoyage-front') and !Exists('..\..\front\dist\voyagevoyage-front\browser')">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <TargetPath>wwwroot\%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
-    </Content>
   </ItemGroup>
 
 </Project>
