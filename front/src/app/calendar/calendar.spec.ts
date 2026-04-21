@@ -60,8 +60,9 @@ describe('CalendarComponent', () => {
     await fixture.whenStable();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const prevButton = compiled.querySelector('button[aria-label="Previous month"]');
+    const prevButton = compiled.querySelector('button[aria-label]');
     expect(prevButton).toBeTruthy();
+    expect(prevButton?.getAttribute('aria-label')).toBe('Mois précédent');
   });
 
   it('should have a next month button', async () => {
@@ -70,8 +71,10 @@ describe('CalendarComponent', () => {
     await fixture.whenStable();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const nextButton = compiled.querySelector('button[aria-label="Next month"]');
+    const buttons = compiled.querySelectorAll('button[aria-label]');
+    const nextButton = buttons[1];
     expect(nextButton).toBeTruthy();
+    expect(nextButton?.getAttribute('aria-label')).toBe('Mois suivant');
   });
 
   it('should have a today button', async () => {
@@ -81,7 +84,7 @@ describe('CalendarComponent', () => {
 
     const compiled = fixture.nativeElement as HTMLElement;
     const buttons = Array.from(compiled.querySelectorAll('button'));
-    const todayBtn = buttons.find((b) => b.textContent?.trim() === 'Today');
+    const todayBtn = buttons.find((b) => b.textContent?.trim() === "Aujourd'hui");
     expect(todayBtn).toBeTruthy();
   });
 

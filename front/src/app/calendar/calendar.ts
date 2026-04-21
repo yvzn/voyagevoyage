@@ -14,7 +14,7 @@ import { LocaleService } from '../locale.service';
   templateUrl: './calendar.html',
 })
 export class CalendarComponent {
-  private readonly localeService = inject(LocaleService);
+  protected readonly localeService = inject(LocaleService);
 
   protected readonly currentYear = signal(new Date().getFullYear());
   protected readonly currentMonth = signal(new Date().getMonth());

@@ -49,7 +49,17 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    const langBtn = compiled.querySelector('[data-dropdown-toggle="language-dropdown"]');
+    const langBtn = compiled.querySelector('[aria-haspopup="true"]');
     expect(langBtn).toBeTruthy();
+  });
+
+  it('should have a skip link to main content', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    const compiled = fixture.nativeElement as HTMLElement;
+    const skipLink = compiled.querySelector('a[href="#main-content"]');
+    expect(skipLink).toBeTruthy();
+    const main = compiled.querySelector('#main-content');
+    expect(main).toBeTruthy();
   });
 });
