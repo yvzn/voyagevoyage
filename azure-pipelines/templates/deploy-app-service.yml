@@ -59,7 +59,7 @@ stages:
 
           - script: |
               cd front
-              npm install --registry https://registry.npmjs.org/
+              npm ci --registry https://registry.npmjs.org/
               npm run build
             displayName: Build Angular front end
 
@@ -74,6 +74,11 @@ stages:
               dotnet restore
               dotnet publish -c Release -o "$(Build.ArtifactStagingDirectory)/app"
             displayName: Publish ASP.NET server
+
+          - script: |
+              mkdir -p "$(Build.ArtifactStagingDirectory)/app/wwwroot"
+              cp -R front/dist/voyagevoyage-front/browser/. "$(Build.ArtifactStagingDirectory)/app/wwwroot/"
+            displayName: Ensure Angular build is present in published wwwroot
 
           - task: ArchiveFiles@2
             displayName: Archive deploy package
