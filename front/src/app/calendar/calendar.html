@@ -39,7 +39,7 @@
             id="month-select"
             [value]="currentMonth()"
             (change)="onMonthChange($event)"
-            class="block rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            class="block appearance-auto rounded-lg border border-gray-300 bg-gray-50 py-2 pl-3 pr-8 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
           >
             @for (name of monthNames(); track $index) {
               <option [value]="$index" [selected]="$index === currentMonth()">{{ name }}</option>
@@ -48,17 +48,16 @@
         </div>
 
         <div>
-          <label for="year-select" class="sr-only" i18n="@@yearSelectLabel">Year</label>
-          <select
-            id="year-select"
+          <label for="year-input" class="sr-only" i18n="@@yearInputLabel">Year</label>
+          <input
+            id="year-input"
+            type="number"
             [value]="currentYear()"
+            [min]="minYear"
+            [max]="maxYear"
             (change)="onYearChange($event)"
-            class="block rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-          >
-            @for (y of years(); track y) {
-              <option [value]="y" [selected]="y === currentYear()">{{ y }}</option>
-            }
-          </select>
+            class="block w-20 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          />
         </div>
       </div>
 

@@ -3,7 +3,12 @@ import { CalendarComponent } from './calendar/calendar';
 
 export const routes: Routes = [
   {
-    path: '',
+    path: 'calendar',
     component: CalendarComponent,
+  },
+  {
+    path: '',
+    redirectTo: 'calendar',
+    pathMatch: 'full',
   },
 ];

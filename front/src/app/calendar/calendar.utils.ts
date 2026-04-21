@@ -97,9 +97,3 @@ export function getDayOfWeekNames(locale: string): string[] {
     return formatter.format(date);
   });
 }
-
-export function getYearRange(currentYear: number): number[] {
-  const startYear = currentYear - 5;
-  const endYear = currentYear + 5;
-  return Array.from({ length: endYear - startYear + 1 }, (_, i) => startYear + i);
-}

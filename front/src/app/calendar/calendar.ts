@@ -5,7 +5,6 @@ import {
   getCalendarWeeks,
   getDayOfWeekNames,
   getMonthNames,
-  getYearRange,
 } from './calendar.utils';
 
 @Component({
@@ -21,13 +20,15 @@ export class CalendarComponent {
 
   protected readonly monthNames = computed(() => getMonthNames(this.locale));
   protected readonly dayOfWeekNames = computed(() => getDayOfWeekNames(this.locale));
-  protected readonly years = computed(() => getYearRange(new Date().getFullYear()));
   protected readonly weeks = computed<CalendarWeek[]>(() =>
     getCalendarWeeks(this.currentYear(), this.currentMonth())
   );
 
   protected readonly displayMonth = computed(() => this.monthNames()[this.currentMonth()]);
   protected readonly displayYear = computed(() => this.currentYear().toString());
+
+  protected readonly minYear = 2000;
+  protected readonly maxYear = 2099;
 
   goToPreviousMonth(): void {
     const month = this.currentMonth();
@@ -63,8 +64,11 @@ export class CalendarComponent {
   }
 
   onYearChange(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    this.currentYear.set(Number(select.value));
+    const input = event.target as HTMLInputElement;
+    const value = Number(input.value);
+    if (!isNaN(value) && value >= this.minYear && value <= this.maxYear) {
+      this.currentYear.set(value);
+    }
   }
 
   trackByWeekIndex(index: number): number {

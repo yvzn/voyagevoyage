@@ -1,4 +1,4 @@
-import { getCalendarWeeks, getDayOfWeekNames, getMonthNames, getYearRange } from './calendar.utils';
+import { getCalendarWeeks, getDayOfWeekNames, getMonthNames } from './calendar.utils';
 
 describe('calendar.utils', () => {
   describe('getCalendarWeeks', () => {
@@ -117,20 +117,6 @@ describe('calendar.utils', () => {
       for (const name of names) {
         expect(name.length).toBeGreaterThan(0);
       }
-    });
-  });
-
-  describe('getYearRange', () => {
-    it('should return 11 years centered on the current year', () => {
-      const years = getYearRange(2026);
-      expect(years.length).toBe(11);
-      expect(years[0]).toBe(2021);
-      expect(years[10]).toBe(2031);
-    });
-
-    it('should include the current year', () => {
-      const years = getYearRange(2026);
-      expect(years).toContain(2026);
     });
   });
 });

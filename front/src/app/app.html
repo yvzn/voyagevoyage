@@ -1,14 +1,90 @@
-<!-- App shell -->
-<div class="min-h-screen bg-gray-50 antialiased dark:bg-gray-900">
-  <header class="border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
-    <div class="mx-auto flex max-w-screen-xl items-center">
-      <h1 class="text-xl font-semibold text-gray-900 dark:text-white" i18n="@@appTitle">
-        Voyage Voyage
-      </h1>
+<div class="antialiased bg-gray-50 dark:bg-gray-900">
+  <nav
+    class="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50">
+    <div class="flex flex-wrap justify-between items-center">
+      <div class="flex justify-start items-center">
+        <button data-drawer-target="drawer-navigation" data-drawer-toggle="drawer-navigation"
+          aria-controls="drawer-navigation"
+          class="p-2 mr-2 text-gray-600 rounded-lg cursor-pointer md:hidden hover:text-gray-900 hover:bg-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700 focus:ring-2 focus:ring-gray-100 dark:focus:ring-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+          <svg aria-hidden="true" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+              d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+              clip-rule="evenodd"></path>
+          </svg>
+          <svg aria-hidden="true" class="hidden w-6 h-6" fill="currentColor" viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clip-rule="evenodd"></path>
+          </svg>
+          <span class="sr-only" i18n="@@toggleSidebar">Toggle sidebar</span>
+        </button>
+        <a href="/" target="_top" class="flex items-center justify-between mr-4">
+          <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white" i18n="@@appTitle">Voyage Voyage</span>
+        </a>
+      </div>
+      <div class="flex items-center lg:order-2">
+        <button type="button" data-dropdown-toggle="language-dropdown"
+          class="inline-flex justify-center p-2 text-gray-500 rounded cursor-pointer dark:hover:text-white dark:text-gray-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600">
+          <span class="sr-only" i18n="@@changeLanguage">Change language</span>
+          <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="m10.5 21 5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 0 1 6-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 0 1-3.827-5.802" />
+          </svg>
+        </button>
+        <!-- Language dropdown -->
+        <div
+          class="hidden z-50 my-4 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700"
+          id="language-dropdown">
+          <ul class="py-1" role="none">
+            <li>
+              <a href="#"
+                class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:hover:text-white dark:text-gray-300 dark:hover:bg-gray-600"
+                role="menuitem">
+                <div class="inline-flex items-center">
+                  Français
+                </div>
+              </a>
+            </li>
+            <li>
+              <a href="#"
+                class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-600"
+                role="menuitem">
+                <div class="inline-flex items-center">
+                  English
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
-  </header>
+  </nav>
 
-  <main class="mx-auto max-w-screen-xl p-4 md:p-6">
+  <!-- Sidebar -->
+  <aside
+    class="fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform -translate-x-full bg-white border-r border-gray-200 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+    aria-label="Sidenav" i18n-aria-label="@@sidenavLabel" id="drawer-navigation">
+    <div class="overflow-y-auto py-5 px-3 h-full bg-white dark:bg-gray-800">
+      <ul class="space-y-2">
+        <li>
+          <a routerLink="/calendar" routerLinkActive="bg-gray-100 dark:bg-gray-700"
+            class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <svg aria-hidden="true"
+              class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+              fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+            </svg>
+            <span class="ml-3" i18n="@@calendarNavItem">Calendar</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="p-4 md:ml-64 min-h-dvh pt-20">
     <router-outlet />
   </main>
 </div>

@@ -76,24 +76,25 @@ describe('CalendarComponent', () => {
     await fixture.whenStable();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const todayButton = compiled.querySelector('button');
     const buttons = Array.from(compiled.querySelectorAll('button'));
     const todayBtn = buttons.find((b) => b.textContent?.trim() === 'Today');
     expect(todayBtn).toBeTruthy();
   });
 
-  it('should have month and year selectors', async () => {
+  it('should have month select and year number input', async () => {
     const fixture = TestBed.createComponent(CalendarComponent);
     fixture.detectChanges();
     await fixture.whenStable();
 
     const compiled = fixture.nativeElement as HTMLElement;
     const monthSelect = compiled.querySelector('#month-select') as HTMLSelectElement;
-    const yearSelect = compiled.querySelector('#year-select') as HTMLSelectElement;
+    const yearInput = compiled.querySelector('#year-input') as HTMLInputElement;
     expect(monthSelect).toBeTruthy();
-    expect(yearSelect).toBeTruthy();
+    expect(yearInput).toBeTruthy();
     expect(monthSelect.options.length).toBe(12);
-    expect(yearSelect.options.length).toBe(11);
+    expect(yearInput.type).toBe('number');
+    expect(yearInput.min).toBe('2000');
+    expect(yearInput.max).toBe('2099');
   });
 
   it('should navigate to previous month when clicking previous button', async () => {
@@ -143,12 +144,10 @@ describe('CalendarComponent', () => {
     const component = fixture.componentInstance;
     fixture.detectChanges();
 
-    // Navigate away first
     component.goToNextMonth();
     component.goToNextMonth();
     fixture.detectChanges();
 
-    // Click today
     component.goToToday();
     fixture.detectChanges();
 
@@ -214,14 +213,14 @@ describe('CalendarComponent', () => {
     expect(nav?.getAttribute('aria-label')).toBeTruthy();
   });
 
-  it('should have labeled select elements', async () => {
+  it('should have labeled form controls', async () => {
     const fixture = TestBed.createComponent(CalendarComponent);
     fixture.detectChanges();
     await fixture.whenStable();
 
     const compiled = fixture.nativeElement as HTMLElement;
     const monthLabel = compiled.querySelector('label[for="month-select"]');
-    const yearLabel = compiled.querySelector('label[for="year-select"]');
+    const yearLabel = compiled.querySelector('label[for="year-input"]');
     expect(monthLabel).toBeTruthy();
     expect(yearLabel).toBeTruthy();
   });
