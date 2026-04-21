@@ -49,8 +49,10 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    const langBtn = compiled.querySelector('[aria-haspopup="true"]');
+    const langBtn = compiled.querySelector('#language-dropdown');
     expect(langBtn).toBeTruthy();
+    const toggleBtn = langBtn?.parentElement?.querySelector('button[aria-haspopup]');
+    expect(toggleBtn).toBeTruthy();
   });
 
   it('should have a skip link to main content', async () => {

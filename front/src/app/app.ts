@@ -28,11 +28,15 @@ export class App implements OnInit {
 
   @HostListener('document:click')
   onDocumentClick(): void {
-    this.languageDropdownOpen.set(false);
+    if (this.languageDropdownOpen()) {
+      this.languageDropdownOpen.set(false);
+    }
   }
 
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
-    this.languageDropdownOpen.set(false);
+    if (this.languageDropdownOpen()) {
+      this.languageDropdownOpen.set(false);
+    }
   }
 }

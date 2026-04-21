@@ -31,7 +31,7 @@
       <div class="relative flex items-center lg:order-2">
         <button type="button" (click)="toggleLanguageDropdown($event)"
           [attr.aria-expanded]="languageDropdownOpen()"
-          aria-haspopup="true"
+          aria-haspopup="menu"
           class="inline-flex justify-center items-center gap-1 p-2 text-gray-500 rounded cursor-pointer dark:hover:text-white dark:text-gray-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600">
           <span class="sr-only">{{ localeService.translate('changeLanguage') }}</span>
           <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
