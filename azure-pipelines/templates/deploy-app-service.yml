@@ -1,59 +1,119 @@
-# Azure DevOps template: deploy an existing package artifact to Azure App Service.
+# Azure DevOps CI/CD pipeline template for VoyageVoyage.
 #
-# Required parameters:
-# - azureSubscription: name of the Azure DevOps service connection
-# - appName: target Azure App Service name
-# - packagePath: package path/glob inside the downloaded artifact (for example: "$(Pipeline.Workspace)/drop/drop/**/*.zip")
+# CI stage:
+# - runs on all branches
+# - builds Angular front end
+# - publishes ASP.NET server (including front build copied to wwwroot)
+# - archives and publishes a deployment artifact
 #
-# Optional parameters:
-# - artifactName: name of the published build artifact to download (default: drop)
-# - environmentName: Azure DevOps environment name (default: production)
+# CD stage:
+# - runs only when source branch is main
+# - deploys the artifact to Azure App Service
 #
-# Usage example:
+# Required pipeline variables (set in the consuming pipeline or variable group):
+# - azureSubscription: Azure DevOps service connection name
+# - appName: Azure App Service name
+#
+# Usage example (root azure-pipelines.yml):
+# trigger:
+#   branches:
+#     include:
+#       - '*'
+# pr:
+#   branches:
+#     include:
+#       - '*'
 # stages:
-# - stage: Deploy
-#   jobs:
 #   - template: azure-pipelines/templates/deploy-app-service.yml
 #     parameters:
-#       azureSubscription: 'my-service-connection'
-#       appName: 'voyagevoyage-prod-app'
-#       artifactName: 'drop'
-#       packagePath: '$(Pipeline.Workspace)/drop/drop/**/*.zip'
+#       artifactName: drop
+#       packageFileName: voyagevoyage-app.zip
+#       environmentName: production
 
 parameters:
-  - name: azureSubscription
-    type: string
-  - name: appName
-    type: string
   - name: artifactName
     type: string
     default: drop
-  - name: packagePath
+  - name: packageFileName
     type: string
+    default: voyagevoyage-app.zip
   - name: environmentName
     type: string
     default: production
 
-jobs:
-  - deployment: DeployToAzureAppService
+stages:
+  - stage: CI
+    displayName: Build and package
+    jobs:
+      - job: BuildAndPackage
+        displayName: Build front and server
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+
+          - task: NodeTool@0
+            displayName: Use Node.js 20
+            inputs:
+              versionSpec: 20.x
+
+          - script: |
+              cd front
+              npm install --registry https://registry.npmjs.org/
+              npm run build
+            displayName: Build Angular front end
+
+          - task: UseDotNet@2
+            displayName: Use .NET SDK 10.x
+            inputs:
+              packageType: sdk
+              version: 10.0.x
+
+          - script: |
+              cd server/VoyageVoyage.Server
+              dotnet restore
+              dotnet publish -c Release -o "$(Build.ArtifactStagingDirectory)/app"
+            displayName: Publish ASP.NET server
+
+          - task: ArchiveFiles@2
+            displayName: Archive deploy package
+            inputs:
+              rootFolderOrFile: $(Build.ArtifactStagingDirectory)/app
+              includeRootFolder: false
+              archiveType: zip
+              archiveFile: $(Build.ArtifactStagingDirectory)/${{ parameters.packageFileName }}
+              replaceExistingArchive: true
+
+          - task: PublishPipelineArtifact@1
+            displayName: Publish deployment artifact
+            inputs:
+              targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.packageFileName }}
+              artifact: ${{ parameters.artifactName }}
+
+  - stage: CD
     displayName: Deploy to Azure App Service
-    environment: ${{ parameters.environmentName }}
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-            - checkout: none
+    dependsOn: CI
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployToAzureAppService
+        displayName: Deploy package
+        environment: ${{ parameters.environmentName }}
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: none
 
-            - task: DownloadPipelineArtifact@2
-              displayName: Download build artifact
-              inputs:
-                artifact: ${{ parameters.artifactName }}
-                path: $(Pipeline.Workspace)/${{ parameters.artifactName }}
+                - task: DownloadPipelineArtifact@2
+                  displayName: Download build artifact
+                  inputs:
+                    artifact: ${{ parameters.artifactName }}
+                    path: $(Pipeline.Workspace)/${{ parameters.artifactName }}
 
-            - task: AzureWebApp@1
-              displayName: Deploy package to App Service
-              inputs:
-                azureSubscription: ${{ parameters.azureSubscription }}
-                appType: webApp
-                appName: ${{ parameters.appName }}
-                package: ${{ parameters.packagePath }}
+                - task: AzureWebApp@1
+                  displayName: Deploy package to App Service
+                  inputs:
+                    azureSubscription: $(azureSubscription)
+                    appType: webApp
+                    appName: $(appName)
+                    package: $(Pipeline.Workspace)/${{ parameters.artifactName }}/${{ parameters.packageFileName }}
