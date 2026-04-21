@@ -13,6 +13,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 var summaries = new[]
 {
@@ -32,6 +34,8 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast");
+
+app.MapFallbackToFile("index.html");
 
 app.Run();
 

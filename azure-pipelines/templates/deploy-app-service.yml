@@ -1,0 +1,59 @@
+# Azure DevOps template: deploy an existing package artifact to Azure App Service.
+#
+# Required parameters:
+# - azureSubscription: name of the Azure DevOps service connection
+# - appName: target Azure App Service name
+# - packagePath: package path/glob inside the downloaded artifact (for example: "$(Pipeline.Workspace)/drop/**/*.zip")
+#
+# Optional parameters:
+# - artifactName: name of the published build artifact to download (default: drop)
+# - environmentName: Azure DevOps environment name (default: production)
+#
+# Usage example:
+# stages:
+# - stage: Deploy
+#   jobs:
+#   - template: azure-pipelines/templates/deploy-app-service.yml
+#     parameters:
+#       azureSubscription: 'my-service-connection'
+#       appName: 'voyagevoyage-prod-app'
+#       artifactName: 'drop'
+#       packagePath: '$(Pipeline.Workspace)/drop/**/*.zip'
+
+parameters:
+  - name: azureSubscription
+    type: string
+  - name: appName
+    type: string
+  - name: artifactName
+    type: string
+    default: drop
+  - name: packagePath
+    type: string
+  - name: environmentName
+    type: string
+    default: production
+
+jobs:
+  - deployment: DeployToAzureAppService
+    displayName: Deploy to Azure App Service
+    environment: ${{ parameters.environmentName }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - checkout: none
+
+            - task: DownloadPipelineArtifact@2
+              displayName: Download build artifact
+              inputs:
+                artifact: ${{ parameters.artifactName }}
+                path: $(Pipeline.Workspace)
+
+            - task: AzureWebApp@1
+              displayName: Deploy package to App Service
+              inputs:
+                azureSubscription: ${{ parameters.azureSubscription }}
+                appType: webApp
+                appName: ${{ parameters.appName }}
+                package: ${{ parameters.packagePath }}
