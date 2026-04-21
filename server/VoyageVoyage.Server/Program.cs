@@ -13,6 +13,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+// Serve Angular static assets before endpoint dispatch; API routes keep precedence through explicit mappings below.
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
