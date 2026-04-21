@@ -1,4 +1,4 @@
-import { Component, computed, LOCALE_ID, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import {
   CalendarDay,
   CalendarWeek,
@@ -6,6 +6,7 @@ import {
   getDayOfWeekNames,
   getMonthNames,
 } from './calendar.utils';
+import { LocaleService } from '../locale.service';
 
 @Component({
   selector: 'app-calendar',
@@ -13,13 +14,13 @@ import {
   templateUrl: './calendar.html',
 })
 export class CalendarComponent {
-  private readonly locale = inject(LOCALE_ID);
+  private readonly localeService = inject(LocaleService);
 
   protected readonly currentYear = signal(new Date().getFullYear());
   protected readonly currentMonth = signal(new Date().getMonth());
 
-  protected readonly monthNames = computed(() => getMonthNames(this.locale));
-  protected readonly dayOfWeekNames = computed(() => getDayOfWeekNames(this.locale));
+  protected readonly monthNames = computed(() => getMonthNames(this.localeService.currentLocale()));
+  protected readonly dayOfWeekNames = computed(() => getDayOfWeekNames(this.localeService.currentLocale()));
   protected readonly weeks = computed<CalendarWeek[]>(() =>
     getCalendarWeeks(this.currentYear(), this.currentMonth())
   );

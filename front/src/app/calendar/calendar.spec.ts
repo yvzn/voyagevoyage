@@ -1,12 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 import { LOCALE_ID } from '@angular/core';
 import { CalendarComponent } from './calendar';
+import { LocaleService } from '../locale.service';
 
 describe('CalendarComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CalendarComponent],
-      providers: [{ provide: LOCALE_ID, useValue: 'fr' }],
+      providers: [
+        { provide: LOCALE_ID, useValue: 'fr' },
+        LocaleService,
+      ],
     }).compileComponents();
   });
 

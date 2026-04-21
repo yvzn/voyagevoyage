@@ -26,12 +26,13 @@
       </div>
       <div class="flex items-center lg:order-2">
         <button type="button" data-dropdown-toggle="language-dropdown"
-          class="inline-flex justify-center p-2 text-gray-500 rounded cursor-pointer dark:hover:text-white dark:text-gray-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600">
+          class="inline-flex justify-center items-center gap-1 p-2 text-gray-500 rounded cursor-pointer dark:hover:text-white dark:text-gray-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600">
           <span class="sr-only" i18n="@@changeLanguage">Change language</span>
           <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round"
               d="m10.5 21 5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 0 1 6-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 0 1-3.827-5.802" />
           </svg>
+          <span class="text-sm hidden sm:inline">{{ localeService.displayLanguage() }}</span>
         </button>
         <!-- Language dropdown -->
         <div
@@ -40,6 +41,7 @@
           <ul class="py-1" role="none">
             <li>
               <button type="button"
+                (click)="switchLanguage('fr')"
                 class="block w-full text-left py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:hover:text-white dark:text-gray-300 dark:hover:bg-gray-600"
                 role="menuitem">
                 <span class="inline-flex items-center">
@@ -49,6 +51,7 @@
             </li>
             <li>
               <button type="button"
+                (click)="switchLanguage('en')"
                 class="block w-full text-left py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-600"
                 role="menuitem">
                 <span class="inline-flex items-center">

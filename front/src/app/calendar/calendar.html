@@ -39,7 +39,7 @@
             id="month-select"
             [value]="currentMonth()"
             (change)="onMonthChange($event)"
-            class="block appearance-auto rounded-lg border border-gray-300 bg-gray-50 py-2 pl-3 pr-8 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            class="block rounded-lg border border-gray-300 bg-gray-50 py-2 pl-3 pr-8 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
           >
             @for (name of monthNames(); track $index) {
               <option [value]="$index" [selected]="$index === currentMonth()">{{ name }}</option>

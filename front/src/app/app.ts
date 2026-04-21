@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { initFlowbite } from 'flowbite';
+import { LocaleService } from './locale.service';
 
 @Component({
   selector: 'app-root',
@@ -8,7 +9,13 @@ import { initFlowbite } from 'flowbite';
   templateUrl: './app.html',
 })
 export class App implements OnInit {
+  protected readonly localeService = inject(LocaleService);
+
   ngOnInit(): void {
     initFlowbite();
+  }
+
+  switchLanguage(locale: string): void {
+    this.localeService.setLocale(locale);
   }
 }
