@@ -59,7 +59,7 @@ stages:
 
           - script: |
               cd front
-              npm ci --registry https://registry.npmjs.org/
+              npm ci
               npm run build
             displayName: Build Angular front end
 
@@ -77,7 +77,7 @@ stages:
 
           - script: |
               mkdir -p "$(Build.ArtifactStagingDirectory)/app/wwwroot"
-              cp -R front/dist/voyagevoyage-front/browser/. "$(Build.ArtifactStagingDirectory)/app/wwwroot/"
+              cp -R "$(Build.SourcesDirectory)/front/dist/voyagevoyage-front/browser/." "$(Build.ArtifactStagingDirectory)/app/wwwroot/"
             displayName: Ensure Angular build is present in published wwwroot
 
           - task: ArchiveFiles@2
