@@ -12,12 +12,21 @@
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
+      "i18n": {
+        "sourceLocale": "en",
+        "locales": {
+          "fr": "src/locale/messages.fr.json"
+        }
+      },
       "architect": {
         "build": {
           "builder": "@angular/build:application",
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
+            "polyfills": [
+              "@angular/localize/init"
+            ],
             "assets": [
               {
                 "glob": "**/*",
@@ -30,6 +39,7 @@
           },
           "configurations": {
             "production": {
+              "localize": true,
               "budgets": [
                 {
                   "type": "initial",
@@ -42,10 +52,29 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "optimization": {
+                "scripts": true,
+                "styles": true,
+                "fonts": false
+              }
             },
             "development": {
-              "optimization": false,
+              "optimization": {
+                "scripts": false,
+                "styles": false,
+                "fonts": false
+              },
+              "extractLicenses": false,
+              "sourceMap": true
+            },
+            "fr": {
+              "localize": ["fr"],
+              "optimization": {
+                "scripts": false,
+                "styles": false,
+                "fonts": false
+              },
               "extractLicenses": false,
               "sourceMap": true
             }
@@ -60,12 +89,24 @@
             },
             "development": {
               "buildTarget": "voyagevoyage-front:build:development"
+            },
+            "fr": {
+              "buildTarget": "voyagevoyage-front:build:fr"
             }
           },
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "@angular/build:unit-test"
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "runnerConfig": true
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular/build:extract-i18n",
+          "options": {
+            "format": "json"
+          }
         }
       }
     }
