@@ -1,0 +1,17 @@
+{
+  "locale": "fr",
+  "translations": {
+    "skipToMain": "Aller au contenu principal",
+    "toggleSidebar": "Basculer le menu latéral",
+    "changeLanguage": "Changer de langue",
+    "sidenavLabel": "Menu de navigation",
+    "calendarNavItem": "Calendrier",
+    "calendarHeading": "Calendrier des voyages",
+    "calendarNavLabel": "Navigation du calendrier",
+    "previousMonthLabel": "Mois précédent",
+    "nextMonthLabel": "Mois suivant",
+    "monthSelectLabel": "Mois",
+    "yearInputLabel": "Année",
+    "todayButton": "Aujourd'hui"
+  }
+}

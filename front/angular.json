@@ -12,6 +12,12 @@
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
+      "i18n": {
+        "sourceLocale": "en",
+        "locales": {
+          "fr": "src/locale/messages.fr.json"
+        }
+      },
       "architect": {
         "build": {
           "builder": "@angular/build:application",
@@ -80,6 +86,12 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "runnerConfig": true
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular/build:extract-i18n",
+          "options": {
+            "format": "json"
           }
         }
       }
