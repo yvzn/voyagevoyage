@@ -42,6 +42,7 @@ At a high level:
 - Standalone components
 - Angular signals (when appropriate)
 - Angular control flow blocks
+- `@angular/localize` (i18n and localisation)
 
 ### Backend
 
@@ -200,6 +201,43 @@ General expectations:
 - surface validation messages clearly in the UI
 - preserve user input on recoverable errors
 
+### 4.9 Internationalisation (i18n) and localisation
+
+`@angular/localize` is the mandatory package for all internationalisation and localisation needs.
+
+Why:
+- it is the official Angular i18n solution, tightly integrated with the build toolchain
+- it supports compile-time translation extraction and AOT-optimised locale builds
+- it provides Angular pipes (`DatePipe`, `CurrencyPipe`, `DecimalPipe`, `PercentPipe`) that automatically respect the active locale
+- it avoids introducing a third-party i18n library when the platform already covers the need
+
+Mandatory rules:
+- every user-facing string must be marked for translation — no hardcoded visible text in templates or components
+- use the `i18n` attribute in templates for static text and the `$localize` tagged template literal in TypeScript for dynamic strings
+- dates, numbers, currencies, and percentages must be formatted through the Angular locale pipes, never with raw `Date` methods or manual string formatting
+- translation messages are maintained in JSON files under `front/src/locale/`
+- the active locale is determined at build time by the Angular CLI `--localize` flag; do not implement custom runtime locale switching unless explicitly required
+
+Expected usage in templates:
+```html
+<!-- static label -->
+<span i18n="@@trip.title">Trip title</span>
+
+<!-- pipe-based formatting -->
+{{ expense.date | date:'shortDate' }}
+{{ expense.amount | currency:expense.currency }}
+```
+
+Expected usage in TypeScript:
+```typescript
+const message = $localize`:@@validation.required:This field is required.`;
+```
+
+Practical checklist:
+- run `ng extract-i18n --format=json` to regenerate the source JSON after adding or modifying translated strings
+- review the generated JSON diff in every PR that touches user-facing text
+- do not merge UI changes that introduce untranslated strings
+
 ## 5. Back-end stack
 
 ### 5.1 .NET Web API
@@ -341,6 +379,8 @@ Put in Functions only when the work is:
 - use NgRx for shared business state
 - prefer Tailwind utilities and Flowbite patterns over custom CSS
 - keep templates readable with modern control flow blocks
+- mark every user-facing string with `i18n` or `$localize` — no hardcoded visible text
+- format dates, numbers, and currencies with Angular locale pipes
 
 ### 8.2 When adding a backend feature
 
@@ -365,6 +405,8 @@ Put in Functions only when the work is:
 - do not use global state when local component state is enough
 - do not create custom styling if Tailwind or Flowbite already solve the problem well
 - do not mix file binaries and application metadata in the same persistence model
+- do not hardcode user-facing strings — every visible text must go through `@angular/localize`
+- do not format dates, numbers, or currencies manually — use Angular locale pipes
 
 Preferred mindset:
 - start with clear responsibilities
