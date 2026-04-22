@@ -10,9 +10,9 @@ pr:
 
 variables:
   # Required: Azure DevOps service connection name with access to the target App Service.
-  azureServiceConnection: 'CHANGE_ME_AZURE_SERVICE_CONNECTION'
+  azureServiceConnection: 'REPLACE_WITH_SERVICE_CONNECTION'
   # Required: Existing Azure App Service name that hosts VoyageVoyage.
-  appServiceName: 'CHANGE_ME_APP_SERVICE_NAME'
+  appServiceName: 'REPLACE_WITH_APP_SERVICE_NAME'
   buildConfiguration: 'Release'
   vmImage: 'ubuntu-latest'
   serverProject: 'server/VoyageVoyage.Server/VoyageVoyage.Server.csproj'
@@ -41,7 +41,12 @@ stages:
             workingDirectory: front
 
           - script: |
+              # Enable strict error handling and command echo for easier CI troubleshooting.
               set -eux
+              if [ ! -d "$(frontBuildOutput)/en" ]; then
+                echo "Expected Angular build output at $(frontBuildOutput)/en was not found."
+                exit 1
+              fi
               rm -rf "$(serverWwwroot)"
               mkdir -p "$(serverWwwroot)"
               cp -R "$(frontBuildOutput)/en/." "$(serverWwwroot)/"
