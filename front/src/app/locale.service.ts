@@ -1,4 +1,4 @@
-import { Injectable, LOCALE_ID, inject, signal, computed, DOCUMENT } from '@angular/core';
+import { Injectable, LOCALE_ID, inject, signal, computed, DOCUMENT, isDevMode } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
@@ -20,7 +20,20 @@ export class LocaleService {
   });
 
   setLocale(locale: string): void {
-    this._currentLocale.set(locale);
-    this.document.documentElement.lang = locale;
+    if (isDevMode()) {
+      const message =
+        'Locale switching only works with localized production builds. In development, use the matching locale serve configuration instead.';
+      console.warn(message);
+      this.document.defaultView?.alert(message);
+      return;
+    }
+
+    const knownLocales = ['en', 'fr'];
+    const pathname = this.document.location.pathname;
+    const pathParts = pathname.split('/').filter(Boolean);
+    const routePath = knownLocales.includes(pathParts[0])
+      ? pathParts.slice(1).join('/')
+      : pathParts.join('/');
+    this.document.location.href = `/${locale}/${routePath}`;
   }
 }

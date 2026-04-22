@@ -39,6 +39,7 @@
           },
           "configurations": {
             "production": {
+              "localize": true,
               "budgets": [
                 {
                   "type": "initial",
@@ -66,6 +67,16 @@
               },
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "fr": {
+              "localize": ["fr"],
+              "optimization": {
+                "scripts": false,
+                "styles": false,
+                "fonts": false
+              },
+              "extractLicenses": false,
+              "sourceMap": true
             }
           },
           "defaultConfiguration": "production"
@@ -78,6 +89,9 @@
             },
             "development": {
               "buildTarget": "voyagevoyage-front:build:development"
+            },
+            "fr": {
+              "buildTarget": "voyagevoyage-front:build:fr"
             }
           },
           "defaultConfiguration": "development"
