@@ -42,7 +42,7 @@ At a high level:
 - Standalone components
 - Angular signals (when appropriate)
 - Angular control flow blocks
-- `@angular/localize` (i18n and localisation)
+- `ngx-translate` (i18n and runtime localisation)
 
 ### Backend
 
@@ -203,40 +203,49 @@ General expectations:
 
 ### 4.9 Internationalisation (i18n) and localisation
 
-`@angular/localize` is the mandatory package for all internationalisation and localisation needs.
+`ngx-translate` (`@ngx-translate/core` and `@ngx-translate/http-loader`) is the mandatory library for all internationalisation and localisation needs.
 
 Why:
-- it is the official Angular i18n solution, tightly integrated with the build toolchain
-- it supports compile-time translation extraction and AOT-optimised locale builds
-- it provides Angular pipes (`DatePipe`, `CurrencyPipe`, `DecimalPipe`, `PercentPipe`) that automatically respect the active locale
-- it avoids introducing a third-party i18n library when the platform already covers the need
+- it enables runtime language switching without page reload or separate locale builds
+- it integrates cleanly with Angular's standalone component model
+- it loads translation files as plain JSON assets at runtime via `HttpClient`
+- it avoids the build-time complexity and multi-bundle deployment model of `@angular/localize`
 
 Mandatory rules:
-- every user-facing string must be marked for translation — no hardcoded visible text in templates or components
-- use the `i18n` attribute in templates for static text and the `$localize` tagged template literal in TypeScript for dynamic strings
-- dates, numbers, currencies, and percentages must be formatted through the Angular locale pipes, never with raw `Date` methods or manual string formatting
-- translation messages are maintained in JSON files under `front/src/locale/`
-- the active locale is determined at build time by the Angular CLI `--localize` flag; do not implement custom runtime locale switching unless explicitly required
+- every user-facing string must be externalised to a translation file — no hardcoded visible text in templates or components
+- use the `translate` pipe in templates for all user-facing strings
+- for translated attribute values, use the pipe in a binding expression: `[attr.aria-label]="'key' | translate"`
+- dates, numbers, currencies, and percentages must be formatted using JavaScript's `Intl` APIs (`Intl.DateTimeFormat`, `Intl.NumberFormat`), passing the active locale from `LocaleService.currentLocale()`
+- translation files are maintained as JSON assets under `front/public/i18n/`
+- `TranslatePipe` must be explicitly imported in every standalone component that uses it
+- `TranslateModule.forRoot(...)` is configured once in `app.config.ts` with `TranslateHttpLoader` pointing to `/i18n/{lang}.json`
+- in tests, use `TranslateModule.forRoot()` and load translations via `TranslateService.setTranslation()` in `beforeEach`
 
 Expected usage in templates:
 ```html
 <!-- static label -->
-<span i18n="@@trip.title">Trip title</span>
+<span>{{ 'trip.title' | translate }}</span>
 
-<!-- pipe-based formatting -->
-{{ expense.date | date:'shortDate' }}
-{{ expense.amount | currency:expense.currency }}
+<!-- translated attribute -->
+<button [attr.aria-label]="'actions.close' | translate">...</button>
 ```
 
-Expected usage in TypeScript:
+Expected usage in TypeScript (component class):
 ```typescript
-const message = $localize`:@@validation.required:This field is required.`;
+// inject TranslateService for programmatic translation
+private readonly translate = inject(TranslateService);
+const message = this.translate.instant('validation.required');
 ```
+
+Adding a new translation:
+1. Add the key/value pair to `front/public/i18n/en.json`
+2. Add the translated value to every other locale file (e.g., `fr.json`)
+3. Use the key in the template or component
 
 Practical checklist:
-- run `ng extract-i18n --format=json` to regenerate the source JSON after adding or modifying translated strings
-- review the generated JSON diff in every PR that touches user-facing text
-- do not merge UI changes that introduce untranslated strings
+- verify all locale JSON files have the same set of keys before merging UI changes
+- do not merge UI changes that introduce untranslated or hardcoded strings
+- `LocaleService.setLocale(locale)` is the single entry point for language switching; it calls `TranslateService.use(locale)` and updates the reactive `currentLocale` signal used for `Intl` formatting
 
 ## 5. Back-end stack
 

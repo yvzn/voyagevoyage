@@ -107,6 +107,9 @@ func start
 - Putting business logic directly in Angular templates/components or API endpoints.
 - Shipping UI without explicit loading/error/empty states.
 - Introducing non-internationalized visible strings.
+- Using `i18n` attributes or `$localize` — the project uses `ngx-translate` (`TranslatePipe` + JSON assets in `public/i18n/`), not `@angular/localize`.
+- Forgetting to import `TranslatePipe` in standalone components that use `{{ 'key' | translate }}`.
+- Adding translation keys to templates without adding matching entries in all locale JSON files (`en.json`, `fr.json`).
 
 ## When uncertain
 

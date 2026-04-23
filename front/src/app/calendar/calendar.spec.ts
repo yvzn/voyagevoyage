@@ -1,17 +1,26 @@
 import { TestBed } from '@angular/core/testing';
-import { LOCALE_ID } from '@angular/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { CalendarComponent } from './calendar';
-import { LocaleService } from '../locale.service';
+
+const EN_TRANSLATIONS = {
+  calendarHeading: 'Trip calendar',
+  calendarNavLabel: 'Calendar navigation',
+  previousMonthLabel: 'Previous month',
+  nextMonthLabel: 'Next month',
+  monthSelectLabel: 'Month',
+  yearInputLabel: 'Year',
+  todayButton: 'Today',
+};
 
 describe('CalendarComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CalendarComponent],
-      providers: [
-        { provide: LOCALE_ID, useValue: 'fr' },
-        LocaleService,
-      ],
+      imports: [CalendarComponent, TranslateModule.forRoot()],
     }).compileComponents();
+
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation('en', EN_TRANSLATIONS);
+    translate.use('en');
   });
 
   it('should create', () => {

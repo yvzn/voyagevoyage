@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import {
   CalendarDay,
   CalendarWeek,
@@ -11,6 +12,7 @@ import { LocaleService } from '../locale.service';
 @Component({
   selector: 'app-calendar',
   standalone: true,
+  imports: [TranslatePipe],
   templateUrl: './calendar.html',
 })
 export class CalendarComponent {

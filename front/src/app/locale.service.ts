@@ -1,13 +1,16 @@
-import { Injectable, LOCALE_ID, inject, signal, computed, DOCUMENT, isDevMode } from '@angular/core';
+import { DOCUMENT, Injectable, computed, inject, signal } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LocaleService {
   private readonly document = inject(DOCUMENT);
-  private readonly defaultLocale = inject(LOCALE_ID);
+  private readonly translateService = inject(TranslateService);
 
-  private readonly _currentLocale = signal(this.defaultLocale);
+  private readonly _currentLocale = signal(
+    this.translateService.getCurrentLang() ?? this.translateService.getFallbackLang() ?? 'en'
+  );
 
   readonly currentLocale = this._currentLocale.asReadonly();
 
@@ -20,20 +23,12 @@ export class LocaleService {
   });
 
   setLocale(locale: string): void {
-    if (isDevMode()) {
-      const message =
-        'Locale switching only works with localized production builds. In development, use the matching locale serve configuration instead.';
-      console.warn(message);
-      this.document.defaultView?.alert(message);
-      return;
-    }
+    this.translateService.use(locale);
+    this._currentLocale.set(locale);
+    this.document.documentElement.lang = locale;
+  }
 
-    const knownLocales = ['en', 'fr'];
-    const pathname = this.document.location.pathname;
-    const pathParts = pathname.split('/').filter(Boolean);
-    const routePath = knownLocales.includes(pathParts[0])
-      ? pathParts.slice(1).join('/')
-      : pathParts.join('/');
-    this.document.location.href = `/${locale}/${routePath}`;
+  syncDocumentLang(): void {
+    this.document.documentElement.lang = this._currentLocale();
   }
 }

@@ -1,11 +1,12 @@
 import { Component, HostListener, OnInit, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { initFlowbite } from 'flowbite';
 import { LocaleService } from './locale.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe],
   templateUrl: './app.html',
 })
 export class App implements OnInit {
@@ -13,6 +14,7 @@ export class App implements OnInit {
   protected readonly languageDropdownOpen = signal(false);
 
   ngOnInit(): void {
+    this.localeService.syncDocumentLang();
     initFlowbite();
   }
 

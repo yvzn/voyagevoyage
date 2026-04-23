@@ -1,17 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { RouterModule } from '@angular/router';
-import { LOCALE_ID } from '@angular/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { App } from './app';
-import { LocaleService } from './locale.service';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [App, RouterModule.forRoot([])],
-      providers: [
-        { provide: LOCALE_ID, useValue: 'fr' },
-        LocaleService,
-      ],
+      imports: [App, RouterModule.forRoot([]), TranslateModule.forRoot()],
     }).compileComponents();
   });
 

@@ -1,0 +1,14 @@
+{
+  "skipToMain": "Skip to main content",
+  "toggleSidebar": "Toggle sidebar",
+  "changeLanguage": "Change language",
+  "sidenavLabel": "Side navigation",
+  "calendarNavItem": "Calendar",
+  "calendarHeading": "Trip calendar",
+  "calendarNavLabel": "Calendar navigation",
+  "previousMonthLabel": "Previous month",
+  "nextMonthLabel": "Next month",
+  "monthSelectLabel": "Month",
+  "yearInputLabel": "Year",
+  "todayButton": "Today"
+}
