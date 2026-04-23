@@ -26,6 +26,7 @@ variables:
   - name: artifactName
     value: 'voyagevoyage-app'
   - name: appServiceType
+    # Valid AzureWebApp@1 values include: webApp, webAppLinux, webAppContainer.
     value: 'webAppLinux'
 
 stages:
