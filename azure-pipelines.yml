@@ -52,8 +52,9 @@ stages:
           - script: |
               # Enable strict error handling and command echo for easier CI troubleshooting.
               set -eux
-              if [ ! -f "$(frontBuildOutput)/index.html" ]; then
-                echo "Expected Angular build output at $(frontBuildOutput)/index.html was not found."
+              FRONT_INDEX_PATH="$(frontBuildOutput)/index.html"
+              if [ ! -f "$FRONT_INDEX_PATH" ]; then
+                echo "Expected Angular build output at $FRONT_INDEX_PATH was not found."
                 exit 1
               fi
               rm -rf "$(serverWwwroot)"
