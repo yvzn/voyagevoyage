@@ -1,0 +1,107 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
+
+variables:
+  # Required: Azure DevOps Library variable group containing:
+  # - azureServiceConnection
+  # - appServiceName
+  - group: 'voyagevoyage-deployment'
+  - name: buildConfiguration
+    value: 'Release'
+  - name: vmImage
+    value: 'ubuntu-latest'
+  - name: serverProject
+    value: 'server/VoyageVoyage.Server/VoyageVoyage.Server.csproj'
+  - name: serverWwwroot
+    value: 'server/VoyageVoyage.Server/wwwroot'
+  - name: frontBuildOutput
+    value: 'front/dist/voyagevoyage-front/browser'
+  - name: artifactName
+    value: 'voyagevoyage-app'
+  - name: appServiceType
+    # Valid appType values include: webApp, webAppLinux, webAppContainer.
+    value: 'webAppLinux'
+
+stages:
+  - stage: CI
+    displayName: Build and package
+    jobs:
+      - job: BuildAndPackage
+        displayName: Build front and server
+        pool:
+          vmImage: $(vmImage)
+        steps:
+          - task: NodeTool@0
+            displayName: Use Node.js 24
+            inputs:
+              versionSpec: '24.x'
+
+          - script: |
+              npm ci
+              npm run build
+            displayName: Build Angular app
+            workingDirectory: front
+
+          - script: |
+              # Enable strict error handling and command echo for easier CI troubleshooting.
+              set -eux
+              FRONT_INDEX_PATH="$(frontBuildOutput)/index.html"
+              if [ ! -f "$FRONT_INDEX_PATH" ]; then
+                echo "Expected Angular build output at $FRONT_INDEX_PATH was not found."
+                exit 1
+              fi
+              rm -rf "$(serverWwwroot)"
+              mkdir -p "$(serverWwwroot)"
+              cp -R "$(frontBuildOutput)/." "$(serverWwwroot)/"
+            displayName: Copy Angular production files to server wwwroot
+
+          - task: UseDotNet@2
+            displayName: Use .NET SDK 10.x
+            inputs:
+              packageType: 'sdk'
+              version: '10.x'
+
+          - script: dotnet restore "$(serverProject)"
+            displayName: Restore server dependencies
+
+          - script: dotnet publish "$(serverProject)" -c "$(buildConfiguration)" -o "$(Build.ArtifactStagingDirectory)/publish"
+            displayName: Publish server package
+
+          - task: PublishBuildArtifacts@1
+            displayName: Publish deploy artifact
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
+              ArtifactName: '$(artifactName)'
+              publishLocation: 'Container'
+
+  - stage: CD
+    displayName: Deploy to Azure App Service
+    dependsOn: CI
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployWebApp
+        displayName: Deploy web app
+        environment: production
+        pool:
+          vmImage: $(vmImage)
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: $(artifactName)
+
+                - task: AzureWebApp@1
+                  displayName: Deploy to Azure App Service
+                  inputs:
+                    azureSubscription: '$(azureServiceConnection)'
+                    appType: '$(appServiceType)'
+                    appName: '$(appServiceName)'
+                    package: '$(Pipeline.Workspace)/$(artifactName)'

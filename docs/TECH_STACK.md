@@ -260,6 +260,9 @@ The API is responsible for:
 - handling file-related workflows through Azure Storage
 - returning stable contract shapes to the front end
 
+Routing rule for SPA hosting:
+- API routes must start with `/api` so non-API routes can be safely handled by the Angular SPA fallback (`index.html`) without conflicts.
+
 ### 5.2 Controller / service decomposition
 
 The backend should follow a clear controller / service decomposition.
