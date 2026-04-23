@@ -39,9 +39,9 @@ stages:
           vmImage: $(vmImage)
         steps:
           - task: NodeTool@0
-            displayName: Use Node.js 22
+            displayName: Use Node.js 24
             inputs:
-              versionSpec: '22.x'
+              versionSpec: '24.x'
 
           - script: |
               npm ci
