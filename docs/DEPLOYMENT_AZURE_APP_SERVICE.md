@@ -16,15 +16,16 @@ The pipeline has two stages:
 
 ## Required pipeline variables
 
-Configure these values in Azure DevOps before enabling deployment:
+Configure Azure DevOps Library variable group `voyagevoyage-deployment` before enabling deployment:
 
 - `azureServiceConnection`: service connection name that can deploy to the target App Service
 - `appServiceName`: existing Azure App Service name
 
-The YAML file includes inline comments for these variables.
+The pipeline also exposes `appServiceType` in YAML (default: `webAppLinux`) so the target App Service type is configurable.
 
 ## Deployment behavior
 
 - The API and static front-end files are deployed together as one ASP.NET Core app.
+- CI copies the single production front-end build folder into `server/VoyageVoyage.Server/wwwroot`.
 - Any server route not matched by API controllers falls back to `wwwroot/index.html`, enabling Angular SPA routing.
 - Keep all API endpoints under `/api` to avoid collisions with front-end client routes.

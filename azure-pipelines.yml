@@ -9,16 +9,24 @@ pr:
       - main
 
 variables:
-  # Required: Azure DevOps service connection name with access to the target App Service.
-  azureServiceConnection: 'REPLACE_WITH_SERVICE_CONNECTION'
-  # Required: Existing Azure App Service name that hosts VoyageVoyage.
-  appServiceName: 'REPLACE_WITH_APP_SERVICE_NAME'
-  buildConfiguration: 'Release'
-  vmImage: 'ubuntu-latest'
-  serverProject: 'server/VoyageVoyage.Server/VoyageVoyage.Server.csproj'
-  serverWwwroot: 'server/VoyageVoyage.Server/wwwroot'
-  frontBuildOutput: 'front/dist/voyagevoyage-front/browser'
-  artifactName: 'voyagevoyage-app'
+  # Required: Azure DevOps Library variable group containing:
+  # - azureServiceConnection
+  # - appServiceName
+  - group: 'voyagevoyage-deployment'
+  - name: buildConfiguration
+    value: 'Release'
+  - name: vmImage
+    value: 'ubuntu-latest'
+  - name: serverProject
+    value: 'server/VoyageVoyage.Server/VoyageVoyage.Server.csproj'
+  - name: serverWwwroot
+    value: 'server/VoyageVoyage.Server/wwwroot'
+  - name: frontBuildOutput
+    value: 'front/dist/voyagevoyage-front/browser'
+  - name: artifactName
+    value: 'voyagevoyage-app'
+  - name: appServiceType
+    value: 'webAppLinux'
 
 stages:
   - stage: CI
@@ -43,17 +51,13 @@ stages:
           - script: |
               # Enable strict error handling and command echo for easier CI troubleshooting.
               set -eux
-              if [ ! -d "$(frontBuildOutput)/en" ]; then
-                echo "Expected Angular build output at $(frontBuildOutput)/en was not found."
+              if [ ! -f "$(frontBuildOutput)/index.html" ]; then
+                echo "Expected Angular build output at $(frontBuildOutput)/index.html was not found."
                 exit 1
               fi
               rm -rf "$(serverWwwroot)"
               mkdir -p "$(serverWwwroot)"
-              cp -R "$(frontBuildOutput)/en/." "$(serverWwwroot)/"
-              if [ -d "$(frontBuildOutput)/fr" ]; then
-                mkdir -p "$(serverWwwroot)/fr"
-                cp -R "$(frontBuildOutput)/fr/." "$(serverWwwroot)/fr/"
-              fi
+              cp -R "$(frontBuildOutput)/." "$(serverWwwroot)/"
             displayName: Copy Angular production files to server wwwroot
 
           - task: UseDotNet@2
@@ -96,6 +100,6 @@ stages:
                   displayName: Deploy to Azure App Service
                   inputs:
                     azureSubscription: '$(azureServiceConnection)'
-                    appType: 'webApp'
+                    appType: '$(appServiceType)'
                     appName: '$(appServiceName)'
                     package: '$(Pipeline.Workspace)/$(artifactName)'
