@@ -26,7 +26,7 @@ variables:
   - name: frontBuildOutput
     value: 'front/dist/voyagevoyage-front/browser'
   - name: artifactName
-    value: 'voyagevoyage-app'
+    value: 'VoyageVoyage.Server.zip'
   - name: appServiceType
     # Valid appType values include: webApp, webAppLinux, webAppContainer.
     value: 'webAppLinux'
@@ -84,7 +84,7 @@ stages:
           
           - task: PublishPipelineArtifact@1
             inputs:
-              targetPath: '$(Build.ArtifactStagingDirectory)/publish/*.zip'
+              targetPath: '$(Build.ArtifactStagingDirectory)/publish/$(artifactName)'
               publishLocation: 'pipeline'
               artifact: 'server'
 
