@@ -38,11 +38,11 @@ stages:
         pool:
           vmImage: $(vmImage)
         steps:
-          - task: NodeTool@0
-            displayName: Use Node.js 24
+          - task: UseNode@1
             inputs:
-              versionSpec: '24.x'
-
+              version: '24.x'
+            displayName: Use Node.js 24
+            
           - script: |
               npm ci
               npm run build
