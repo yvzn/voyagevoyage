@@ -71,15 +71,14 @@ stages:
           - script: dotnet restore "$(serverProject)"
             displayName: Restore server dependencies
 
-          - script: dotnet publish "$(serverProject)" -c "$(buildConfiguration)" -o "$(Build.ArtifactStagingDirectory)/publish"
+          - script: dotnet publish "$(serverProject)" -c "$(buildConfiguration)" -o "$(Build.ArtifactStagingDirectory)/publish --no-self-contained"
             displayName: Publish server package
 
-          - task: PublishBuildArtifacts@1
-            displayName: Publish deploy artifact
+          - task: PublishPipelineArtifact@1
             inputs:
-              PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
-              ArtifactName: '$(artifactName)'
-              publishLocation: 'Container'
+              targetPath: '$(Build.ArtifactStagingDirectory)/publish/publish.zip'
+              publishLocation: 'pipeline'
+              artifact: 'server'
 
   - stage: CD
     displayName: Deploy to Azure App Service
@@ -95,13 +94,11 @@ stages:
           runOnce:
             deploy:
               steps:
-                - download: current
-                  artifact: $(artifactName)
-
-                - task: AzureWebApp@1
+                - task: AzureRmWebAppDeployment@4
                   displayName: Deploy to Azure App Service
                   inputs:
+                    ConnectionType: 'AzureRM'
                     azureSubscription: '$(azureServiceConnection)'
                     appType: '$(appServiceType)'
-                    appName: '$(appServiceName)'
-                    package: '$(Pipeline.Workspace)/$(artifactName)'
+                    WebAppName: '$(appServiceName)'
+                    packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'
