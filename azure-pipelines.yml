@@ -15,6 +15,8 @@ variables:
   - group: 'voyagevoyage-deployment'
   - name: buildConfiguration
     value: 'Release'
+  - name: buildPlatform
+    value: 'linux-x64'
   - name: vmImage
     value: 'ubuntu-latest'
   - name: serverProject
@@ -67,16 +69,21 @@ stages:
             inputs:
               packageType: 'sdk'
               version: '10.x'
-
-          - script: dotnet restore "$(serverProject)"
-            displayName: Restore server dependencies
-
-          - script: dotnet publish "$(serverProject)" -c "$(buildConfiguration)" -o "$(Build.ArtifactStagingDirectory)/publish --no-self-contained"
-            displayName: Publish server package
-
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'build'
+              projects: '$(solution)'
+              arguments: '--configuration $(buildConfiguration) -r $(buildPlatform) --no-self-contained'
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'publish'
+              publishWebProjects: false
+              projects: '$(solution)'
+              nobuild: true
+              arguments: '--no-build --configuration $(buildConfiguration) -r $(buildPlatform) --no-self-contained'
           - task: PublishPipelineArtifact@1
             inputs:
-              targetPath: '$(Build.ArtifactStagingDirectory)/publish/publish.zip'
+              targetPath: 'server/VoyageVoyage.Server/bin/$(buildConfiguration)/net10.0/$(buildPlatform)/publish.zip'
               publishLocation: 'pipeline'
               artifact: 'server'
 
