@@ -82,10 +82,9 @@ stages:
               nobuild: true
               arguments: '--no-build --configuration $(buildConfiguration) -r $(buildPlatform) --no-self-contained -o "$(Build.ArtifactStagingDirectory)/publish"'
           
-          - script: 'find "$(Build.ArtifactStagingDirectory)/publish" -type f'
           - task: PublishPipelineArtifact@1
             inputs:
-              targetPath: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+              targetPath: '$(Build.ArtifactStagingDirectory)/publish/*.zip'
               publishLocation: 'pipeline'
               artifact: 'server'
 
