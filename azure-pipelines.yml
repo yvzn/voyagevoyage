@@ -109,4 +109,4 @@ stages:
                     azureSubscription: '$(azureServiceConnection)'
                     appType: '$(appServiceType)'
                     WebAppName: '$(appServiceName)'
-                    packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+                    packageForLinux: '$(Pipeline.Workspace)/admin/*.zip'
