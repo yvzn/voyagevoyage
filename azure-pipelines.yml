@@ -15,8 +15,6 @@ variables:
   - group: 'voyagevoyage-deployment'
   - name: buildConfiguration
     value: 'Release'
-  - name: buildPlatform
-    value: 'linux-x64'
   - name: vmImage
     value: 'ubuntu-latest'
   - name: serverProject
