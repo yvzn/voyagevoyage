@@ -10,5 +10,12 @@
   "nextMonthLabel": "Next month",
   "monthSelectLabel": "Month",
   "yearInputLabel": "Year",
-  "todayButton": "Today"
+  "todayButton": "Today",
+  "tripEventsForDayLabel": "Trip events",
+  "tripStatusLegendLabel": "Trip status legend",
+  "tripStatus": {
+    "planned": "Planned",
+    "confirmed": "Confirmed",
+    "cancelled": "Cancelled"
+  }
 }

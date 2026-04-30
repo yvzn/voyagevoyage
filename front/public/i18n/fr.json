@@ -10,5 +10,12 @@
   "nextMonthLabel": "Mois suivant",
   "monthSelectLabel": "Mois",
   "yearInputLabel": "Année",
-  "todayButton": "Aujourd'hui"
+  "todayButton": "Aujourd'hui",
+  "tripEventsForDayLabel": "Déplacements du jour",
+  "tripStatusLegendLabel": "Légende des statuts de déplacement",
+  "tripStatus": {
+    "planned": "Planifié",
+    "confirmed": "Confirmé",
+    "cancelled": "Annulé"
+  }
 }
