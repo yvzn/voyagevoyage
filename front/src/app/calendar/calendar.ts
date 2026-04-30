@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import {
   CalendarDay,
   CalendarWeek,
@@ -21,6 +21,7 @@ import { Trip, TripStatus } from '../trip/trip.model';
 export class CalendarComponent {
   protected readonly localeService = inject(LocaleService);
   private readonly tripService = inject(TripService);
+  private readonly translateService = inject(TranslateService);
 
   protected readonly currentYear = signal(new Date().getFullYear());
   protected readonly currentMonth = signal(new Date().getMonth());
@@ -99,8 +100,15 @@ export class CalendarComponent {
     }
   }
 
+  protected getTripAriaLabel(trip: Trip): string {
+    const statusLabel = this.translateService.instant(
+      this.getTripStatusTranslationKey(trip.status)
+    );
+    return `${trip.destination} (${statusLabel})`;
+  }
+
   private dayKey(year: number, month: number, date: number): string {
-    return `${year}-${month}-${date}`;
+    return `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
   }
 
   goToPreviousMonth(): void {

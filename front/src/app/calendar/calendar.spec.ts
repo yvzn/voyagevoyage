@@ -1,6 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { signal } from '@angular/core';
 import { CalendarComponent } from './calendar';
+import { TripService } from '../trip/trip.service';
+import { Trip, TripStatus } from '../trip/trip.model';
 
 const EN_TRANSLATIONS = {
   calendarHeading: 'Trip calendar',
@@ -10,6 +13,13 @@ const EN_TRANSLATIONS = {
   monthSelectLabel: 'Month',
   yearInputLabel: 'Year',
   todayButton: 'Today',
+  tripEventsForDay: 'Trip events for day {{date}}',
+  tripStatusLegendLabel: 'Trip status legend',
+  tripStatus: {
+    planned: 'Planned',
+    confirmed: 'Confirmed',
+    cancelled: 'Cancelled',
+  },
 };
 
 describe('CalendarComponent', () => {
@@ -239,5 +249,105 @@ describe('CalendarComponent', () => {
     const yearLabel = compiled.querySelector('label[for="year-input"]');
     expect(monthLabel).toBeTruthy();
     expect(yearLabel).toBeTruthy();
+  });
+});
+
+describe('CalendarComponent — trip events', () => {
+  const MOCK_TRIPS: Trip[] = [
+    {
+      id: 't1',
+      startDate: '2026-04-06',
+      endDate: '2026-04-08',
+      destination: 'Lyon',
+      status: TripStatus.Confirmed,
+    },
+    {
+      id: 't2',
+      startDate: '2026-04-14',
+      endDate: '2026-04-14',
+      destination: 'Bordeaux',
+      status: TripStatus.Planned,
+    },
+    {
+      id: 't3',
+      startDate: '2026-04-22',
+      endDate: '2026-04-22',
+      destination: 'Lille',
+      status: TripStatus.Cancelled,
+    },
+  ];
+
+  beforeEach(async () => {
+    const tripSignal = signal<Trip[]>(MOCK_TRIPS);
+    await TestBed.configureTestingModule({
+      imports: [CalendarComponent, TranslateModule.forRoot()],
+      providers: [{ provide: TripService, useValue: { trips: tripSignal.asReadonly() } }],
+    }).compileComponents();
+
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation('en', EN_TRANSLATIONS);
+    translate.use('en');
+  });
+
+  function createFixtureForApril2026() {
+    const fixture = TestBed.createComponent(CalendarComponent);
+    const component = fixture.componentInstance;
+    component['currentMonth'].set(3); // April (0-indexed)
+    component['currentYear'].set(2026);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  it('should display trip event badges in day cells', async () => {
+    const fixture = createFixtureForApril2026();
+    await fixture.whenStable();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const tripBadges = compiled.querySelectorAll('li[aria-label]');
+    expect(tripBadges.length).toBeGreaterThan(0);
+  });
+
+  it('should show trip destination text in badge', async () => {
+    const fixture = createFixtureForApril2026();
+    await fixture.whenStable();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const badges = Array.from(compiled.querySelectorAll('li'));
+    const lyonBadge = badges.find((b) => b.textContent?.includes('Lyon'));
+    expect(lyonBadge).toBeTruthy();
+  });
+
+  it('should display a status legend', async () => {
+    const fixture = createFixtureForApril2026();
+    await fixture.whenStable();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const legend = compiled.querySelector('[role="note"]');
+    expect(legend).toBeTruthy();
+    expect(legend?.getAttribute('aria-label')).toBeTruthy();
+  });
+});
+
+describe('CalendarComponent — no trips', () => {
+  beforeEach(async () => {
+    const tripSignal = signal<Trip[]>([]);
+    await TestBed.configureTestingModule({
+      imports: [CalendarComponent, TranslateModule.forRoot()],
+      providers: [{ provide: TripService, useValue: { trips: tripSignal.asReadonly() } }],
+    }).compileComponents();
+
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation('en', EN_TRANSLATIONS);
+    translate.use('en');
+  });
+
+  it('should show no trip badges when no trips exist', async () => {
+    const fixture = TestBed.createComponent(CalendarComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const tripLists = compiled.querySelectorAll('ul[aria-label]');
+    expect(tripLists.length).toBe(0);
   });
 });

@@ -11,7 +11,7 @@
   "monthSelectLabel": "Month",
   "yearInputLabel": "Year",
   "todayButton": "Today",
-  "tripEventsForDayLabel": "Trip events",
+  "tripEventsForDay": "Trip events for day {{date}}",
   "tripStatusLegendLabel": "Trip status legend",
   "tripStatus": {
     "planned": "Planned",
