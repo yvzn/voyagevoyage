@@ -328,6 +328,67 @@ General expectations:
 - keep a clear link between file metadata and the business record that owns it
 - handle upload, retrieval, and deletion flows carefully to avoid orphaned files or broken references
 
+### 5.5 Authentication and authorization (App Service Easy Auth)
+
+Authentication is handled at the Azure App Service platform level using **Easy Auth** backed by **Microsoft Entra** (formerly Azure Active Directory).
+
+#### How it works in production
+
+1. Azure App Service intercepts every inbound request and validates the user's identity against Microsoft Entra before forwarding the request to the API.
+2. After successful authentication, App Service injects identity headers (e.g. `X-MS-CLIENT-PRINCIPAL`, `X-MS-CLIENT-PRINCIPAL-ID`, `X-MS-CLIENT-PRINCIPAL-NAME`) into the forwarded request.
+3. The ASP.NET Core API uses `Microsoft.Identity.Web` (`AddAppServicesAuthentication()`) to read these injected headers and populate `HttpContext.User` with the authenticated claims.
+
+This means the API does **not** perform token validation itself — it trusts App Service to have already authenticated the request.
+
+#### `ICurrentUserService` abstraction
+
+The `ICurrentUserService` interface (under `VoyageVoyage.Server.Authentication`) is the single access point for obtaining the current user's identity from within the application.
+
+| Environment | Implementation | Behavior |
+|---|---|---|
+| Production | `AppServiceCurrentUserService` | Reads claims from `HttpContext.User` populated by `AddAppServicesAuthentication()` |
+| Development | `MockCurrentUserService` | Returns a hardcoded `dev@localhost` user identity |
+
+Controllers and services that need the current user should inject `ICurrentUserService` rather than reading `HttpContext.User` directly.
+
+#### Development mode (local)
+
+When running locally, no Azure App Service context exists. The application registers a different set of services:
+
+- `MockAuthHandler` — an ASP.NET Core `AuthenticationHandler` that always authenticates a hardcoded mock user and populates `HttpContext.User`, so code paths that read the claims principal work correctly in development.
+- `MockCurrentUserService` — returns the same hardcoded user via `ICurrentUserService`.
+
+No Azure credentials or App Service configuration are required to run locally.
+
+#### Middleware registration
+
+Both `UseAuthentication()` and `UseAuthorization()` are added to the middleware pipeline in all environments. The registration order follows ASP.NET Core conventions: after static files and before `MapControllers()`.
+
+#### Adding authorization to a new endpoint
+
+To require authentication on a new controller or action:
+
+```csharp
+[Authorize]
+[ApiController]
+[Route("api/[controller]")]
+public class MyController(ICurrentUserService currentUserService) : ControllerBase
+{
+    [HttpGet]
+    public IActionResult Get()
+    {
+        var user = currentUserService.GetCurrentUser();
+        // ...
+    }
+}
+```
+
+Existing endpoints without `[Authorize]` remain accessible without authentication (no breaking change).
+
+#### Platform setup checklist (Azure)
+
+See `DEPLOYMENT_AZURE_APP_SERVICE.md` for the full Easy Auth platform configuration steps.
+
 ## 6. Batch processing with Azure Functions
 
 The project may use occasional Azure Functions in .NET for background or scheduled processing.
