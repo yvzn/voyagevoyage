@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using System.Text.Json.Serialization;
 using VoyageVoyage.Server.Authentication;
+using VoyageVoyage.Server.Data;
 using VoyageVoyage.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,9 +23,17 @@ builder.Services.AddSpaStaticFiles(options =>
 
 builder.Services.AddHttpContextAccessor();
 
-// Trip service: in-memory implementation for development.
-// Replace with a Cosmos DB-backed implementation for production.
-builder.Services.AddSingleton<ITripService, InMemoryTripService>();
+// Cosmos DB via EF Core
+var cosmosConnectionString = builder.Configuration.GetConnectionString("CosmosDb");
+if (string.IsNullOrEmpty(cosmosConnectionString))
+    throw new InvalidOperationException("Cosmos DB connection string 'CosmosDb' is not configured.");
+
+var cosmosDatabaseName = builder.Configuration["CosmosDb:DatabaseName"] ?? "voyagevoyage";
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseCosmos(cosmosConnectionString, cosmosDatabaseName));
+
+builder.Services.AddScoped<ITripService, CosmosDbTripService>();
 
 if (builder.Environment.IsDevelopment())
 {

@@ -249,6 +249,16 @@ Practical checklist:
 
 ## 5. Back-end stack
 
+### 5.0 Full-stack implementation requirement
+
+Every product feature must be implemented end-to-end — both the front end (Angular component, service, i18n) **and** the back end (controller, service, database access).
+
+Practical rules:
+- do not ship front-end features backed only by mock or static data
+- do not ship back-end endpoints without a matching Angular service that calls them
+- use the actual persistence layer (Cosmos DB) from day one; the emulator is available for local development
+- in-memory or mock service implementations are not acceptable as a substitute for real persistence in any environment
+
 ### 5.1 .NET Web API
 
 The backend is built as a .NET Web API.
@@ -312,6 +322,29 @@ Important mindset for developers:
 - model data around access patterns, not only around abstract entities
 - think early about partitioning and query behavior
 - avoid writing generic repository layers that hide important query costs
+
+#### EF Core as the data access layer
+
+EF Core with the Cosmos DB provider (`Microsoft.EntityFrameworkCore.Cosmos`) is used as the data access layer.
+
+Practical rules:
+- access data through `ApplicationDbContext` (`DbSet<T>` per entity)
+- entity types are mapped in `OnModelCreating` with explicit container names and partition keys
+- partition keys must always be used in queries (add `.Where(e => e.PartitionKey == value)` before querying)
+- user-owned data uses `UserId` as the partition key; always filter by the current user from `ICurrentUserService`
+
+#### Local development
+
+Use the [Azure Cosmos DB Emulator](https://aka.ms/cosmosemulator) for local development.
+The default emulator connection string is pre-configured in `appsettings.Development.json`.
+
+For production, set the `ConnectionStrings__CosmosDb` environment variable (or equivalent App Service configuration) to the actual account connection string.
+
+#### No in-memory or mock data stores
+
+All service implementations must use the actual persistence layer (Cosmos DB).
+In-memory or mock service implementations are not acceptable for features — use the emulator for local development instead.
+
 
 ### 5.4 Azure Storage
 
