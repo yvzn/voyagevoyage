@@ -12,7 +12,10 @@ export class TripService {
 
   readonly trips = toSignal(
     this.http.get<Trip[]>('/api/trips').pipe(
-      catchError(() => of([]))
+      catchError((err) => {
+        console.error('Failed to load trips:', err);
+        return of([]);
+      })
     ),
     { initialValue: [] as Trip[] }
   );

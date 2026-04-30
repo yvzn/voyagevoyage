@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace VoyageVoyage.Server.Models;
 
 /// <summary>
@@ -6,6 +8,16 @@ namespace VoyageVoyage.Server.Models;
 public record CreateTripRequest(
     DateOnly StartDate,
     DateOnly EndDate,
-    string Destination,
+    [Required, MinLength(1)] string Destination,
     TripStatus Status
-);
+) : IValidatableObject
+{
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (EndDate < StartDate)
+            yield return new ValidationResult(
+                "EndDate must be on or after StartDate.",
+                [nameof(EndDate)]
+            );
+    }
+}
