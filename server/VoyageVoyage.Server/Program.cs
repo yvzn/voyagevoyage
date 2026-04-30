@@ -1,17 +1,29 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Identity.Web;
+using System.Text.Json.Serialization;
 using VoyageVoyage.Server.Authentication;
+using VoyageVoyage.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Serialize enums as lowercase strings (e.g. "planned", "confirmed", "cancelled")
+        // to match the Angular frontend model conventions.
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(System.Text.Json.JsonNamingPolicy.CamelCase));
+    });
 builder.Services.AddSpaStaticFiles(options =>
 {
     options.RootPath = "wwwroot";
 });
 
 builder.Services.AddHttpContextAccessor();
+
+// Trip service: in-memory implementation for development.
+// Replace with a Cosmos DB-backed implementation for production.
+builder.Services.AddSingleton<ITripService, InMemoryTripService>();
 
 if (builder.Environment.IsDevelopment())
 {

@@ -1,4 +1,6 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { signal } from '@angular/core';
 import { CalendarComponent } from './calendar';
@@ -23,14 +25,24 @@ const EN_TRANSLATIONS = {
 };
 
 describe('CalendarComponent', () => {
+  let httpMock: HttpTestingController;
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CalendarComponent, TranslateModule.forRoot()],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     const translate = TestBed.inject(TranslateService);
     translate.setTranslation('en', EN_TRANSLATIONS);
     translate.use('en');
+
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.expectOne('/api/trips').flush([]);
+    httpMock.verify();
   });
 
   it('should create', () => {
