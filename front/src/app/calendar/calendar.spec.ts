@@ -13,7 +13,7 @@ const EN_TRANSLATIONS = {
   monthSelectLabel: 'Month',
   yearInputLabel: 'Year',
   todayButton: 'Today',
-  tripEventsForDay: 'Trip events for day {{date}}',
+  tripEventsForDay: 'Trip events for {{month}} {{date}}, {{year}}',
   tripStatusLegendLabel: 'Trip status legend',
   tripStatus: {
     planned: 'Planned',

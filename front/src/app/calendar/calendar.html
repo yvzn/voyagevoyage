@@ -110,7 +110,7 @@
                   {{ day.date }}
                 </span>
                 @if (getTripsForDay(day).length > 0) {
-                  <ul class="mt-0.5 space-y-0.5 text-left" [attr.aria-label]="'tripEventsForDay' | translate : { date: day.date }">
+                  <ul class="mt-0.5 space-y-0.5 text-left" [attr.aria-label]="'tripEventsForDay' | translate : { date: day.date, month: displayMonth(), year: displayYear() }">
                     @for (trip of getTripsForDay(day); track trip.id) {
                       <li
                         class="truncate rounded px-1 py-0.5 text-xs leading-tight"

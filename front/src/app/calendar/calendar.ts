@@ -108,7 +108,7 @@ export class CalendarComponent {
   }
 
   private dayKey(year: number, month: number, date: number): string {
-    return `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+    return `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
   }
 
   goToPreviousMonth(): void {

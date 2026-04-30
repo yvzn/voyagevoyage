@@ -11,7 +11,7 @@
   "monthSelectLabel": "Mois",
   "yearInputLabel": "Année",
   "todayButton": "Aujourd'hui",
-  "tripEventsForDay": "Déplacements du {{date}}",
+  "tripEventsForDay": "Déplacements du {{date}} {{month}} {{year}}",
   "tripStatusLegendLabel": "Légende des statuts de déplacement",
   "tripStatus": {
     "planned": "Planifié",
