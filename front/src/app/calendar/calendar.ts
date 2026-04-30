@@ -44,18 +44,19 @@ export class CalendarComponent {
   private readonly tripsPerDay = computed(() => {
     const map = new Map<string, Trip[]>();
     for (const trip of this.tripService.trips()) {
-      const start = new Date(trip.startDate);
-      const end = new Date(trip.endDate);
-      const current = new Date(start);
-      while (current <= end) {
-        const key = this.dayKey(current.getFullYear(), current.getMonth(), current.getDate());
+      const [sy, sm, sd] = trip.startDate.split('-').map(Number);
+      const [ey, em, ed] = trip.endDate.split('-').map(Number);
+      const startTs = Date.UTC(sy, sm - 1, sd);
+      const endTs = Date.UTC(ey, em - 1, ed);
+      for (let ts = startTs; ts <= endTs; ts += 86400000) {
+        const d = new Date(ts);
+        const key = this.dayKey(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
         const existing = map.get(key);
         if (existing) {
           existing.push(trip);
         } else {
           map.set(key, [trip]);
         }
-        current.setDate(current.getDate() + 1);
       }
     }
     return map;
