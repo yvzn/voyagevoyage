@@ -422,6 +422,71 @@ Existing endpoints without `[Authorize]` remain accessible without authenticatio
 
 See `DEPLOYMENT_AZURE_APP_SERVICE.md` for the full Easy Auth platform configuration steps.
 
+## 5.6 Observability
+
+### Application Insights
+
+The server integrates with Azure Application Insights via `Microsoft.ApplicationInsights.AspNetCore`.
+
+Registration in `Program.cs`:
+
+```csharp
+builder.Services.AddApplicationInsightsTelemetry();
+```
+
+The SDK reads the connection string from configuration in order of priority:
+
+1. `ApplicationInsights:ConnectionString` in `appsettings.json` / environment-specific files.
+2. The `APPLICATIONINSIGHTS_CONNECTION_STRING` environment variable — the recommended production/staging wiring on Azure App Service. No extra code is required.
+
+When no connection string is configured (e.g. local development), the SDK operates as a graceful no-op: the application starts and runs normally, no telemetry is emitted, and no errors are thrown.
+
+**Do not commit real connection strings to source control.** The `appsettings.json` placeholder is intentionally empty. Set the real value via Azure App Service application settings or a Key Vault reference.
+
+### HTTP Request/Response Logging Middleware
+
+An opt-in middleware logs full HTTP request and response detail (headers + body) using the built-in `Microsoft.AspNetCore.HttpLogging` package. It is **off by default** and must never be enabled in production unless deliberately configured.
+
+#### Configuration
+
+Add or update the `HttpLogging` section in the applicable `appsettings` file:
+
+```json
+"HttpLogging": {
+  "Enabled": true,
+  "LogRequestHeaders": true,
+  "LogResponseHeaders": true,
+  "LogRequestBody": true,
+  "LogResponseBody": true,
+  "BodySizeLimit": 32768
+}
+```
+
+Set `Enabled: false` (the default) to skip registering the middleware entirely.
+
+Also ensure the log level is set to `Information` for the middleware logger:
+
+```json
+"Logging": {
+  "LogLevel": {
+    "Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware": "Information"
+  }
+}
+```
+
+#### Sensitive header redaction
+
+When the middleware is active, the following headers are always redacted from logs:
+
+- `Authorization`
+- `Cookie` / `Set-Cookie`
+- `X-MS-CLIENT-PRINCIPAL*` (App Service Easy Auth principal headers)
+
+#### Implementation
+
+- `Infrastructure/HttpLoggingOptions.cs` — binds the `HttpLogging` configuration section.
+- `Program.cs` — conditionally calls `AddHttpLogging()` and `UseHttpLogging()` based on the `Enabled` flag.
+
 ## 6. Batch processing with Azure Functions
 
 The project may use occasional Azure Functions in .NET for background or scheduled processing.

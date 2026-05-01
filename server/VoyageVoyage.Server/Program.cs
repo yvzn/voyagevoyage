@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using System.Text.Json.Serialization;
@@ -8,6 +9,9 @@ using VoyageVoyage.Server.Infrastructure;
 using VoyageVoyage.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Application Insights — graceful no-op when connection string is absent (e.g. local dev).
+builder.Services.AddApplicationInsightsTelemetry();
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers()
@@ -62,6 +66,36 @@ else
 
 builder.Services.AddAuthorization();
 
+// Optional HTTP request/response logging — off by default, never enabled in production
+// unless explicitly configured. Sensitive headers are always redacted.
+var httpLoggingOptions = builder.Configuration
+    .GetSection(HttpRequestLoggingOptions.SectionName)
+    .Get<HttpRequestLoggingOptions>() ?? new HttpRequestLoggingOptions();
+
+if (httpLoggingOptions.Enabled)
+{
+    builder.Services.AddHttpLogging(logging =>
+    {
+        logging.LoggingFields = HttpLoggingFields.None;
+
+        if (httpLoggingOptions.LogRequestHeaders)
+            logging.LoggingFields |= HttpLoggingFields.RequestHeaders;
+        if (httpLoggingOptions.LogResponseHeaders)
+            logging.LoggingFields |= HttpLoggingFields.ResponseHeaders;
+        if (httpLoggingOptions.LogRequestBody)
+            logging.LoggingFields |= HttpLoggingFields.RequestBody;
+        if (httpLoggingOptions.LogResponseBody)
+            logging.LoggingFields |= HttpLoggingFields.ResponseBody;
+
+        logging.RequestBodyLogLimit = httpLoggingOptions.BodySizeLimit;
+        logging.ResponseBodyLogLimit = httpLoggingOptions.BodySizeLimit;
+
+        // Sensitive headers (Authorization, Cookie, X-MS-CLIENT-PRINCIPAL*, etc.) are
+        // redacted automatically: only headers explicitly listed in RequestHeaders /
+        // ResponseHeaders are logged in plain text; all others appear as [Redacted].
+    });
+}
+
 var app = builder.Build();
 
 // Initialize the database: ensure it exists and seed example data in development.
@@ -86,6 +120,12 @@ app.UseStaticFiles();
 app.UseSpaStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
+
+if (httpLoggingOptions.Enabled)
+{
+    app.UseHttpLogging();
+}
+
 app.MapControllers();
 app.MapHealthChecks("/api/health");
 app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api"), spaApp =>
