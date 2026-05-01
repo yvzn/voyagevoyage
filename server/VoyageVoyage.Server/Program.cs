@@ -87,7 +87,7 @@ app.UseSpaStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/api/health");
 app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api"), spaApp =>
 {
     spaApp.UseSpa(spa =>

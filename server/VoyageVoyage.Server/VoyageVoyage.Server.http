@@ -45,3 +45,8 @@ Content-Type: application/json
 DELETE {{VoyageVoyage.Server_HostAddress}}/api/trips/1
 
 ###
+
+### Database health check
+GET {{VoyageVoyage.Server_HostAddress}}/api/health
+
+###
