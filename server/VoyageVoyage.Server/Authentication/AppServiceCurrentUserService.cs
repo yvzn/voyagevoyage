@@ -33,7 +33,8 @@ public class AppServiceCurrentUserService(
             return null;
 
         var id = user.FindFirstValue("http://schemas.microsoft.com/identity/claims/objectidentifier")
-            ?? user.FindFirstValue(ClaimTypes.NameIdentifier);
+            ?? user.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? user.FindFirstValue("sub");
 
         logger.LogInformation("GetCurrentUser: id claim resolved={IdResolved}", !string.IsNullOrEmpty(id));
 
@@ -45,6 +46,7 @@ public class AppServiceCurrentUserService(
             ?? string.Empty;
 
         var email = user.FindFirstValue("preferred_username")
+            ?? user.FindFirstValue("email")
             ?? user.FindFirstValue(ClaimTypes.Email)
             ?? string.Empty;
 

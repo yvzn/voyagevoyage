@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="VoyageVoyage.Server/VoyageVoyage.Server.csproj" />
+  <Project Path="VoyageVoyage.Server.Tests/VoyageVoyage.Server.Tests.csproj" />
 </Solution>
