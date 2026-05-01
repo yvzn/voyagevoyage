@@ -89,6 +89,7 @@ if (httpLoggingOptions.Enabled)
 
         logging.RequestBodyLogLimit = httpLoggingOptions.BodySizeLimit;
         logging.ResponseBodyLogLimit = httpLoggingOptions.BodySizeLimit;
+        logging.CombineLogs = true;
 
         // Sensitive headers (Authorization, Cookie, X-MS-CLIENT-PRINCIPAL*, etc.) are
         // redacted automatically: only headers explicitly listed in RequestHeaders /
