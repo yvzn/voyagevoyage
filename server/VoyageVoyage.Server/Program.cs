@@ -1,17 +1,42 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
+using System.Text.Json.Serialization;
 using VoyageVoyage.Server.Authentication;
+using VoyageVoyage.Server.Data;
+using VoyageVoyage.Server.Infrastructure;
+using VoyageVoyage.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Serialize enums as lowercase strings (e.g. "planned", "confirmed", "cancelled")
+        // to match the Angular frontend model conventions.
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(System.Text.Json.JsonNamingPolicy.CamelCase));
+    });
 builder.Services.AddSpaStaticFiles(options =>
 {
     options.RootPath = "wwwroot";
 });
 
 builder.Services.AddHttpContextAccessor();
+
+// Cosmos DB via EF Core
+var cosmosConnectionString = builder.Configuration.GetConnectionString("CosmosDb");
+if (string.IsNullOrEmpty(cosmosConnectionString))
+    throw new InvalidOperationException("Cosmos DB connection string 'CosmosDb' is not configured.");
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseCosmos(cosmosConnectionString, ApplicationDbContext.DatabaseName));
+
+builder.Services.AddScoped<ITripService, CosmosDbTripService>();
+builder.Services.AddScoped<DbInitializer>();
+
+builder.Services.AddHealthChecks()
+    .AddCheck<DatabaseHealthCheck>("cosmos-db");
 
 if (builder.Environment.IsDevelopment())
 {
@@ -39,6 +64,13 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+// Initialize the database: ensure it exists and seed example data in development.
+using (var scope = app.Services.CreateScope())
+{
+    var initializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
+    await initializer.InitAsync();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -55,6 +87,7 @@ app.UseSpaStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/api/health");
 app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api"), spaApp =>
 {
     spaApp.UseSpa(spa =>

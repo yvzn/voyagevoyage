@@ -95,7 +95,7 @@
             @for (day of week.days; track trackByDay($index, day)) {
               <td
                 role="gridcell"
-                class="h-12 px-2 py-1 text-center align-top md:h-24 md:px-3 md:py-2"
+                class="h-16 px-2 py-1 text-center align-top md:h-28 md:px-3 md:py-2"
                 [class.text-gray-400]="!day.isCurrentMonth"
                 [class.dark:text-gray-500]="!day.isCurrentMonth"
                 [class.text-gray-900]="day.isCurrentMonth && !day.isToday"
@@ -109,11 +109,39 @@
                 >
                   {{ day.date }}
                 </span>
+                @if (getTripsForDay(day).length > 0) {
+                  <ul class="mt-0.5 space-y-0.5 text-left" [attr.aria-label]="'tripEventsForDay' | translate : { date: day.date, month: displayMonth(), year: displayYear() }">
+                    @for (trip of getTripsForDay(day); track trip.id) {
+                      <li
+                        class="truncate rounded px-1 py-0.5 text-xs leading-tight"
+                        [ngClass]="getTripStatusClass(trip.status)"
+                        [title]="trip.destination"
+                        [attr.aria-label]="getTripAriaLabel(trip)"
+                      >
+                        {{ trip.destination }}
+                      </li>
+                    }
+                  </ul>
+                }
               </td>
             }
           </tr>
         }
       </tbody>
     </table>
+  </div>
+
+  <!-- Status legend -->
+  <div class="mt-4 flex flex-wrap gap-4 rounded-lg bg-white px-4 py-3 shadow-sm dark:bg-gray-800" role="note" [attr.aria-label]="'tripStatusLegendLabel' | translate">
+    @for (status of tripStatuses; track status) {
+      <div class="flex items-center gap-1.5">
+        <span
+          class="h-3 w-3 flex-shrink-0 rounded"
+          [ngClass]="getTripStatusDotClass(status)"
+          aria-hidden="true"
+        ></span>
+        <span class="text-xs text-gray-600 dark:text-gray-300">{{ getTripStatusTranslationKey(status) | translate }}</span>
+      </div>
+    }
   </div>
 </section>
