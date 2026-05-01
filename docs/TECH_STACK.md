@@ -568,6 +568,13 @@ Put in Functions only when the work is:
 - reuse shared services where possible
 - ensure failures can be diagnosed through logs and monitoring
 
+### 8.4 When writing unit tests
+
+- use the **Arrange / Act / Assert** pattern in every test method: set up inputs and dependencies under `// Arrange`, execute the subject under test under `// Act`, and verify expectations under `// Assert`
+- name tests using the pattern `MethodName_Scenario_ExpectedBehavior`
+- keep each test focused on a single behaviour
+- use NSubstitute to substitute external dependencies
+
 ## 9. What developers should keep in mind
 
 - do not put business rules only in the UI
