@@ -8,13 +8,16 @@ namespace VoyageVoyage.Server.Data;
 /// </summary>
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
+    public const string DatabaseName = "voyagevoyage";
+    public const string TripsContainerName = "trips";
+
     public DbSet<Trip> Trips { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Trip>(entity =>
         {
-            entity.ToContainer("trips");
+            entity.ToContainer(TripsContainerName);
             entity.HasPartitionKey(t => t.UserId);
             entity.HasKey(t => t.Id);
         });
