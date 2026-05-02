@@ -51,6 +51,23 @@ if (builder.Environment.IsDevelopment())
         .AddScheme<AuthenticationSchemeOptions, MockAuthHandler>(MockAuthHandler.SchemeName, null);
 
     builder.Services.AddScoped<ICurrentUserService, MockCurrentUserService>();
+
+    // HTTP request/response logging — development only. All fields are logged.
+    // Sensitive headers (Authorization, Cookie, X-MS-CLIENT-PRINCIPAL*, etc.) are
+    // redacted automatically: only headers explicitly listed in RequestHeaders /
+    // ResponseHeaders are logged in plain text; all others appear as [Redacted].
+    builder.Services.AddHttpLogging(logging =>
+    {
+        logging.LoggingFields =
+            HttpLoggingFields.RequestHeaders |
+            HttpLoggingFields.ResponseHeaders |
+            HttpLoggingFields.RequestBody |
+            HttpLoggingFields.ResponseBody;
+
+        logging.RequestBodyLogLimit = 32768;
+        logging.ResponseBodyLogLimit = 32768;
+        logging.CombineLogs = true;
+    });
 }
 else
 {
@@ -66,37 +83,6 @@ else
 
 builder.Services.AddAuthorization();
 
-// Optional HTTP request/response logging — off by default, never enabled in production
-// unless explicitly configured. Sensitive headers are always redacted.
-var httpLoggingOptions = builder.Configuration
-    .GetSection(HttpRequestLoggingOptions.SectionName)
-    .Get<HttpRequestLoggingOptions>() ?? new HttpRequestLoggingOptions();
-
-if (httpLoggingOptions.Enabled)
-{
-    builder.Services.AddHttpLogging(logging =>
-    {
-        logging.LoggingFields = HttpLoggingFields.None;
-
-        if (httpLoggingOptions.LogRequestHeaders)
-            logging.LoggingFields |= HttpLoggingFields.RequestHeaders;
-        if (httpLoggingOptions.LogResponseHeaders)
-            logging.LoggingFields |= HttpLoggingFields.ResponseHeaders;
-        if (httpLoggingOptions.LogRequestBody)
-            logging.LoggingFields |= HttpLoggingFields.RequestBody;
-        if (httpLoggingOptions.LogResponseBody)
-            logging.LoggingFields |= HttpLoggingFields.ResponseBody;
-
-        logging.RequestBodyLogLimit = httpLoggingOptions.BodySizeLimit;
-        logging.ResponseBodyLogLimit = httpLoggingOptions.BodySizeLimit;
-        logging.CombineLogs = true;
-
-        // Sensitive headers (Authorization, Cookie, X-MS-CLIENT-PRINCIPAL*, etc.) are
-        // redacted automatically: only headers explicitly listed in RequestHeaders /
-        // ResponseHeaders are logged in plain text; all others appear as [Redacted].
-    });
-}
-
 var app = builder.Build();
 
 // Initialize the database: ensure it exists and seed example data in development.
@@ -108,6 +94,7 @@ using (var scope = app.Services.CreateScope())
 
 if (app.Environment.IsDevelopment())
 {
+    app.UseHttpLogging();
     app.MapOpenApi();
     app.UseCors(policy =>
         policy.WithOrigins("http://localhost:4200")
@@ -121,11 +108,6 @@ app.UseStaticFiles();
 app.UseSpaStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
-
-if (httpLoggingOptions.Enabled)
-{
-    app.UseHttpLogging();
-}
 
 app.MapControllers();
 app.MapHealthChecks("/api/health");
