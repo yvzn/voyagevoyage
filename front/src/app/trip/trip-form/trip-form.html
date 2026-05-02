@@ -1,0 +1,153 @@
+<div
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-labelledby]="'trip-form-title'"
+  class="fixed inset-0 z-50 overflow-y-auto"
+>
+  <!-- Backdrop -->
+  <div
+    class="fixed inset-0 bg-black/50"
+    (click)="onCancel()"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Modal panel -->
+  <div class="flex min-h-full items-center justify-center p-4">
+    <div class="relative z-10 w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800">
+      <h3
+        id="trip-form-title"
+        class="mb-6 text-lg font-semibold text-gray-900 dark:text-white"
+      >
+        {{ (isEditMode ? 'tripForm.editTitle' : 'tripForm.createTitle') | translate }}
+      </h3>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <!-- Destination -->
+        <div class="mb-4">
+          <label
+            for="trip-destination"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'tripForm.destination' | translate }}
+          </label>
+          <input
+            id="trip-destination"
+            type="text"
+            formControlName="destination"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('destination')?.invalid && form.get('destination')?.touched }"
+          />
+          @if (form.get('destination')?.invalid && form.get('destination')?.touched) {
+            <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+              {{ 'tripForm.destinationRequired' | translate }}
+            </p>
+          }
+        </div>
+
+        <!-- Start date -->
+        <div class="mb-4">
+          <label
+            for="trip-start-date"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'tripForm.startDate' | translate }}
+          </label>
+          <input
+            id="trip-start-date"
+            type="date"
+            formControlName="startDate"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('startDate')?.invalid && form.get('startDate')?.touched }"
+          />
+        </div>
+
+        <!-- End date -->
+        <div class="mb-4">
+          <label
+            for="trip-end-date"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'tripForm.endDate' | translate }}
+          </label>
+          <input
+            id="trip-end-date"
+            type="date"
+            formControlName="endDate"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            [ngClass]="{ 'border-red-500 dark:border-red-500': (form.get('endDate')?.invalid && form.get('endDate')?.touched) || (form.hasError('endBeforeStart') && form.get('endDate')?.touched) }"
+          />
+          @if (form.hasError('endBeforeStart') && form.get('endDate')?.touched) {
+            <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+              {{ 'tripForm.endBeforeStart' | translate }}
+            </p>
+          }
+        </div>
+
+        <!-- Status -->
+        <div class="mb-6">
+          <label
+            for="trip-status"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'tripForm.status' | translate }}
+          </label>
+          <select
+            id="trip-status"
+            formControlName="status"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          >
+            @for (s of tripStatuses; track s) {
+              <option [value]="s">{{ getTripStatusTranslationKey(s) | translate }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Error message -->
+        @if (errorKey()) {
+          <div
+            role="alert"
+            class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-400"
+          >
+            {{ errorKey()! | translate }}
+          </div>
+        }
+
+        <!-- Actions -->
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            @if (isEditMode) {
+              <button
+                type="button"
+                (click)="onDelete()"
+                [disabled]="isLoading()"
+                class="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300 disabled:opacity-50 dark:border-red-600 dark:text-red-400 dark:hover:bg-red-900/20"
+              >
+                {{ 'tripForm.delete' | translate }}
+              </button>
+            }
+          </div>
+          <div class="flex gap-2">
+            <button
+              type="button"
+              (click)="onCancel()"
+              class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+            >
+              {{ 'tripForm.cancel' | translate }}
+            </button>
+            <button
+              type="submit"
+              [disabled]="isLoading()"
+              class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
+            >
+              @if (isLoading()) {
+                {{ 'tripForm.saving' | translate }}
+              } @else {
+                {{ 'tripForm.save' | translate }}
+              }
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

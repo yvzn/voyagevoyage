@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { TripService } from './trip.service';
-import { Trip, TripStatus } from './trip.model';
+import { Trip, TripStatus, CreateTripRequest, UpdateTripRequest } from './trip.model';
 
 const MOCK_TRIPS: Trip[] = [
   { id: '1', startDate: '2026-04-06', endDate: '2026-04-08', destination: 'Lyon', status: TripStatus.Confirmed },
@@ -63,5 +63,62 @@ describe('TripService', () => {
       expect(trip.endDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
       expect(Object.values(TripStatus)).toContain(trip.status);
     }
+  });
+
+  describe('create', () => {
+    it('should POST to /api/trips and add the new trip to the signal', () => {
+      httpMock.expectOne('/api/trips').flush([]);
+
+      const request: CreateTripRequest = {
+        destination: 'Paris',
+        startDate: '2026-05-10',
+        endDate: '2026-05-12',
+        status: TripStatus.Planned,
+      };
+      const created: Trip = { id: 'new-1', ...request };
+
+      let result: Trip | undefined;
+      service.create(request).subscribe((t) => (result = t));
+
+      httpMock.expectOne({ method: 'POST', url: '/api/trips' }).flush(created);
+
+      expect(result).toEqual(created);
+      expect(service.trips()).toContain(created);
+    });
+  });
+
+  describe('update', () => {
+    it('should PUT to /api/trips/:id and update the trip in the signal', () => {
+      httpMock.expectOne('/api/trips').flush(MOCK_TRIPS);
+
+      const request: UpdateTripRequest = {
+        destination: 'Lyon-Updated',
+        startDate: '2026-04-06',
+        endDate: '2026-04-09',
+        status: TripStatus.Confirmed,
+      };
+      const updated: Trip = { id: '1', ...request };
+
+      let result: Trip | undefined;
+      service.update('1', request).subscribe((t) => (result = t));
+
+      httpMock.expectOne({ method: 'PUT', url: '/api/trips/1' }).flush(updated);
+
+      expect(result).toEqual(updated);
+      expect(service.trips().find((t) => t.id === '1')).toEqual(updated);
+    });
+  });
+
+  describe('delete', () => {
+    it('should DELETE /api/trips/:id and remove the trip from the signal', () => {
+      httpMock.expectOne('/api/trips').flush(MOCK_TRIPS);
+
+      service.delete('2').subscribe();
+
+      httpMock.expectOne({ method: 'DELETE', url: '/api/trips/2' }).flush(null);
+
+      expect(service.trips().find((t) => t.id === '2')).toBeUndefined();
+      expect(service.trips().length).toBe(MOCK_TRIPS.length - 1);
+    });
   });
 });

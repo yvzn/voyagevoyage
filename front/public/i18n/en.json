@@ -11,11 +11,29 @@
   "monthSelectLabel": "Month",
   "yearInputLabel": "Year",
   "todayButton": "Today",
+  "newTripButton": "New trip",
+  "addTripForDay": "Add a trip on {{month}} {{date}}, {{year}}",
   "tripEventsForDay": "Trip events for {{month}} {{date}}, {{year}}",
   "tripStatusLegendLabel": "Trip status legend",
   "tripStatus": {
     "planned": "Planned",
     "confirmed": "Confirmed",
     "cancelled": "Cancelled"
+  },
+  "tripForm": {
+    "createTitle": "New trip",
+    "editTitle": "Edit trip",
+    "destination": "Destination",
+    "destinationRequired": "Destination is required.",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "endBeforeStart": "End date must be on or after the start date.",
+    "status": "Status",
+    "save": "Save",
+    "saving": "Saving…",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "saveError": "An error occurred while saving the trip. Please try again.",
+    "deleteError": "An error occurred while deleting the trip. Please try again."
   }
 }

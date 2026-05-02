@@ -11,11 +11,29 @@
   "monthSelectLabel": "Mois",
   "yearInputLabel": "Année",
   "todayButton": "Aujourd'hui",
+  "newTripButton": "Nouveau déplacement",
+  "addTripForDay": "Ajouter un déplacement le {{date}} {{month}} {{year}}",
   "tripEventsForDay": "Déplacements du {{date}} {{month}} {{year}}",
   "tripStatusLegendLabel": "Légende des statuts de déplacement",
   "tripStatus": {
     "planned": "Planifié",
     "confirmed": "Confirmé",
     "cancelled": "Annulé"
+  },
+  "tripForm": {
+    "createTitle": "Nouveau déplacement",
+    "editTitle": "Modifier le déplacement",
+    "destination": "Destination",
+    "destinationRequired": "La destination est obligatoire.",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "endBeforeStart": "La date de fin doit être égale ou postérieure à la date de début.",
+    "status": "Statut",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "delete": "Supprimer",
+    "cancel": "Annuler",
+    "saveError": "Une erreur est survenue lors de l'enregistrement du déplacement. Veuillez réessayer.",
+    "deleteError": "Une erreur est survenue lors de la suppression du déplacement. Veuillez réessayer."
   }
 }
