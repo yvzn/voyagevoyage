@@ -445,34 +445,9 @@ When no connection string is configured (e.g. local development), the SDK operat
 
 ### HTTP Request/Response Logging Middleware
 
-An opt-in middleware logs full HTTP request and response detail (headers + body) using the built-in `Microsoft.AspNetCore.HttpLogging` package. It is **off by default** and must never be enabled in production unless deliberately configured.
+The built-in `Microsoft.AspNetCore.HttpLogging` middleware logs full HTTP request and response detail (headers + body). It is **enabled automatically in development mode** and is **never active in production**.
 
-#### Configuration
-
-Add or update the `HttpLogging` section in the applicable `appsettings` file:
-
-```json
-"HttpLogging": {
-  "Enabled": true,
-  "LogRequestHeaders": true,
-  "LogResponseHeaders": true,
-  "LogRequestBody": true,
-  "LogResponseBody": true,
-  "BodySizeLimit": 32768
-}
-```
-
-Set `Enabled: false` (the default) to skip registering the middleware entirely.
-
-Also ensure the log level is set to `Information` for the middleware logger:
-
-```json
-"Logging": {
-  "LogLevel": {
-    "Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware": "Information"
-  }
-}
-```
+No configuration is required to enable it — it is wired up unconditionally when `ASPNETCORE_ENVIRONMENT` is `Development`. All logging fields (request headers, response headers, request body, response body) are enabled with a 32 KB body size limit.
 
 #### Sensitive header redaction
 
@@ -484,8 +459,8 @@ When the middleware is active, the following headers are always redacted from lo
 
 #### Implementation
 
-- `Infrastructure/HttpLoggingOptions.cs` — binds the `HttpLogging` configuration section.
-- `Program.cs` — conditionally calls `AddHttpLogging()` and `UseHttpLogging()` based on the `Enabled` flag.
+- `Program.cs` — registers `AddHttpLogging()` and calls `UseHttpLogging()` inside the `IsDevelopment()` blocks.
+- `appsettings.Development.json` — sets the log level for `Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware` to `Information` so that log entries are emitted.
 
 ## 6. Batch processing with Azure Functions
 
