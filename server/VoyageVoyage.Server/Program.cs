@@ -94,13 +94,13 @@ using (var scope = app.Services.CreateScope())
 
 if (app.Environment.IsDevelopment())
 {
+    app.UseHttpLogging();
     app.MapOpenApi();
     app.UseCors(policy =>
         policy.WithOrigins("http://localhost:4200")
               .AllowAnyHeader()
               .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE")
     );
-    app.UseHttpLogging();
 }
 
 app.UseHttpsRedirection();
