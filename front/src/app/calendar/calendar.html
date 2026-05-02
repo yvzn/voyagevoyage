@@ -108,7 +108,7 @@
             @for (day of week.days; track trackByDay($index, day)) {
               <td
                 role="gridcell"
-                class="h-16 px-2 py-1 align-top md:h-28 md:px-3 md:py-2"
+                class="group h-16 px-2 py-1 align-top md:h-28 md:px-3 md:py-2"
                 [class.text-gray-400]="!day.isCurrentMonth"
                 [class.dark:text-gray-500]="!day.isCurrentMonth"
                 [class.text-gray-900]="day.isCurrentMonth && !day.isToday"
