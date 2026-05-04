@@ -4,13 +4,16 @@ using VoyageVoyage.Server.Models;
 namespace VoyageVoyage.Server.Data;
 
 /// <summary>
-/// Ensures the Cosmos DB database and containers are created on startup,
-/// and seeds example data in development environments.
+/// Background hosted service that initialises the Cosmos DB database on application startup.
+/// Runs once when the host starts and stops gracefully.
+/// If initialisation fails, the error is logged and the application continues; the
+/// <c>/api/health</c> endpoint (backed by <see cref="Infrastructure.DatabaseHealthCheck"/>) will
+/// report the degraded state.
 /// </summary>
-public class DbInitializer(
-    ApplicationDbContext db,
+public class DbInitializerHostedService(
+    IServiceScopeFactory scopeFactory,
     IHostEnvironment env,
-    ILogger<DbInitializer> logger)
+    ILogger<DbInitializerHostedService> logger) : IHostedService
 {
     /// <summary>
     /// User ID used by <see cref="Authentication.MockCurrentUserService"/> in development.
@@ -30,12 +33,27 @@ public class DbInitializer(
     private const int FutureConfirmedStartOffset = 18;
     private const int FutureConfirmedEndOffset   = 20;
 
-    /// <summary>
-    /// Initializes the database: creates it if it does not exist,
-    /// and populates it with example data if running in development and the trips container is empty.
-    /// </summary>
-    public async Task InitAsync(CancellationToken cancellationToken = default)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
+        try
+        {
+            await InitAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // Swallow the exception so the host continues to start.
+            // The /api/health endpoint will surface the degraded database state.
+            logger.LogError(ex, "Database initialisation failed. The application will start but data access may not work.");
+        }
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+    private async Task InitAsync(CancellationToken cancellationToken)
+    {
+        using var scope = scopeFactory.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
         logger.LogInformation("Ensuring database and containers exist...");
         await db.Database.EnsureCreatedAsync(cancellationToken);
 

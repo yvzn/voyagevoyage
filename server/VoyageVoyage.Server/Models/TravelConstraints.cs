@@ -24,10 +24,14 @@ public class TravelConstraints
     public string UserId { get; set; } = string.Empty;
 
     /// <summary>
-    /// Days of the week on which travel is allowed.
+    /// Days of the week on which travel is allowed, stored as integers (0 = Sunday … 6 = Saturday).
     /// An empty list means all days are allowed.
     /// </summary>
-    public List<DayOfWeek> AllowedDaysOfWeek { get; set; } = [];
+    /// <remarks>
+    /// Stored as <see cref="int"/> rather than <see cref="DayOfWeek"/> because the EF Core
+    /// Cosmos DB provider does not support value converters on collection element types.
+    /// </remarks>
+    public List<int> AllowedDaysOfWeek { get; set; } = [];
 
     /// <summary>
     /// Maximum number of travel days allowed per calendar month.
