@@ -105,6 +105,12 @@ export class TripFormComponent implements AfterViewInit {
     }
   }
 
+  protected onDialogCancel(event: Event): void {
+    // Prevent the browser from closing the dialog directly; let our close logic handle it
+    event.preventDefault();
+    this.onCancel();
+  }
+
   protected onBackdropClick(event: MouseEvent): void {
     // The inner content div stops propagation; clicks reaching the <dialog> are on the backdrop
     if (event.target === this.dialogEl().nativeElement) {
