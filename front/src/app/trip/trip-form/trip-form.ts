@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   Component,
+  DestroyRef,
   ElementRef,
   computed,
   effect,
@@ -10,6 +11,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -49,6 +51,7 @@ export class TripFormComponent implements AfterViewInit {
   private readonly fb = inject(FormBuilder);
   protected readonly localeService = inject(LocaleService);
   private readonly constraintsService = inject(ConstraintsService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly TripStatus = TripStatus;
   protected readonly tripStatuses = [TripStatus.Planned, TripStatus.Confirmed, TripStatus.Cancelled];
@@ -136,8 +139,12 @@ export class TripFormComponent implements AfterViewInit {
       { allowSignalWrites: true },
     );
 
-    this.form.get('startDate')!.valueChanges.subscribe((v) => this.formStartDate.set(v ?? ''));
-    this.form.get('endDate')!.valueChanges.subscribe((v) => this.formEndDate.set(v ?? ''));
+    this.form.get('startDate')!.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((v) => this.formStartDate.set(v ?? ''));
+    this.form.get('endDate')!.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((v) => this.formEndDate.set(v ?? ''));
   }
 
   ngAfterViewInit(): void {
