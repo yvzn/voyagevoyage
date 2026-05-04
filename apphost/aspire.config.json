@@ -1,0 +1,22 @@
+{
+  "appHost": {
+    "path": "apphost.ts",
+    "language": "typescript/nodejs"
+  },
+  "sdk": {
+    "version": "13.2.4"
+  },
+  "profiles": {
+    "https": {
+      "applicationUrl": "https://localhost:27616;http://localhost:33827",
+      "environmentVariables": {
+        "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:43327",
+        "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:20462"
+      }
+    }
+  },
+  "packages": {
+    "Aspire.Hosting.JavaScript": "13.2.4",
+    "Aspire.Hosting.Azure.CosmosDB": "13.2.4"
+  }
+}
