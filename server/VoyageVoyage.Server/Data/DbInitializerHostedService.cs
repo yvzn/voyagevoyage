@@ -11,7 +11,7 @@ namespace VoyageVoyage.Server.Data;
 /// report the degraded state.
 /// </summary>
 public class DbInitializerHostedService(
-    ApplicationDbContext db,
+    IServiceScopeFactory scopeFactory,
     IHostEnvironment env,
     ILogger<DbInitializerHostedService> logger) : BackgroundService
 {
@@ -49,6 +49,9 @@ public class DbInitializerHostedService(
 
     private async Task InitAsync(CancellationToken cancellationToken)
     {
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        
         logger.LogInformation("Ensuring database and containers exist...");
         await db.Database.EnsureCreatedAsync(cancellationToken);
 
