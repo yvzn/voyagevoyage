@@ -14,6 +14,7 @@ import { NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Trip, TripStatus } from '../trip.model';
 import { TripService } from '../trip.service';
+import { LocaleService } from '../../locale.service';
 
 function endDateAfterStartDate(group: AbstractControl): ValidationErrors | null {
   const start = group.get('startDate')?.value as string;
@@ -43,6 +44,7 @@ export class TripFormComponent implements AfterViewInit {
   private readonly dialogEl = viewChild.required<ElementRef<HTMLDialogElement>>('dialogEl');
   private readonly tripService = inject(TripService);
   private readonly fb = inject(FormBuilder);
+  protected readonly localeService = inject(LocaleService);
 
   protected readonly TripStatus = TripStatus;
   protected readonly tripStatuses = [TripStatus.Planned, TripStatus.Confirmed, TripStatus.Cancelled];

@@ -49,6 +49,7 @@
           id="trip-start-date"
           type="date"
           formControlName="startDate"
+          [lang]="localeService.currentLocale()"
           class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
           [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('startDate')?.invalid && form.get('startDate')?.touched }"
         />
@@ -66,6 +67,7 @@
           id="trip-end-date"
           type="date"
           formControlName="endDate"
+          [lang]="localeService.currentLocale()"
           class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
           [ngClass]="{ 'border-red-500 dark:border-red-500': (form.get('endDate')?.invalid && form.get('endDate')?.touched) || (form.hasError('endBeforeStart') && form.get('endDate')?.touched) }"
         />
