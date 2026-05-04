@@ -42,7 +42,7 @@ public class DbInitializer(
         if (!env.IsDevelopment())
             return;
 
-        if (await db.Trips.AnyAsync(cancellationToken))
+        if (await db.Trips.FirstOrDefaultAsync(cancellationToken) != null)
         {
             logger.LogInformation("Trips container already contains data. Skipping seed.");
             return;

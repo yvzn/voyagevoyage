@@ -11,3 +11,17 @@ export interface Trip {
   destination: string;
   status: TripStatus;
 }
+
+export interface CreateTripRequest {
+  startDate: string; // ISO 8601 date: YYYY-MM-DD
+  endDate: string; // ISO 8601 date: YYYY-MM-DD
+  destination: string;
+  status: TripStatus;
+}
+
+export interface UpdateTripRequest {
+  startDate: string; // ISO 8601 date: YYYY-MM-DD
+  endDate: string; // ISO 8601 date: YYYY-MM-DD
+  destination: string;
+  status: TripStatus;
+}

@@ -11,11 +11,12 @@ import {
 import { LocaleService } from '../locale.service';
 import { TripService } from '../trip/trip.service';
 import { Trip, TripStatus } from '../trip/trip.model';
+import { TripFormComponent } from '../trip/trip-form/trip-form';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [NgClass, TranslatePipe],
+  imports: [NgClass, TranslatePipe, TripFormComponent],
   templateUrl: './calendar.html',
 })
 export class CalendarComponent {
@@ -41,6 +42,15 @@ export class CalendarComponent {
   protected readonly TripStatus = TripStatus;
 
   protected readonly tripStatuses = [TripStatus.Planned, TripStatus.Confirmed, TripStatus.Cancelled];
+
+  /** Whether the trip form modal is open */
+  protected readonly isFormOpen = signal(false);
+
+  /** The trip being edited, or null when creating a new trip */
+  protected readonly editingTrip = signal<Trip | null>(null);
+
+  /** Pre-filled date for new trip creation (YYYY-MM-DD) */
+  protected readonly formDefaultDate = signal<string | null>(null);
 
   private readonly tripsPerDay = computed(() => {
     const map = new Map<string, Trip[]>();
@@ -109,6 +119,26 @@ export class CalendarComponent {
 
   private dayKey(year: number, month: number, date: number): string {
     return `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+  }
+
+  private formatDayKey(day: CalendarDay): string {
+    return `${day.year}-${String(day.month + 1).padStart(2, '0')}-${String(day.date).padStart(2, '0')}`;
+  }
+
+  openCreateForm(day?: CalendarDay): void {
+    this.editingTrip.set(null);
+    this.formDefaultDate.set(day ? this.formatDayKey(day) : null);
+    this.isFormOpen.set(true);
+  }
+
+  openEditForm(trip: Trip): void {
+    this.editingTrip.set(trip);
+    this.formDefaultDate.set(null);
+    this.isFormOpen.set(true);
+  }
+
+  closeForm(): void {
+    this.isFormOpen.set(false);
   }
 
   goToPreviousMonth(): void {

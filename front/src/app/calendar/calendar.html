@@ -61,14 +61,27 @@
         </div>
       </div>
 
-      <!-- Today button -->
-      <button
-        type="button"
-        (click)="goToToday()"
-        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
-      >
-        {{ 'todayButton' | translate }}
-      </button>
+      <!-- Today button and New trip button -->
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          (click)="goToToday()"
+          class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+        >
+          {{ 'todayButton' | translate }}
+        </button>
+
+        <button
+          type="button"
+          (click)="openCreateForm()"
+          class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600"
+        >
+          <svg class="h-4 w-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          {{ 'newTripButton' | translate }}
+        </button>
+      </div>
     </div>
   </nav>
 
@@ -95,30 +108,48 @@
             @for (day of week.days; track trackByDay($index, day)) {
               <td
                 role="gridcell"
-                class="h-16 px-2 py-1 text-center align-top md:h-28 md:px-3 md:py-2"
+                class="group h-16 px-2 py-1 align-top md:h-28 md:px-3 md:py-2"
                 [class.text-gray-400]="!day.isCurrentMonth"
                 [class.dark:text-gray-500]="!day.isCurrentMonth"
                 [class.text-gray-900]="day.isCurrentMonth && !day.isToday"
                 [class.dark:text-white]="day.isCurrentMonth && !day.isToday"
               >
-                <span
-                  class="inline-flex h-7 w-7 items-center justify-center rounded-full text-sm"
-                  [class.bg-blue-600]="day.isToday"
-                  [class.text-white]="day.isToday"
-                  [class.font-semibold]="day.isToday"
-                >
-                  {{ day.date }}
-                </span>
+                <div class="flex items-start justify-between">
+                  <span
+                    class="inline-flex h-7 w-7 items-center justify-center rounded-full text-sm"
+                    [class.bg-blue-600]="day.isToday"
+                    [class.text-white]="day.isToday"
+                    [class.font-semibold]="day.isToday"
+                  >
+                    {{ day.date }}
+                  </span>
+                  @if (day.isCurrentMonth) {
+                    <button
+                      type="button"
+                      (click)="openCreateForm(day)"
+                      class="flex h-6 w-6 items-center justify-center rounded text-gray-400 opacity-0 hover:bg-gray-100 hover:text-gray-600 focus:opacity-100 focus:outline-none focus:ring-1 focus:ring-blue-300 group-hover:opacity-100 dark:hover:bg-gray-700 dark:hover:text-gray-300 [td:hover_&]:opacity-100"
+                      [attr.aria-label]="'addTripForDay' | translate : { date: day.date, month: displayMonth(), year: displayYear() }"
+                    >
+                      <svg class="h-4 w-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
+                    </button>
+                  }
+                </div>
                 @if (getTripsForDay(day).length > 0) {
                   <ul class="mt-0.5 space-y-0.5 text-left" [attr.aria-label]="'tripEventsForDay' | translate : { date: day.date, month: displayMonth(), year: displayYear() }">
                     @for (trip of getTripsForDay(day); track trip.id) {
-                      <li
-                        class="truncate rounded px-1 py-0.5 text-xs leading-tight"
-                        [ngClass]="getTripStatusClass(trip.status)"
-                        [title]="trip.destination"
-                        [attr.aria-label]="getTripAriaLabel(trip)"
-                      >
-                        {{ trip.destination }}
+                      <li>
+                        <button
+                          type="button"
+                          class="w-full truncate rounded px-1 py-0.5 text-left text-xs leading-tight focus:outline-none focus:ring-1 focus:ring-blue-400"
+                          [ngClass]="getTripStatusClass(trip.status)"
+                          [title]="trip.destination"
+                          [attr.aria-label]="getTripAriaLabel(trip)"
+                          (click)="openEditForm(trip)"
+                        >
+                          {{ trip.destination }}
+                        </button>
                       </li>
                     }
                   </ul>
@@ -145,3 +176,15 @@
     }
   </div>
 </section>
+
+<!-- Trip form modal -->
+@if (isFormOpen()) {
+  <app-trip-form
+    [trip]="editingTrip()"
+    [defaultDate]="formDefaultDate()"
+    (saved)="closeForm()"
+    (deleted)="closeForm()"
+    (cancelled)="closeForm()"
+  />
+}
+

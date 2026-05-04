@@ -15,12 +15,30 @@ const EN_TRANSLATIONS = {
   monthSelectLabel: 'Month',
   yearInputLabel: 'Year',
   todayButton: 'Today',
+  newTripButton: 'New trip',
+  addTripForDay: 'Add a trip on {{month}} {{date}}, {{year}}',
   tripEventsForDay: 'Trip events for {{month}} {{date}}, {{year}}',
   tripStatusLegendLabel: 'Trip status legend',
   tripStatus: {
     planned: 'Planned',
     confirmed: 'Confirmed',
     cancelled: 'Cancelled',
+  },
+  tripForm: {
+    createTitle: 'New trip',
+    editTitle: 'Edit trip',
+    destination: 'Destination',
+    destinationRequired: 'Destination is required.',
+    startDate: 'Start date',
+    endDate: 'End date',
+    endBeforeStart: 'End date must be on or after the start date.',
+    status: 'Status',
+    save: 'Save',
+    saving: 'Saving…',
+    delete: 'Delete',
+    cancel: 'Cancel',
+    saveError: 'An error occurred while saving the trip. Please try again.',
+    deleteError: 'An error occurred while deleting the trip. Please try again.',
   },
 };
 
@@ -293,7 +311,17 @@ describe('CalendarComponent — trip events', () => {
     const tripSignal = signal<Trip[]>(MOCK_TRIPS);
     await TestBed.configureTestingModule({
       imports: [CalendarComponent, TranslateModule.forRoot()],
-      providers: [{ provide: TripService, useValue: { trips: tripSignal.asReadonly() } }],
+      providers: [
+        {
+          provide: TripService,
+          useValue: {
+            trips: tripSignal.asReadonly(),
+            create: () => { throw new Error('not implemented'); },
+            update: () => { throw new Error('not implemented'); },
+            delete: () => { throw new Error('not implemented'); },
+          },
+        },
+      ],
     }).compileComponents();
 
     const translate = TestBed.inject(TranslateService);
@@ -315,8 +343,12 @@ describe('CalendarComponent — trip events', () => {
     await fixture.whenStable();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const tripBadges = compiled.querySelectorAll('li[aria-label]');
-    expect(tripBadges.length).toBeGreaterThan(0);
+    const tripBadges = compiled.querySelectorAll('button[aria-label]');
+    // filter out the "add trip" buttons which have a different aria-label format
+    const tripEventBadges = Array.from(tripBadges).filter(
+      (b) => !b.getAttribute('aria-label')?.startsWith('Add a trip'),
+    );
+    expect(tripEventBadges.length).toBeGreaterThan(0);
   });
 
   it('should show trip destination text in badge', async () => {
@@ -345,7 +377,17 @@ describe('CalendarComponent — no trips', () => {
     const tripSignal = signal<Trip[]>([]);
     await TestBed.configureTestingModule({
       imports: [CalendarComponent, TranslateModule.forRoot()],
-      providers: [{ provide: TripService, useValue: { trips: tripSignal.asReadonly() } }],
+      providers: [
+        {
+          provide: TripService,
+          useValue: {
+            trips: tripSignal.asReadonly(),
+            create: () => { throw new Error('not implemented'); },
+            update: () => { throw new Error('not implemented'); },
+            delete: () => { throw new Error('not implemented'); },
+          },
+        },
+      ],
     }).compileComponents();
 
     const translate = TestBed.inject(TranslateService);
@@ -361,5 +403,98 @@ describe('CalendarComponent — no trips', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     const tripLists = compiled.querySelectorAll('ul[aria-label]');
     expect(tripLists.length).toBe(0);
+  });
+});
+
+describe('CalendarComponent — trip form', () => {
+  let httpMock: HttpTestingController;
+
+  beforeEach(async () => {
+    // JSDOM does not implement HTMLDialogElement.showModal(); stub it
+    HTMLDialogElement.prototype.showModal = () => {};
+
+    await TestBed.configureTestingModule({
+      imports: [CalendarComponent, TranslateModule.forRoot()],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    }).compileComponents();
+
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation('en', EN_TRANSLATIONS);
+    translate.use('en');
+
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.expectOne('/api/trips').flush([]);
+    httpMock.verify();
+  });
+
+  it('should have a "New trip" button', async () => {
+    const fixture = TestBed.createComponent(CalendarComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const buttons = Array.from(compiled.querySelectorAll('button'));
+    const newTripBtn = buttons.find((b) => b.textContent?.includes('New trip'));
+    expect(newTripBtn).toBeTruthy();
+  });
+
+  it('should open the form modal when "New trip" button is clicked', async () => {
+    const fixture = TestBed.createComponent(CalendarComponent);
+    const component = fixture.componentInstance;
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component['isFormOpen']()).toBe(false);
+
+    component.openCreateForm();
+    fixture.detectChanges();
+
+    expect(component['isFormOpen']()).toBe(true);
+    expect(component['editingTrip']()).toBeNull();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const modal = compiled.querySelector('dialog');
+    expect(modal).toBeTruthy();
+  });
+
+  it('should close the form modal on cancel', async () => {
+    const fixture = TestBed.createComponent(CalendarComponent);
+    const component = fixture.componentInstance;
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.openCreateForm();
+    fixture.detectChanges();
+
+    component.closeForm();
+    fixture.detectChanges();
+
+    expect(component['isFormOpen']()).toBe(false);
+    const compiled = fixture.nativeElement as HTMLElement;
+    const modal = compiled.querySelector('dialog');
+    expect(modal).toBeNull();
+  });
+
+  it('should pre-fill the editing trip when opening in edit mode', () => {
+    const fixture = TestBed.createComponent(CalendarComponent);
+    const component = fixture.componentInstance;
+    fixture.detectChanges();
+
+    const trip: Trip = {
+      id: 'edit-1',
+      destination: 'Marseille',
+      startDate: '2026-06-10',
+      endDate: '2026-06-12',
+      status: TripStatus.Planned,
+    };
+
+    component.openEditForm(trip);
+    fixture.detectChanges();
+
+    expect(component['isFormOpen']()).toBe(true);
+    expect(component['editingTrip']()).toEqual(trip);
   });
 });

@@ -166,6 +166,42 @@ Use signals for:
 
 Avoid using signals as an ad hoc replacement for application architecture. Shared business state should still be modeled deliberately, usually through NgRx.
 
+#### Component inputs and outputs
+
+Use the **signal-based `input()` and `output()` functions** (Angular 17.1+) rather than the legacy `@Input()` and `@Output()` decorator APIs.
+
+```typescript
+import { Component, input, output } from '@angular/core';
+
+@Component({ ... })
+export class MyComponent {
+  // Signal-based input (read-only signal inside the component)
+  readonly value = input<string>();
+  readonly required = input.required<string>();
+  readonly withDefault = input<number>(0);
+
+  // Signal-based output (replaces @Output() + EventEmitter)
+  readonly saved = output<void>();
+  readonly changed = output<string>();
+}
+```
+
+Why:
+- inputs are plain signals, so they integrate naturally with `effect()` and `computed()`
+- no need to implement `OnChanges` to react to input changes — use an `effect()` instead
+- outputs have a simpler API: `this.saved.emit()` without `EventEmitter`
+- decorators (`@Input`, `@Output`) are still supported by Angular but should not be used in new code
+
+```typescript
+// Reacting to input changes with effect() instead of ngOnChanges
+constructor() {
+  effect(() => {
+    const current = this.value();
+    // runs whenever `value` changes
+  });
+}
+```
+
 ### 4.7 Control flow blocks
 
 Angular control flow blocks should be preferred in templates for readability and maintainability.
@@ -522,11 +558,12 @@ Put in Functions only when the work is:
 - create focused standalone components
 - use Reactive Forms for non-trivial forms
 - use signals for local UI state
+- use `input()` and `output()` functions for component inputs and outputs — **do not use `@Input()` / `@Output()` decorators** in new components
 - use NgRx for shared business state
 - prefer Tailwind utilities and Flowbite patterns over custom CSS
 - keep templates readable with modern control flow blocks
-- mark every user-facing string with `i18n` or `$localize` — no hardcoded visible text
-- format dates, numbers, and currencies with Angular locale pipes
+- mark every user-facing string with the `translate` pipe — no hardcoded visible text
+- format dates, numbers, and currencies with `Intl.DateTimeFormat` / `Intl.NumberFormat` passing the active locale from `LocaleService.currentLocale()`
 
 ### 8.2 When adding a backend feature
 
@@ -558,8 +595,8 @@ Put in Functions only when the work is:
 - do not use global state when local component state is enough
 - do not create custom styling if Tailwind or Flowbite already solve the problem well
 - do not mix file binaries and application metadata in the same persistence model
-- do not hardcode user-facing strings — every visible text must go through `@angular/localize`
-- do not format dates, numbers, or currencies manually — use Angular locale pipes
+- do not hardcode user-facing strings — every visible text must go through the `translate` pipe (`ngx-translate`)
+- do not format dates, numbers, or currencies manually — use `Intl.DateTimeFormat` / `Intl.NumberFormat` with the active locale from `LocaleService.currentLocale()`
 
 Preferred mindset:
 - start with clear responsibilities

@@ -10,8 +10,19 @@ using VoyageVoyage.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Application Insights — graceful no-op when connection string is absent (e.g. local dev).
-builder.Services.AddApplicationInsightsTelemetry();
+// Application Insights is optional.
+// Register it only when a connection string is provided to avoid local startup failures.
+var appInsightsConnectionString =
+    builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]
+    ?? builder.Configuration["ApplicationInsights:ConnectionString"];
+
+if (!string.IsNullOrWhiteSpace(appInsightsConnectionString))
+{
+    builder.Services.AddApplicationInsightsTelemetry(options =>
+    {
+        options.ConnectionString = appInsightsConnectionString;
+    });
+}
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers()
