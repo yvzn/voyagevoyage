@@ -1,0 +1,175 @@
+<main id="main-content" class="container mx-auto max-w-2xl">
+  <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
+    {{ 'constraints.heading' | translate }}
+  </h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <!-- Allowed days of week -->
+    <fieldset class="mb-6 rounded-lg border border-gray-200 p-4 dark:border-gray-600">
+      <legend class="px-2 text-sm font-semibold text-gray-900 dark:text-white">
+        {{ 'constraints.allowedDaysLabel' | translate }}
+      </legend>
+      <div class="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        @for (day of allDays; track day) {
+          <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+            <input
+              type="checkbox"
+              [formControlName]="getDayControlName(day)"
+              class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
+            />
+            {{ getDayTranslationKey(day) | translate }}
+          </label>
+        }
+      </div>
+      <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+        {{ 'constraints.allowedDaysHint' | translate }}
+      </p>
+    </fieldset>
+
+    <!-- Max days per month -->
+    <div class="mb-6">
+      <label
+        for="max-days-per-month"
+        class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+      >
+        {{ 'constraints.maxDaysPerMonth' | translate }}
+      </label>
+      <input
+        id="max-days-per-month"
+        type="number"
+        min="1"
+        max="31"
+        formControlName="maxDaysPerMonth"
+        class="block w-32 rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+        [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('maxDaysPerMonth')?.invalid && form.get('maxDaysPerMonth')?.touched }"
+        [attr.aria-describedby]="form.get('maxDaysPerMonth')?.invalid && form.get('maxDaysPerMonth')?.touched ? 'max-days-error' : null"
+      />
+      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+        {{ 'constraints.maxDaysPerMonthHint' | translate }}
+      </p>
+      @if (form.get('maxDaysPerMonth')?.invalid && form.get('maxDaysPerMonth')?.touched) {
+        <p id="max-days-error" class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+          {{ 'constraints.maxDaysPerMonthError' | translate }}
+        </p>
+      }
+    </div>
+
+    <!-- Public holidays -->
+    <div class="mb-4 flex items-start gap-3">
+      <input
+        id="consider-public-holidays"
+        type="checkbox"
+        formControlName="considerPublicHolidays"
+        class="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+      />
+      <div>
+        <label
+          for="consider-public-holidays"
+          class="block text-sm font-medium text-gray-900 dark:text-white"
+        >
+          {{ 'constraints.considerPublicHolidays' | translate }}
+        </label>
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          {{ 'constraints.considerPublicHolidaysHint' | translate }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Vacation days -->
+    <div class="mb-6 flex items-start gap-3">
+      <input
+        id="consider-vacation-days"
+        type="checkbox"
+        formControlName="considerVacationDays"
+        class="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+      />
+      <div>
+        <label
+          for="consider-vacation-days"
+          class="block text-sm font-medium text-gray-900 dark:text-white"
+        >
+          {{ 'constraints.considerVacationDays' | translate }}
+        </label>
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          {{ 'constraints.considerVacationDaysHint' | translate }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Strict vs Flexible -->
+    <fieldset class="mb-6 rounded-lg border border-gray-200 p-4 dark:border-gray-600">
+      <legend class="px-2 text-sm font-semibold text-gray-900 dark:text-white">
+        {{ 'constraints.constraintModeLabel' | translate }}
+      </legend>
+      <div class="mt-2 flex flex-col gap-3">
+        <label class="flex cursor-pointer items-start gap-3">
+          <input
+            type="radio"
+            formControlName="isStrict"
+            [value]="false"
+            class="mt-0.5 h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+          />
+          <div>
+            <span class="block text-sm font-medium text-gray-900 dark:text-white">
+              {{ 'constraints.flexible' | translate }}
+            </span>
+            <span class="text-xs text-gray-500 dark:text-gray-400">
+              {{ 'constraints.flexibleHint' | translate }}
+            </span>
+          </div>
+        </label>
+        <label class="flex cursor-pointer items-start gap-3">
+          <input
+            type="radio"
+            formControlName="isStrict"
+            [value]="true"
+            class="mt-0.5 h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+          />
+          <div>
+            <span class="block text-sm font-medium text-gray-900 dark:text-white">
+              {{ 'constraints.strict' | translate }}
+            </span>
+            <span class="text-xs text-gray-500 dark:text-gray-400">
+              {{ 'constraints.strictHint' | translate }}
+            </span>
+          </div>
+        </label>
+      </div>
+    </fieldset>
+
+    <!-- Success message -->
+    @if (isSaved()) {
+      <div
+        role="status"
+        class="mb-4 rounded-lg bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/30 dark:text-green-400"
+      >
+        {{ 'constraints.saveSuccess' | translate }}
+      </div>
+    }
+
+    <!-- Error message -->
+    @if (errorKey()) {
+      <div
+        role="alert"
+        class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-400"
+      >
+        {{ errorKey()! | translate }}
+      </div>
+    }
+
+    <!-- Submit button -->
+    <div class="flex justify-end">
+      <button
+        type="submit"
+        [disabled]="isLoading() || form.invalid"
+        class="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
+      >
+        @if (isLoading()) {
+          {{ 'constraints.saving' | translate }}
+        } @else {
+          {{ 'constraints.save' | translate }}
+        }
+      </button>
+    </div>
+  </form>
+</main>

@@ -48,6 +48,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseCosmos(cosmosConnectionString, ApplicationDbContext.DatabaseName));
 
 builder.Services.AddScoped<ITripService, CosmosDbTripService>();
+builder.Services.AddScoped<ITravelConstraintsService, CosmosDbTravelConstraintsService>();
 builder.Services.AddScoped<DbInitializer>();
 
 builder.Services.AddHealthChecks()

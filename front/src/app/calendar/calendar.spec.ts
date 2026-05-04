@@ -426,6 +426,10 @@ describe('CalendarComponent — trip form', () => {
   });
 
   afterEach(() => {
+    // Flush any pending /api/travel-constraints requests (opened when the trip form is shown)
+    httpMock.match('/api/travel-constraints').forEach((req) =>
+      req.flush(null, { status: 204, statusText: 'No Content' }),
+    );
     httpMock.expectOne('/api/trips').flush([]);
     httpMock.verify();
   });

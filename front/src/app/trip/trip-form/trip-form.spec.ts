@@ -5,6 +5,7 @@ import { signal } from '@angular/core';
 import { TripFormComponent } from './trip-form';
 import { TripService } from '../trip.service';
 import { Trip, TripStatus } from '../trip.model';
+import { ConstraintsService } from '../../constraints/constraints.service';
 
 const EN_TRANSLATIONS = {
   tripForm: {
@@ -40,6 +41,13 @@ function makeMockTripService(overrides: Partial<TripService> = {}): TripService 
   } as unknown as TripService;
 }
 
+function makeMockConstraintsService(): ConstraintsService {
+  return {
+    constraints: signal(null).asReadonly(),
+    update: () => of({}),
+  } as unknown as ConstraintsService;
+}
+
 // JSDOM does not implement HTMLDialogElement.showModal(); stub it globally
 beforeEach(() => {
   HTMLDialogElement.prototype.showModal = () => {};
@@ -48,7 +56,10 @@ beforeEach(() => {
 async function setupModule(mockService: TripService): Promise<void> {
   await TestBed.configureTestingModule({
     imports: [TripFormComponent, TranslateModule.forRoot()],
-    providers: [{ provide: TripService, useValue: mockService }],
+    providers: [
+      { provide: TripService, useValue: mockService },
+      { provide: ConstraintsService, useValue: makeMockConstraintsService() },
+    ],
   }).compileComponents();
 
   const translate = TestBed.inject(TranslateService);
