@@ -1,11 +1,13 @@
 import {
+  AfterViewInit,
   Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
+  ElementRef,
+  effect,
   inject,
+  input,
+  output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { NgClass } from '@angular/common';
@@ -28,16 +30,17 @@ function endDateAfterStartDate(group: AbstractControl): ValidationErrors | null 
   imports: [ReactiveFormsModule, NgClass, TranslatePipe],
   templateUrl: './trip-form.html',
 })
-export class TripFormComponent implements OnChanges {
+export class TripFormComponent implements AfterViewInit {
   /** null = create mode; a Trip object = edit mode */
-  @Input() trip: Trip | null = null;
+  readonly trip = input<Trip | null>(null);
   /** Pre-fill the start/end date when creating a new trip */
-  @Input() defaultDate: string | null = null;
+  readonly defaultDate = input<string | null>(null);
 
-  @Output() saved = new EventEmitter<void>();
-  @Output() deleted = new EventEmitter<void>();
-  @Output() cancelled = new EventEmitter<void>();
+  readonly saved = output<void>();
+  readonly deleted = output<void>();
+  readonly cancelled = output<void>();
 
+  private readonly dialogEl = viewChild.required<ElementRef<HTMLDialogElement>>('dialogEl');
   private readonly tripService = inject(TripService);
   private readonly fb = inject(FormBuilder);
 
@@ -57,27 +60,38 @@ export class TripFormComponent implements OnChanges {
     { validators: endDateAfterStartDate },
   );
 
-  ngOnChanges(): void {
-    this.errorKey.set(null);
-    if (this.trip) {
-      this.form.setValue({
-        destination: this.trip.destination,
-        startDate: this.trip.startDate,
-        endDate: this.trip.endDate,
-        status: this.trip.status,
-      });
-    } else {
-      this.form.reset({
-        destination: '',
-        startDate: this.defaultDate ?? '',
-        endDate: this.defaultDate ?? '',
-        status: TripStatus.Planned,
-      });
-    }
+  constructor() {
+    effect(
+      () => {
+        const t = this.trip();
+        const d = this.defaultDate();
+        this.errorKey.set(null);
+        if (t) {
+          this.form.setValue({
+            destination: t.destination,
+            startDate: t.startDate,
+            endDate: t.endDate,
+            status: t.status,
+          });
+        } else {
+          this.form.reset({
+            destination: '',
+            startDate: d ?? '',
+            endDate: d ?? '',
+            status: TripStatus.Planned,
+          });
+        }
+      },
+      { allowSignalWrites: true },
+    );
+  }
+
+  ngAfterViewInit(): void {
+    this.dialogEl().nativeElement.showModal();
   }
 
   get isEditMode(): boolean {
-    return this.trip !== null;
+    return this.trip() !== null;
   }
 
   protected getTripStatusTranslationKey(status: TripStatus): string {
@@ -88,6 +102,13 @@ export class TripFormComponent implements OnChanges {
         return 'tripStatus.confirmed';
       case TripStatus.Cancelled:
         return 'tripStatus.cancelled';
+    }
+  }
+
+  protected onBackdropClick(event: MouseEvent): void {
+    // The inner content div stops propagation; clicks reaching the <dialog> are on the backdrop
+    if (event.target === this.dialogEl().nativeElement) {
+      this.onCancel();
     }
   }
 
@@ -105,8 +126,9 @@ export class TripFormComponent implements OnChanges {
     this.isLoading.set(true);
     this.errorKey.set(null);
 
-    const operation = this.isEditMode
-      ? this.tripService.update(this.trip!.id, request)
+    const trip = this.trip();
+    const operation = trip
+      ? this.tripService.update(trip.id, request)
       : this.tripService.create(request);
 
     operation.subscribe({
@@ -122,12 +144,13 @@ export class TripFormComponent implements OnChanges {
   }
 
   protected onDelete(): void {
-    if (!this.trip || this.isLoading()) return;
+    const trip = this.trip();
+    if (!trip || this.isLoading()) return;
 
     this.isLoading.set(true);
     this.errorKey.set(null);
 
-    this.tripService.delete(this.trip.id).subscribe({
+    this.tripService.delete(trip.id).subscribe({
       next: () => {
         this.isLoading.set(false);
         this.deleted.emit();

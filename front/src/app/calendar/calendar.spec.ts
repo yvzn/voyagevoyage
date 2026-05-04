@@ -410,6 +410,9 @@ describe('CalendarComponent — trip form', () => {
   let httpMock: HttpTestingController;
 
   beforeEach(async () => {
+    // JSDOM does not implement HTMLDialogElement.showModal(); stub it
+    HTMLDialogElement.prototype.showModal = () => {};
+
     await TestBed.configureTestingModule({
       imports: [CalendarComponent, TranslateModule.forRoot()],
       providers: [provideHttpClient(), provideHttpClientTesting()],
@@ -453,7 +456,7 @@ describe('CalendarComponent — trip form', () => {
     expect(component['editingTrip']()).toBeNull();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const modal = compiled.querySelector('[role="dialog"]');
+    const modal = compiled.querySelector('dialog');
     expect(modal).toBeTruthy();
   });
 
@@ -471,7 +474,7 @@ describe('CalendarComponent — trip form', () => {
 
     expect(component['isFormOpen']()).toBe(false);
     const compiled = fixture.nativeElement as HTMLElement;
-    const modal = compiled.querySelector('[role="dialog"]');
+    const modal = compiled.querySelector('dialog');
     expect(modal).toBeNull();
   });
 

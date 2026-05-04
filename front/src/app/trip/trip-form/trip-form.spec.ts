@@ -40,6 +40,11 @@ function makeMockTripService(overrides: Partial<TripService> = {}): TripService 
   } as unknown as TripService;
 }
 
+// JSDOM does not implement HTMLDialogElement.showModal(); stub it globally
+beforeEach(() => {
+  HTMLDialogElement.prototype.showModal = () => {};
+});
+
 async function setupModule(mockService: TripService): Promise<void> {
   await TestBed.configureTestingModule({
     imports: [TripFormComponent, TranslateModule.forRoot()],
