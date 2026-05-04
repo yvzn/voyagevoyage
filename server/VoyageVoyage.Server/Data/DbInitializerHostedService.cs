@@ -4,16 +4,16 @@ using VoyageVoyage.Server.Models;
 namespace VoyageVoyage.Server.Data;
 
 /// <summary>
-/// Background hosted service that initialises the Cosmos DB database on application startup.
+/// Background service that initialises the Cosmos DB database on application startup.
 /// Runs once when the host starts and stops gracefully.
 /// If initialisation fails, the error is logged and the application continues; the
 /// <c>/api/health</c> endpoint (backed by <see cref="Infrastructure.DatabaseHealthCheck"/>) will
 /// report the degraded state.
 /// </summary>
 public class DbInitializerHostedService(
-    IServiceScopeFactory scopeFactory,
+    ApplicationDbContext db,
     IHostEnvironment env,
-    ILogger<DbInitializerHostedService> logger) : IHostedService
+    ILogger<DbInitializerHostedService> logger) : BackgroundService
 {
     /// <summary>
     /// User ID used by <see cref="Authentication.MockCurrentUserService"/> in development.
@@ -33,11 +33,11 @@ public class DbInitializerHostedService(
     private const int FutureConfirmedStartOffset = 18;
     private const int FutureConfirmedEndOffset   = 20;
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
-            await InitAsync(cancellationToken);
+            await InitAsync(stoppingToken);
         }
         catch (Exception ex)
         {
@@ -47,13 +47,8 @@ public class DbInitializerHostedService(
         }
     }
 
-    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-
     private async Task InitAsync(CancellationToken cancellationToken)
     {
-        using var scope = scopeFactory.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
         logger.LogInformation("Ensuring database and containers exist...");
         await db.Database.EnsureCreatedAsync(cancellationToken);
 

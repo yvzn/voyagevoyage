@@ -1,9 +1,7 @@
 import {
   AfterViewInit,
   Component,
-  DestroyRef,
   ElementRef,
-  computed,
   effect,
   inject,
   input,
@@ -11,7 +9,6 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -19,7 +16,7 @@ import { Trip, TripStatus } from '../trip.model';
 import { TripService } from '../trip.service';
 import { LocaleService } from '../../locale.service';
 import { ConstraintsService } from '../../constraints/constraints.service';
-import { DayOfWeek } from '../../constraints/constraints.model';
+import { constraintViolationValidator } from './constraint-violation.validator';
 
 function endDateAfterStartDate(group: AbstractControl): ValidationErrors | null {
   const start = group.get('startDate')?.value as string;
@@ -51,54 +48,12 @@ export class TripFormComponent implements AfterViewInit {
   private readonly fb = inject(FormBuilder);
   protected readonly localeService = inject(LocaleService);
   private readonly constraintsService = inject(ConstraintsService);
-  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly TripStatus = TripStatus;
   protected readonly tripStatuses = [TripStatus.Planned, TripStatus.Confirmed, TripStatus.Cancelled];
 
   protected readonly isLoading = signal(false);
   protected readonly errorKey = signal<string | null>(null);
-
-  /** The start/end date values as reactive signals (updated on form value changes) */
-  protected readonly formStartDate = signal<string>('');
-  protected readonly formEndDate = signal<string>('');
-
-  /**
-   * Constraint violation status for the currently selected date range.
-   * null = no constraints configured or no dates selected.
-   * 'warning' = dates violate flexible constraints.
-   * 'error' = dates violate strict constraints.
-   */
-  protected readonly constraintViolation = computed<'warning' | 'error' | null>(() => {
-    const constraints = this.constraintsService.constraints();
-    if (!constraints) return null;
-
-    const start = this.formStartDate();
-    const end = this.formEndDate();
-    if (!start || !end) return null;
-
-    // Check allowed days of week (only when some days are configured)
-    if (constraints.allowedDaysOfWeek.length > 0) {
-      const startDate = new Date(start + 'T00:00:00');
-      const endDate = new Date(end + 'T00:00:00');
-      const current = new Date(startDate);
-      while (current <= endDate) {
-        // JS getDay(): 0=Sunday, 1=Monday, ..., 6=Saturday — matches DayOfWeek enum
-        const jsDay = current.getDay() as DayOfWeek;
-        if (!constraints.allowedDaysOfWeek.includes(jsDay)) {
-          return constraints.isStrict ? 'error' : 'warning';
-        }
-        current.setDate(current.getDate() + 1);
-      }
-    }
-
-    return null;
-  });
-
-  /** True when constraint errors should block form submission */
-  protected get hasBlockingConstraintViolation(): boolean {
-    return this.constraintViolation() === 'error';
-  }
 
   protected readonly form = this.fb.group(
     {
@@ -107,7 +62,7 @@ export class TripFormComponent implements AfterViewInit {
       endDate: ['', Validators.required],
       status: [TripStatus.Planned as TripStatus, Validators.required],
     },
-    { validators: endDateAfterStartDate },
+    { validators: [endDateAfterStartDate, constraintViolationValidator(() => this.constraintsService.constraints())] },
   );
 
   constructor() {
@@ -123,8 +78,6 @@ export class TripFormComponent implements AfterViewInit {
             endDate: t.endDate,
             status: t.status,
           });
-          this.formStartDate.set(t.startDate);
-          this.formEndDate.set(t.endDate);
         } else {
           this.form.reset({
             destination: '',
@@ -132,19 +85,10 @@ export class TripFormComponent implements AfterViewInit {
             endDate: d ?? '',
             status: TripStatus.Planned,
           });
-          this.formStartDate.set(d ?? '');
-          this.formEndDate.set(d ?? '');
         }
       },
       { allowSignalWrites: true },
     );
-
-    this.form.get('startDate')!.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((v) => this.formStartDate.set(v ?? ''));
-    this.form.get('endDate')!.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((v) => this.formEndDate.set(v ?? ''));
   }
 
   ngAfterViewInit(): void {
@@ -180,7 +124,13 @@ export class TripFormComponent implements AfterViewInit {
   }
 
   protected onSubmit(): void {
-    if (this.form.invalid || this.isLoading() || this.hasBlockingConstraintViolation) return;
+    // constraintWarning (flexible mode) is informational — it must not block submission.
+    // Check field-level errors and specific group errors explicitly instead of form.invalid.
+    const fieldInvalid = ['destination', 'startDate', 'endDate', 'status'].some(
+      (name) => this.form.get(name)?.invalid,
+    );
+    const groupInvalid = this.form.hasError('endBeforeStart') || this.form.hasError('constraintError');
+    if (fieldInvalid || groupInvalid || this.isLoading()) return;
 
     const { destination, startDate, endDate, status } = this.form.getRawValue();
     const request = {
