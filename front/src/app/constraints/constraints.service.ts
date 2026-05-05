@@ -1,6 +1,6 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, catchError, map, of } from 'rxjs';
 import { TravelConstraints, UpdateTravelConstraintsRequest } from './constraints.model';
 
 @Injectable({
@@ -9,25 +9,19 @@ import { TravelConstraints, UpdateTravelConstraintsRequest } from './constraints
 export class ConstraintsService {
   private readonly http = inject(HttpClient);
 
-  private readonly _constraints = signal<TravelConstraints | null>(null);
-
-  readonly constraints = this._constraints.asReadonly();
-
-  constructor() {
-    this.http.get<TravelConstraints>('/api/travel-constraints').subscribe({
-      next: (constraints) => this._constraints.set(constraints),
-      error: (err) => {
-        // 204 No Content is not an error; the signal stays null
-        if (err?.status !== 204) {
-          console.error('Failed to load travel constraints:', err);
-        }
-      },
-    });
+  get(): Observable<TravelConstraints | null> {
+    return this.http.get<TravelConstraints | null>('/api/travel-constraints').pipe(
+      map((constraints) => constraints ?? null),
+      catchError((error: unknown) => {
+        // 204 No Content — no constraints configured yet
+        if ((error as { status?: number })?.status === 204) return of(null);
+        throw error;
+      }),
+    );
   }
 
   update(request: UpdateTravelConstraintsRequest): Observable<TravelConstraints> {
-    return this.http.put<TravelConstraints>('/api/travel-constraints', request).pipe(
-      tap((constraints) => this._constraints.set(constraints)),
-    );
+    return this.http.put<TravelConstraints>('/api/travel-constraints', request);
   }
 }
+

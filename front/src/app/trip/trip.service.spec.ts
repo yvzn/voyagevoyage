@@ -27,48 +27,46 @@ describe('TripService', () => {
   });
 
   it('should be created', () => {
-    httpMock.expectOne('/api/trips').flush([]);
     expect(service).toBeTruthy();
   });
 
-  it('should return trips from the API', () => {
-    const req = httpMock.expectOne('/api/trips');
-    req.flush(MOCK_TRIPS);
+  describe('getAll', () => {
+    it('should GET /api/trips and return trips', () => {
+      let result: Trip[] | undefined;
+      service.getAll().subscribe((t) => (result = t));
 
-    expect(service.trips()).toEqual(MOCK_TRIPS);
-  });
+      httpMock.expectOne('/api/trips').flush(MOCK_TRIPS);
 
-  it('should return an empty array when API returns empty list', () => {
-    const req = httpMock.expectOne('/api/trips');
-    req.flush([]);
+      expect(result).toEqual(MOCK_TRIPS);
+    });
 
-    expect(service.trips()).toEqual([]);
-  });
+    it('should return an empty array when API returns empty list', () => {
+      let result: Trip[] | undefined;
+      service.getAll().subscribe((t) => (result = t));
 
-  it('should return an empty array on HTTP error', () => {
-    const req = httpMock.expectOne('/api/trips');
-    req.error(new ProgressEvent('error'));
+      httpMock.expectOne('/api/trips').flush([]);
 
-    expect(service.trips()).toEqual([]);
-  });
+      expect(result).toEqual([]);
+    });
 
-  it('each trip returned from API should have required fields', () => {
-    const req = httpMock.expectOne('/api/trips');
-    req.flush(MOCK_TRIPS);
+    it('each trip returned from API should have required fields', () => {
+      let result: Trip[] | undefined;
+      service.getAll().subscribe((t) => (result = t));
 
-    for (const trip of service.trips()) {
-      expect(trip.id).toBeTruthy();
-      expect(trip.destination).toBeTruthy();
-      expect(trip.startDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-      expect(trip.endDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-      expect(Object.values(TripStatus)).toContain(trip.status);
-    }
+      httpMock.expectOne('/api/trips').flush(MOCK_TRIPS);
+
+      for (const trip of result ?? []) {
+        expect(trip.id).toBeTruthy();
+        expect(trip.destination).toBeTruthy();
+        expect(trip.startDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+        expect(trip.endDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+        expect(Object.values(TripStatus)).toContain(trip.status);
+      }
+    });
   });
 
   describe('create', () => {
-    it('should POST to /api/trips and add the new trip to the signal', () => {
-      httpMock.expectOne('/api/trips').flush([]);
-
+    it('should POST to /api/trips and return the new trip', () => {
       const request: CreateTripRequest = {
         destination: 'Paris',
         startDate: '2026-05-10',
@@ -83,14 +81,11 @@ describe('TripService', () => {
       httpMock.expectOne({ method: 'POST', url: '/api/trips' }).flush(created);
 
       expect(result).toEqual(created);
-      expect(service.trips()).toContain(created);
     });
   });
 
   describe('update', () => {
-    it('should PUT to /api/trips/:id and update the trip in the signal', () => {
-      httpMock.expectOne('/api/trips').flush(MOCK_TRIPS);
-
+    it('should PUT to /api/trips/:id and return the updated trip', () => {
       const request: UpdateTripRequest = {
         destination: 'Lyon-Updated',
         startDate: '2026-04-06',
@@ -105,20 +100,19 @@ describe('TripService', () => {
       httpMock.expectOne({ method: 'PUT', url: '/api/trips/1' }).flush(updated);
 
       expect(result).toEqual(updated);
-      expect(service.trips().find((t) => t.id === '1')).toEqual(updated);
     });
   });
 
   describe('delete', () => {
-    it('should DELETE /api/trips/:id and remove the trip from the signal', () => {
-      httpMock.expectOne('/api/trips').flush(MOCK_TRIPS);
-
-      service.delete('2').subscribe();
+    it('should DELETE /api/trips/:id', () => {
+      let completed = false;
+      service.delete('2').subscribe({ complete: () => (completed = true) });
 
       httpMock.expectOne({ method: 'DELETE', url: '/api/trips/2' }).flush(null);
 
-      expect(service.trips().find((t) => t.id === '2')).toBeUndefined();
-      expect(service.trips().length).toBe(MOCK_TRIPS.length - 1);
+      expect(completed).toBe(true);
     });
   });
 });
+
+

@@ -29,32 +29,42 @@ describe('ConstraintsService', () => {
   });
 
   it('should be created', () => {
-    httpMock.expectOne('/api/travel-constraints').flush(null, { status: 204, statusText: 'No Content' });
     expect(service).toBeTruthy();
   });
 
-  it('should set constraints signal when API returns constraints', () => {
-    httpMock.expectOne('/api/travel-constraints').flush(MOCK_CONSTRAINTS);
+  describe('get', () => {
+    it('should GET /api/travel-constraints and return constraints', () => {
+      let result: TravelConstraints | null | undefined;
+      service.get().subscribe((c) => (result = c));
 
-    expect(service.constraints()).toEqual(MOCK_CONSTRAINTS);
-  });
+      httpMock.expectOne('/api/travel-constraints').flush(MOCK_CONSTRAINTS);
 
-  it('should keep constraints signal null when API returns 204', () => {
-    httpMock.expectOne('/api/travel-constraints').flush(null, { status: 204, statusText: 'No Content' });
+      expect(result).toEqual(MOCK_CONSTRAINTS);
+    });
 
-    expect(service.constraints()).toBeNull();
-  });
+    it('should return null when API returns 204 No Content', () => {
+      let result: TravelConstraints | null | undefined;
+      service.get().subscribe((c) => (result = c));
 
-  it('should keep constraints signal null on HTTP error', () => {
-    httpMock.expectOne('/api/travel-constraints').error(new ProgressEvent('error'));
+      httpMock
+        .expectOne('/api/travel-constraints')
+        .flush(null, { status: 204, statusText: 'No Content' });
 
-    expect(service.constraints()).toBeNull();
+      expect(result).toBeNull();
+    });
+
+    it('should propagate errors for non-204 failures', () => {
+      let error: unknown;
+      service.get().subscribe({ error: (e) => (error = e) });
+
+      httpMock.expectOne('/api/travel-constraints').error(new ProgressEvent('error'));
+
+      expect(error).toBeTruthy();
+    });
   });
 
   describe('update', () => {
-    it('should PUT to /api/travel-constraints and update the signal', () => {
-      httpMock.expectOne('/api/travel-constraints').flush(null, { status: 204, statusText: 'No Content' });
-
+    it('should PUT to /api/travel-constraints and return the updated constraints', () => {
       const request: UpdateTravelConstraintsRequest = {
         allowedDaysOfWeek: [1, 2, 3, 4, 5],
         maxDaysPerMonth: 8,
@@ -70,7 +80,7 @@ describe('ConstraintsService', () => {
       httpMock.expectOne({ method: 'PUT', url: '/api/travel-constraints' }).flush(updated);
 
       expect(result).toEqual(updated);
-      expect(service.constraints()).toEqual(updated);
     });
   });
 });
+

@@ -153,6 +153,22 @@ Recommended rule of thumb:
 - form state: Reactive Forms
 - shared business state: NgRx store
 
+#### 4.5.1 Feature store architecture
+
+Each NgRx feature store is co-located with the feature code it manages. A feature store is a self-contained folder with consistent structure: typed action creators, a reducer with explicit state shape and API status tracking, functional effects, and selector functions.
+
+**Responsibilities are split as follows:**
+
+- **Services** handle the HTTP layer. They make API calls and return Observables. They do not know about the NgRx store.
+- **Effects** call services, react to API outcomes, and dispatch the corresponding success or failure actions.
+- **Components** dispatch actions to trigger operations and use selectors to read state from the store. Components do not call services directly.
+
+This separation ensures testability at each layer: services are tested against the HTTP layer, effects are tested by mocking services, and component tests use the mock store.
+
+#### 4.5.2 API status tracking
+
+Each async operation exposes a dedicated status field in the store state (e.g., `loadStatus`, `createStatus`). This allows any component to observe whether an operation is `idle`, `loading`, has succeeded (`success`), or has failed (`failure`).
+
 ### 4.6 Signals
 
 Signals are the preferred primitive for local reactive state inside Angular components and lightweight UI services.

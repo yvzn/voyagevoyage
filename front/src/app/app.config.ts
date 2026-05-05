@@ -3,8 +3,14 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
+import { provideStore } from '@ngrx/store';
+import { provideEffects } from '@ngrx/effects';
 
 import { routes } from './app.routes';
+import { tripsFeature } from './trip/store/trip.reducer';
+import { settingsFeature } from './constraints/store/settings.reducer';
+import * as tripEffects from './trip/store/trip.effects';
+import * as settingsEffects from './constraints/store/settings.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -19,5 +25,10 @@ export const appConfig: ApplicationConfig = {
     // provideTranslateHttpLoader must come after forRoot so its TranslateLoader
     // registration overrides the default TranslateNoOpLoader registered by forRoot.
     provideTranslateHttpLoader({ prefix: '/i18n/', suffix: '.json' }),
+    provideStore({
+      [tripsFeature.name]: tripsFeature.reducer,
+      [settingsFeature.name]: settingsFeature.reducer,
+    }),
+    provideEffects(tripEffects, settingsEffects),
   ],
 };

@@ -1,10 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { signal } from '@angular/core';
+import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { ConstraintsSettingsComponent } from './constraints-settings';
-import { ConstraintsService } from '../constraints.service';
 import { TravelConstraints } from '../constraints.model';
+import { selectConstraints, selectSettingsUpdateStatus } from '../store/settings.selectors';
+import { ApiStatus } from '../store/settings.reducer';
 
 const EN_TRANSLATIONS = {
   constraints: {
@@ -37,31 +37,31 @@ const EN_TRANSLATIONS = {
   },
 };
 
-function makeMockConstraintsService(
+async function setupModule(
   constraints: TravelConstraints | null = null,
-  overrides: Partial<ConstraintsService> = {},
-): ConstraintsService {
-  return {
-    constraints: signal(constraints).asReadonly(),
-    update: () => of(constraints ?? ({} as TravelConstraints)),
-    ...overrides,
-  } as unknown as ConstraintsService;
-}
-
-async function setupModule(mockService: ConstraintsService): Promise<void> {
+): Promise<MockStore> {
   await TestBed.configureTestingModule({
     imports: [ConstraintsSettingsComponent, TranslateModule.forRoot()],
-    providers: [{ provide: ConstraintsService, useValue: mockService }],
+    providers: [
+      provideMockStore({
+        selectors: [
+          { selector: selectConstraints, value: constraints },
+          { selector: selectSettingsUpdateStatus, value: 'idle' as ApiStatus },
+        ],
+      }),
+    ],
   }).compileComponents();
 
   const translate = TestBed.inject(TranslateService);
   translate.setTranslation('en', EN_TRANSLATIONS);
   translate.use('en');
+
+  return TestBed.inject(MockStore);
 }
 
 describe('ConstraintsSettingsComponent — display', () => {
   beforeEach(async () => {
-    await setupModule(makeMockConstraintsService());
+    await setupModule();
   });
 
   it('should create', () => {
@@ -109,9 +109,8 @@ describe('ConstraintsSettingsComponent — pre-fill', () => {
     considerVacationDays: false,
     isStrict: true,
   };
-
   beforeEach(async () => {
-    await setupModule(makeMockConstraintsService(existingConstraints));
+    await setupModule(existingConstraints);
   });
 
   it('should pre-fill form from existing constraints', async () => {
@@ -130,10 +129,10 @@ describe('ConstraintsSettingsComponent — pre-fill', () => {
 });
 
 describe('ConstraintsSettingsComponent — save success', () => {
+  let store: MockStore;
+
   beforeEach(async () => {
-    await setupModule(makeMockConstraintsService(null, {
-      update: () => of({} as TravelConstraints),
-    }));
+    store = await setupModule();
   });
 
   it('should show success message after saving', async () => {
@@ -142,6 +141,9 @@ describe('ConstraintsSettingsComponent — save success', () => {
 
     const component = fixture.componentInstance;
     component['onSubmit']();
+
+    store.overrideSelector(selectSettingsUpdateStatus, 'success');
+    store.refreshState();
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -153,10 +155,10 @@ describe('ConstraintsSettingsComponent — save success', () => {
 });
 
 describe('ConstraintsSettingsComponent — save error', () => {
+  let store: MockStore;
+
   beforeEach(async () => {
-    await setupModule(makeMockConstraintsService(null, {
-      update: () => throwError(() => new Error('Server error')),
-    }));
+    store = await setupModule();
   });
 
   it('should show error message when save fails', async () => {
@@ -165,6 +167,9 @@ describe('ConstraintsSettingsComponent — save error', () => {
 
     const component = fixture.componentInstance;
     component['onSubmit']();
+
+    store.overrideSelector(selectSettingsUpdateStatus, 'failure');
+    store.refreshState();
     fixture.detectChanges();
     await fixture.whenStable();
 
