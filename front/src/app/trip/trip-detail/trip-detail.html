@@ -11,7 +11,7 @@
     {{ 'tripDetail.backToCalendar' | translate }}
   </a>
 
-  @if (trip()) {
+  @if (trip(); as currentTrip) {
     <!-- Trip details card -->
     <section aria-labelledby="trip-detail-heading" class="mt-6 rounded-xl bg-white shadow-sm dark:bg-gray-800">
       <div class="p-6">
@@ -20,13 +20,13 @@
             id="trip-detail-heading"
             class="text-xl font-semibold text-gray-900 dark:text-white"
           >
-            {{ trip()!.destination }}
+            {{ currentTrip.destination }}
           </h1>
           <span
             class="inline-block rounded-full px-3 py-1 text-sm font-medium"
-            [ngClass]="getTripStatusClass(trip()!.status)"
+            [ngClass]="getTripStatusClass(currentTrip.status)"
           >
-            {{ getTripStatusTranslationKey(trip()!.status) | translate }}
+            {{ getTripStatusTranslationKey(currentTrip.status) | translate }}
           </span>
         </div>
 
@@ -35,13 +35,13 @@
             <dt class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
               {{ 'tripDetail.startDate' | translate }}
             </dt>
-            <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ trip()!.startDate }}</dd>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ currentTrip.startDate }}</dd>
           </div>
           <div>
             <dt class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
               {{ 'tripDetail.endDate' | translate }}
             </dt>
-            <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ trip()!.endDate }}</dd>
+            <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ currentTrip.endDate }}</dd>
           </div>
         </dl>
 

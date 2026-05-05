@@ -4,6 +4,7 @@ import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { provideRouter } from '@angular/router';
 import { Router } from '@angular/router';
 import { convertToParamMap, ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { TripDetailComponent } from './trip-detail';
 import { Trip, TripStatus } from '../trip.model';
@@ -69,7 +70,7 @@ async function setupModule(trips: Trip[] = [MOCK_TRIP], tripId = 'trip-1'): Prom
       {
         provide: ActivatedRoute,
         useValue: {
-          snapshot: { paramMap: convertToParamMap({ id: tripId }) },
+          paramMap: of(convertToParamMap({ id: tripId })),
         },
       },
       provideMockStore({

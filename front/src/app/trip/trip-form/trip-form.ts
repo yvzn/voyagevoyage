@@ -19,6 +19,7 @@ import { selectTripsCreateStatus, selectTripsUpdateStatus } from '../store/trip.
 import { LocaleService } from '../../locale.service';
 import { selectConstraints } from '../../constraints/store/settings.selectors';
 import { constraintViolationValidator } from './constraint-violation.validator';
+import { getTripStatusTranslationKey } from '../trip-status.utils';
 
 function endDateAfterStartDate(group: AbstractControl): ValidationErrors | null {
   const start = group.get('startDate')?.value as string;
@@ -55,6 +56,7 @@ export class TripFormComponent implements AfterViewInit {
 
   protected readonly TripStatus = TripStatus;
   protected readonly tripStatuses = [TripStatus.Planned, TripStatus.Confirmed, TripStatus.Cancelled];
+  protected readonly getTripStatusTranslationKey = getTripStatusTranslationKey;
 
   protected readonly isSaving = computed(
     () => this.createStatus() === 'loading' || this.updateStatus() === 'loading',
@@ -125,17 +127,6 @@ export class TripFormComponent implements AfterViewInit {
 
   get isEditMode(): boolean {
     return this.trip() !== null;
-  }
-
-  protected getTripStatusTranslationKey(status: TripStatus): string {
-    switch (status) {
-      case TripStatus.Planned:
-        return 'tripStatus.planned';
-      case TripStatus.Confirmed:
-        return 'tripStatus.confirmed';
-      case TripStatus.Cancelled:
-        return 'tripStatus.cancelled';
-    }
   }
 
   protected onDialogCancel(event: Event): void {

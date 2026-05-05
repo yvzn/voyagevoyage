@@ -1,13 +1,15 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
-import { Trip, TripStatus } from '../trip.model';
+import { TripStatus } from '../trip.model';
 import { TripActions } from '../store/trip.actions';
-import { selectTripById, selectTripsDeleteStatus } from '../store/trip.selectors';
+import { selectAllTrips, selectTripsDeleteStatus } from '../store/trip.selectors';
 import { TripFormComponent } from '../trip-form/trip-form';
-import { LocaleService } from '../../locale.service';
+import { getTripStatusClass, getTripStatusTranslationKey } from '../trip-status.utils';
 
 @Component({
   selector: 'app-trip-detail',
@@ -19,10 +21,16 @@ export class TripDetailComponent {
   private readonly store = inject(Store);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  protected readonly localeService = inject(LocaleService);
 
-  protected readonly tripId = this.route.snapshot.paramMap.get('id') ?? '';
-  protected readonly trip = this.store.selectSignal(selectTripById(this.tripId));
+  private readonly routeParamId = toSignal(
+    this.route.paramMap.pipe(map((p) => p.get('id') ?? ''))
+  );
+  protected readonly tripId = computed(() => this.routeParamId() ?? '');
+
+  private readonly allTrips = this.store.selectSignal(selectAllTrips);
+  protected readonly trip = computed(() =>
+    this.allTrips().find((t) => t.id === this.tripId()) ?? null
+  );
 
   /** Whether the edit form modal is open */
   protected readonly isFormOpen = signal(false);
@@ -34,6 +42,8 @@ export class TripDetailComponent {
   );
 
   protected readonly TripStatus = TripStatus;
+  protected readonly getTripStatusClass = getTripStatusClass;
+  protected readonly getTripStatusTranslationKey = getTripStatusTranslationKey;
 
   /** True while a delete dispatched by this instance is in flight. */
   private deletePending = false;
@@ -66,27 +76,5 @@ export class TripDetailComponent {
 
     this.deletePending = true;
     this.store.dispatch(TripActions.deleteTrip({ id: trip.id }));
-  }
-
-  protected getTripStatusClass(status: TripStatus): string {
-    switch (status) {
-      case TripStatus.Planned:
-        return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200';
-      case TripStatus.Confirmed:
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case TripStatus.Cancelled:
-        return 'bg-gray-100 text-gray-500 line-through dark:bg-gray-700 dark:text-gray-400';
-    }
-  }
-
-  protected getTripStatusTranslationKey(status: TripStatus): string {
-    switch (status) {
-      case TripStatus.Planned:
-        return 'tripStatus.planned';
-      case TripStatus.Confirmed:
-        return 'tripStatus.confirmed';
-      case TripStatus.Cancelled:
-        return 'tripStatus.cancelled';
-    }
   }
 }
