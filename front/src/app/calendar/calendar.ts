@@ -1,6 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Store } from '@ngrx/store';
 import {
   CalendarDay,
   CalendarWeek,
@@ -9,9 +11,11 @@ import {
   getMonthNames,
 } from './calendar.utils';
 import { LocaleService } from '../locale.service';
-import { TripService } from '../trip/trip.service';
 import { Trip, TripStatus } from '../trip/trip.model';
 import { TripFormComponent } from '../trip/trip-form/trip-form';
+import { TripActions } from '../trip/store/trip.actions';
+import { SettingsActions } from '../constraints/store/settings.actions';
+import { selectAllTrips } from '../trip/store/trip.selectors';
 
 @Component({
   selector: 'app-calendar',
@@ -21,8 +25,17 @@ import { TripFormComponent } from '../trip/trip-form/trip-form';
 })
 export class CalendarComponent {
   protected readonly localeService = inject(LocaleService);
-  private readonly tripService = inject(TripService);
   private readonly translateService = inject(TranslateService);
+  private readonly store = inject(Store);
+
+  constructor() {
+    this.store.dispatch(TripActions.loadTrips());
+    this.store.dispatch(SettingsActions.loadSettings());
+  }
+
+  private readonly trips = toSignal(this.store.select(selectAllTrips), {
+    initialValue: [] as Trip[],
+  });
 
   protected readonly currentYear = signal(new Date().getFullYear());
   protected readonly currentMonth = signal(new Date().getMonth());
@@ -54,7 +67,7 @@ export class CalendarComponent {
 
   private readonly tripsPerDay = computed(() => {
     const map = new Map<string, Trip[]>();
-    for (const trip of this.tripService.trips()) {
+    for (const trip of this.trips()) {
       const [sy, sm, sd] = trip.startDate.split('-').map(Number);
       const [ey, em, ed] = trip.endDate.split('-').map(Number);
       const startTs = Date.UTC(sy, sm - 1, sd);

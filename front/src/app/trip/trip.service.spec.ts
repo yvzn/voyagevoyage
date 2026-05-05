@@ -1,13 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { provideMockStore, MockStore } from '@ngrx/store/testing';
-import { provideMockActions } from '@ngrx/effects/testing';
-import { Subject } from 'rxjs';
-import { vi } from 'vitest';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
 import { TripService } from './trip.service';
 import { Trip, TripStatus, CreateTripRequest, UpdateTripRequest } from './trip.model';
-import { TripActions } from './store/trip.actions';
-import { selectAllTrips } from './store/trip.selectors';
-import { Action } from '@ngrx/store';
 
 const MOCK_TRIPS: Trip[] = [
   { id: '1', startDate: '2026-04-06', endDate: '2026-04-08', destination: 'Lyon', status: TripStatus.Confirmed },
@@ -15,65 +10,63 @@ const MOCK_TRIPS: Trip[] = [
   { id: '3', startDate: '2026-04-22', endDate: '2026-04-23', destination: 'Lille', status: TripStatus.Cancelled },
 ];
 
-describe('TripService (NgRx facade)', () => {
+describe('TripService', () => {
   let service: TripService;
-  let store: MockStore;
-  let actions$: Subject<Action>;
+  let httpMock: HttpTestingController;
 
   beforeEach(() => {
-    actions$ = new Subject<Action>();
     TestBed.configureTestingModule({
-      providers: [
-        provideMockStore({
-          selectors: [{ selector: selectAllTrips, value: [] }],
-        }),
-        provideMockActions(() => actions$),
-      ],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     });
-    store = TestBed.inject(MockStore);
     service = TestBed.inject(TripService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should dispatch loadTrips on construction', () => {
-    const dispatchedActions: Action[] = [];
-    store.scannedActions$.subscribe((action) => dispatchedActions.push(action));
+  describe('getAll', () => {
+    it('should GET /api/trips and return trips', () => {
+      let result: Trip[] | undefined;
+      service.getAll().subscribe((t) => (result = t));
 
-    // Re-create service to verify constructor dispatch
-    TestBed.resetTestingModule();
-    actions$ = new Subject<Action>();
-    TestBed.configureTestingModule({
-      providers: [
-        provideMockStore({ selectors: [{ selector: selectAllTrips, value: [] }] }),
-        provideMockActions(() => actions$),
-      ],
+      httpMock.expectOne('/api/trips').flush(MOCK_TRIPS);
+
+      expect(result).toEqual(MOCK_TRIPS);
     });
-    store = TestBed.inject(MockStore);
-    const capturedActions: Action[] = [];
-    store.scannedActions$.subscribe((a) => capturedActions.push(a));
-    TestBed.inject(TripService);
 
-    expect(capturedActions.some((a) => a.type === TripActions.loadTrips.type)).toBe(true);
-  });
+    it('should return an empty array when API returns empty list', () => {
+      let result: Trip[] | undefined;
+      service.getAll().subscribe((t) => (result = t));
 
-  it('should expose trips from the store selector', () => {
-    store.overrideSelector(selectAllTrips, MOCK_TRIPS);
-    store.refreshState();
+      httpMock.expectOne('/api/trips').flush([]);
 
-    expect(service.trips()).toEqual(MOCK_TRIPS);
-  });
+      expect(result).toEqual([]);
+    });
 
-  it('should return an empty array when the store has no trips', () => {
-    store.overrideSelector(selectAllTrips, []);
-    store.refreshState();
-    expect(service.trips()).toEqual([]);
+    it('each trip returned from API should have required fields', () => {
+      let result: Trip[] | undefined;
+      service.getAll().subscribe((t) => (result = t));
+
+      httpMock.expectOne('/api/trips').flush(MOCK_TRIPS);
+
+      for (const trip of result ?? []) {
+        expect(trip.id).toBeTruthy();
+        expect(trip.destination).toBeTruthy();
+        expect(trip.startDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+        expect(trip.endDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+        expect(Object.values(TripStatus)).toContain(trip.status);
+      }
+    });
   });
 
   describe('create', () => {
-    it('should dispatch createTrip action and resolve on success', () => {
+    it('should POST to /api/trips and return the new trip', () => {
       const request: CreateTripRequest = {
         destination: 'Paris',
         startDate: '2026-05-10',
@@ -81,37 +74,18 @@ describe('TripService (NgRx facade)', () => {
         status: TripStatus.Planned,
       };
       const created: Trip = { id: 'new-1', ...request };
-      const dispatchSpy = vi.spyOn(store, 'dispatch');
 
       let result: Trip | undefined;
       service.create(request).subscribe((t) => (result = t));
 
-      expect(dispatchSpy).toHaveBeenCalledWith(TripActions.createTrip({ request }));
-
-      actions$.next(TripActions.createTripSuccess({ trip: created }));
+      httpMock.expectOne({ method: 'POST', url: '/api/trips' }).flush(created);
 
       expect(result).toEqual(created);
-    });
-
-    it('should reject on createTripFailure', () => {
-      const request: CreateTripRequest = {
-        destination: 'Paris',
-        startDate: '2026-05-10',
-        endDate: '2026-05-12',
-        status: TripStatus.Planned,
-      };
-
-      let error: unknown;
-      service.create(request).subscribe({ error: (e) => (error = e) });
-
-      actions$.next(TripActions.createTripFailure({ error: 'Server error' }));
-
-      expect(error).toBeTruthy();
     });
   });
 
   describe('update', () => {
-    it('should dispatch updateTrip action and resolve on success', () => {
+    it('should PUT to /api/trips/:id and return the updated trip', () => {
       const request: UpdateTripRequest = {
         destination: 'Lyon-Updated',
         startDate: '2026-04-06',
@@ -119,56 +93,24 @@ describe('TripService (NgRx facade)', () => {
         status: TripStatus.Confirmed,
       };
       const updated: Trip = { id: '1', ...request };
-      const dispatchSpy = vi.spyOn(store, 'dispatch');
 
       let result: Trip | undefined;
       service.update('1', request).subscribe((t) => (result = t));
 
-      expect(dispatchSpy).toHaveBeenCalledWith(TripActions.updateTrip({ id: '1', request }));
-
-      actions$.next(TripActions.updateTripSuccess({ trip: updated }));
+      httpMock.expectOne({ method: 'PUT', url: '/api/trips/1' }).flush(updated);
 
       expect(result).toEqual(updated);
-    });
-
-    it('should reject on updateTripFailure', () => {
-      const request: UpdateTripRequest = {
-        destination: 'Lyon-Updated',
-        startDate: '2026-04-06',
-        endDate: '2026-04-09',
-        status: TripStatus.Confirmed,
-      };
-
-      let error: unknown;
-      service.update('1', request).subscribe({ error: (e) => (error = e) });
-
-      actions$.next(TripActions.updateTripFailure({ error: 'Server error' }));
-
-      expect(error).toBeTruthy();
     });
   });
 
   describe('delete', () => {
-    it('should dispatch deleteTrip action and resolve on success', () => {
-      const dispatchSpy = vi.spyOn(store, 'dispatch');
-
+    it('should DELETE /api/trips/:id', () => {
       let completed = false;
       service.delete('2').subscribe({ complete: () => (completed = true) });
 
-      expect(dispatchSpy).toHaveBeenCalledWith(TripActions.deleteTrip({ id: '2' }));
-
-      actions$.next(TripActions.deleteTripSuccess({ id: '2' }));
+      httpMock.expectOne({ method: 'DELETE', url: '/api/trips/2' }).flush(null);
 
       expect(completed).toBe(true);
-    });
-
-    it('should reject on deleteTripFailure', () => {
-      let error: unknown;
-      service.delete('2').subscribe({ error: (e) => (error = e) });
-
-      actions$.next(TripActions.deleteTripFailure({ error: 'Server error' }));
-
-      expect(error).toBeTruthy();
     });
   });
 });

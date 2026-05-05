@@ -1,9 +1,13 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
+import { Store } from '@ngrx/store';
+import { Actions, ofType } from '@ngrx/effects';
 import { DayOfWeek, TravelConstraints } from '../constraints.model';
-import { ConstraintsService } from '../constraints.service';
+import { SettingsActions } from '../store/settings.actions';
+import { selectConstraints } from '../store/settings.selectors';
 
 @Component({
   selector: 'app-constraints-settings',
@@ -12,8 +16,14 @@ import { ConstraintsService } from '../constraints.service';
   templateUrl: './constraints-settings.html',
 })
 export class ConstraintsSettingsComponent implements OnInit {
-  private readonly constraintsService = inject(ConstraintsService);
+  private readonly store = inject(Store);
+  private readonly actions$ = inject(Actions);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
+
+  private readonly storeConstraints = toSignal(this.store.select(selectConstraints), {
+    initialValue: null as TravelConstraints | null,
+  });
 
   protected readonly DayOfWeek = DayOfWeek;
   protected readonly allDays: DayOfWeek[] = [
@@ -45,7 +55,8 @@ export class ConstraintsSettingsComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const existing = this.constraintsService.constraints();
+    this.store.dispatch(SettingsActions.loadSettings());
+    const existing = this.storeConstraints();
     if (existing) {
       this.applyConstraints(existing);
     }
@@ -120,15 +131,18 @@ export class ConstraintsSettingsComponent implements OnInit {
     this.errorKey.set(null);
     this.isSaved.set(false);
 
-    this.constraintsService.update(request).subscribe({
-      next: () => {
-        this.isLoading.set(false);
+    this.store.dispatch(SettingsActions.updateSettings({ request }));
+
+    this.actions$.pipe(
+      ofType(SettingsActions.updateSettingsSuccess, SettingsActions.updateSettingsFailure),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe((action) => {
+      this.isLoading.set(false);
+      if (action.type === SettingsActions.updateSettingsSuccess.type) {
         this.isSaved.set(true);
-      },
-      error: () => {
-        this.isLoading.set(false);
+      } else {
         this.errorKey.set('constraints.saveError');
-      },
+      }
     });
   }
 }

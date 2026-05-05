@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, of, throwError } from 'rxjs';
 import { Action } from '@ngrx/store';
+import { vi } from 'vitest';
 import { TravelConstraints, UpdateTravelConstraintsRequest } from '../constraints.model';
 import { SettingsActions } from './settings.actions';
+import { ConstraintsService } from '../constraints.service';
 import * as SettingsEffects from './settings.effects';
 
 const MOCK_CONSTRAINTS: TravelConstraints = {
@@ -16,28 +16,32 @@ const MOCK_CONSTRAINTS: TravelConstraints = {
   isStrict: false,
 };
 
+function makeMockConstraintsService() {
+  return {
+    get: vi.fn().mockReturnValue(of(null)),
+    update: vi.fn().mockReturnValue(of({})),
+  };
+}
+
 describe('Settings Effects', () => {
   let actions$: Subject<Action>;
-  let httpMock: HttpTestingController;
+  let mockConstraintsService: ReturnType<typeof makeMockConstraintsService>;
 
   beforeEach(() => {
     actions$ = new Subject<Action>();
+    mockConstraintsService = makeMockConstraintsService();
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
+        { provide: ConstraintsService, useValue: mockConstraintsService },
         provideMockActions(() => actions$),
       ],
     });
-    httpMock = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => {
-    httpMock.verify();
   });
 
   describe('loadSettingsEffect', () => {
-    it('should dispatch loadSettingsSuccess with constraints on HTTP success', () => {
+    it('should dispatch loadSettingsSuccess when service returns constraints', () => {
+      mockConstraintsService.get.mockReturnValue(of(MOCK_CONSTRAINTS));
+
       const effect$: Observable<Action> = TestBed.runInInjectionContext(() =>
         SettingsEffects.loadSettingsEffect(),
       );
@@ -46,12 +50,13 @@ describe('Settings Effects', () => {
       effect$.subscribe((action) => (result = action));
 
       actions$.next(SettingsActions.loadSettings());
-      httpMock.expectOne('/api/travel-constraints').flush(MOCK_CONSTRAINTS);
 
       expect(result).toEqual(SettingsActions.loadSettingsSuccess({ constraints: MOCK_CONSTRAINTS }));
     });
 
-    it('should dispatch loadSettingsEmpty on 204 No Content', () => {
+    it('should dispatch loadSettingsEmpty when service returns null', () => {
+      mockConstraintsService.get.mockReturnValue(of(null));
+
       const effect$: Observable<Action> = TestBed.runInInjectionContext(() =>
         SettingsEffects.loadSettingsEffect(),
       );
@@ -60,14 +65,13 @@ describe('Settings Effects', () => {
       effect$.subscribe((action) => (result = action));
 
       actions$.next(SettingsActions.loadSettings());
-      httpMock
-        .expectOne('/api/travel-constraints')
-        .flush(null, { status: 204, statusText: 'No Content' });
 
       expect(result).toEqual(SettingsActions.loadSettingsEmpty());
     });
 
-    it('should dispatch loadSettingsFailure on HTTP error', () => {
+    it('should dispatch loadSettingsFailure when service throws', () => {
+      mockConstraintsService.get.mockReturnValue(throwError(() => new Error('Network error')));
+
       const effect$: Observable<Action> = TestBed.runInInjectionContext(() =>
         SettingsEffects.loadSettingsEffect(),
       );
@@ -76,9 +80,6 @@ describe('Settings Effects', () => {
       effect$.subscribe((action) => (result = action));
 
       actions$.next(SettingsActions.loadSettings());
-      httpMock
-        .expectOne('/api/travel-constraints')
-        .error(new ProgressEvent('error'));
 
       expect(result).toBeDefined();
       expect((result as ReturnType<typeof SettingsActions.loadSettingsFailure>).type).toBe(
@@ -88,7 +89,7 @@ describe('Settings Effects', () => {
   });
 
   describe('updateSettingsEffect', () => {
-    it('should dispatch updateSettingsSuccess on HTTP success', () => {
+    it('should dispatch updateSettingsSuccess when service updates constraints', () => {
       const request: UpdateTravelConstraintsRequest = {
         allowedDaysOfWeek: [1, 2, 3, 4, 5],
         maxDaysPerMonth: 8,
@@ -97,6 +98,7 @@ describe('Settings Effects', () => {
         isStrict: true,
       };
       const updated: TravelConstraints = { ...request };
+      mockConstraintsService.update.mockReturnValue(of(updated));
 
       const effect$: Observable<Action> = TestBed.runInInjectionContext(() =>
         SettingsEffects.updateSettingsEffect(),
@@ -106,14 +108,11 @@ describe('Settings Effects', () => {
       effect$.subscribe((action) => (result = action));
 
       actions$.next(SettingsActions.updateSettings({ request }));
-      httpMock
-        .expectOne({ method: 'PUT', url: '/api/travel-constraints' })
-        .flush(updated);
 
       expect(result).toEqual(SettingsActions.updateSettingsSuccess({ constraints: updated }));
     });
 
-    it('should dispatch updateSettingsFailure on HTTP error', () => {
+    it('should dispatch updateSettingsFailure when service throws', () => {
       const request: UpdateTravelConstraintsRequest = {
         allowedDaysOfWeek: [1, 2, 3, 4, 5],
         maxDaysPerMonth: 8,
@@ -121,6 +120,7 @@ describe('Settings Effects', () => {
         considerVacationDays: true,
         isStrict: true,
       };
+      mockConstraintsService.update.mockReturnValue(throwError(() => new Error('Server error')));
 
       const effect$: Observable<Action> = TestBed.runInInjectionContext(() =>
         SettingsEffects.updateSettingsEffect(),
@@ -130,9 +130,6 @@ describe('Settings Effects', () => {
       effect$.subscribe((action) => (result = action));
 
       actions$.next(SettingsActions.updateSettings({ request }));
-      httpMock
-        .expectOne({ method: 'PUT', url: '/api/travel-constraints' })
-        .error(new ProgressEvent('error'));
 
       expect(result).toBeDefined();
       expect(

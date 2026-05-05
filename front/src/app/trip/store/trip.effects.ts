@@ -1,16 +1,15 @@
 import { inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, mergeMap, of } from 'rxjs';
-import { Trip } from '../trip.model';
 import { TripActions } from './trip.actions';
+import { TripService } from '../trip.service';
 
 export const loadTripsEffect = createEffect(
-  (actions$ = inject(Actions), http = inject(HttpClient)) =>
+  (actions$ = inject(Actions), tripService = inject(TripService)) =>
     actions$.pipe(
       ofType(TripActions.loadTrips),
       mergeMap(() =>
-        http.get<Trip[]>('/api/trips').pipe(
+        tripService.getAll().pipe(
           map((trips) => TripActions.loadTripsSuccess({ trips })),
           catchError((error: unknown) =>
             of(TripActions.loadTripsFailure({ error: String(error) })),
@@ -22,11 +21,11 @@ export const loadTripsEffect = createEffect(
 );
 
 export const createTripEffect = createEffect(
-  (actions$ = inject(Actions), http = inject(HttpClient)) =>
+  (actions$ = inject(Actions), tripService = inject(TripService)) =>
     actions$.pipe(
       ofType(TripActions.createTrip),
       mergeMap(({ request }) =>
-        http.post<Trip>('/api/trips', request).pipe(
+        tripService.create(request).pipe(
           map((trip) => TripActions.createTripSuccess({ trip })),
           catchError((error: unknown) =>
             of(TripActions.createTripFailure({ error: String(error) })),
@@ -38,11 +37,11 @@ export const createTripEffect = createEffect(
 );
 
 export const updateTripEffect = createEffect(
-  (actions$ = inject(Actions), http = inject(HttpClient)) =>
+  (actions$ = inject(Actions), tripService = inject(TripService)) =>
     actions$.pipe(
       ofType(TripActions.updateTrip),
       mergeMap(({ id, request }) =>
-        http.put<Trip>(`/api/trips/${id}`, request).pipe(
+        tripService.update(id, request).pipe(
           map((trip) => TripActions.updateTripSuccess({ trip })),
           catchError((error: unknown) =>
             of(TripActions.updateTripFailure({ error: String(error) })),
@@ -54,11 +53,11 @@ export const updateTripEffect = createEffect(
 );
 
 export const deleteTripEffect = createEffect(
-  (actions$ = inject(Actions), http = inject(HttpClient)) =>
+  (actions$ = inject(Actions), tripService = inject(TripService)) =>
     actions$.pipe(
       ofType(TripActions.deleteTrip),
       mergeMap(({ id }) =>
-        http.delete<void>(`/api/trips/${id}`).pipe(
+        tripService.delete(id).pipe(
           map(() => TripActions.deleteTripSuccess({ id })),
           catchError((error: unknown) =>
             of(TripActions.deleteTripFailure({ error: String(error) })),

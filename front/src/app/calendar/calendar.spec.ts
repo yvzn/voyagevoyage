@@ -1,17 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { signal } from '@angular/core';
-import { provideStore } from '@ngrx/store';
-import { provideEffects } from '@ngrx/effects';
+import { provideMockStore } from '@ngrx/store/testing';
+import { provideMockActions } from '@ngrx/effects/testing';
+import { Subject } from 'rxjs';
+import { Action } from '@ngrx/store';
 import { CalendarComponent } from './calendar';
-import { TripService } from '../trip/trip.service';
 import { Trip, TripStatus } from '../trip/trip.model';
-import { tripsFeature } from '../trip/store/trip.reducer';
-import { settingsFeature } from '../constraints/store/settings.reducer';
-import * as tripEffects from '../trip/store/trip.effects';
-import * as settingsEffects from '../constraints/store/settings.effects';
+import { selectAllTrips } from '../trip/store/trip.selectors';
+import { selectConstraints } from '../constraints/store/settings.selectors';
 
 const EN_TRANSLATIONS = {
   calendarHeading: 'Trip calendar',
@@ -48,27 +44,29 @@ const EN_TRANSLATIONS = {
   },
 };
 
+async function setupWithMockStore(trips: Trip[] = [], actions$?: Subject<Action>): Promise<void> {
+  const actionsSubject = actions$ ?? new Subject<Action>();
+  await TestBed.configureTestingModule({
+    imports: [CalendarComponent, TranslateModule.forRoot()],
+    providers: [
+      provideMockStore({
+        selectors: [
+          { selector: selectAllTrips, value: trips },
+          { selector: selectConstraints, value: null },
+        ],
+      }),
+      provideMockActions(() => actionsSubject),
+    ],
+  }).compileComponents();
+
+  const translate = TestBed.inject(TranslateService);
+  translate.setTranslation('en', EN_TRANSLATIONS);
+  translate.use('en');
+}
+
 describe('CalendarComponent', () => {
   beforeEach(async () => {
-    const tripSignal = signal<Trip[]>([]);
-    await TestBed.configureTestingModule({
-      imports: [CalendarComponent, TranslateModule.forRoot()],
-      providers: [
-        {
-          provide: TripService,
-          useValue: {
-            trips: tripSignal.asReadonly(),
-            create: () => { throw new Error('not implemented'); },
-            update: () => { throw new Error('not implemented'); },
-            delete: () => { throw new Error('not implemented'); },
-          },
-        },
-      ],
-    }).compileComponents();
-
-    const translate = TestBed.inject(TranslateService);
-    translate.setTranslation('en', EN_TRANSLATIONS);
-    translate.use('en');
+    await setupWithMockStore();
   });
 
   it('should create', () => {
@@ -316,25 +314,7 @@ describe('CalendarComponent — trip events', () => {
   ];
 
   beforeEach(async () => {
-    const tripSignal = signal<Trip[]>(MOCK_TRIPS);
-    await TestBed.configureTestingModule({
-      imports: [CalendarComponent, TranslateModule.forRoot()],
-      providers: [
-        {
-          provide: TripService,
-          useValue: {
-            trips: tripSignal.asReadonly(),
-            create: () => { throw new Error('not implemented'); },
-            update: () => { throw new Error('not implemented'); },
-            delete: () => { throw new Error('not implemented'); },
-          },
-        },
-      ],
-    }).compileComponents();
-
-    const translate = TestBed.inject(TranslateService);
-    translate.setTranslation('en', EN_TRANSLATIONS);
-    translate.use('en');
+    await setupWithMockStore(MOCK_TRIPS);
   });
 
   function createFixtureForApril2026() {
@@ -382,25 +362,7 @@ describe('CalendarComponent — trip events', () => {
 
 describe('CalendarComponent — no trips', () => {
   beforeEach(async () => {
-    const tripSignal = signal<Trip[]>([]);
-    await TestBed.configureTestingModule({
-      imports: [CalendarComponent, TranslateModule.forRoot()],
-      providers: [
-        {
-          provide: TripService,
-          useValue: {
-            trips: tripSignal.asReadonly(),
-            create: () => { throw new Error('not implemented'); },
-            update: () => { throw new Error('not implemented'); },
-            delete: () => { throw new Error('not implemented'); },
-          },
-        },
-      ],
-    }).compileComponents();
-
-    const translate = TestBed.inject(TranslateService);
-    translate.setTranslation('en', EN_TRANSLATIONS);
-    translate.use('en');
+    await setupWithMockStore([]);
   });
 
   it('should show no trip badges when no trips exist', async () => {
@@ -415,39 +377,13 @@ describe('CalendarComponent — no trips', () => {
 });
 
 describe('CalendarComponent — trip form', () => {
-  let httpMock: HttpTestingController;
+  let actions$: Subject<Action>;
 
   beforeEach(async () => {
     // JSDOM does not implement HTMLDialogElement.showModal(); stub it
     HTMLDialogElement.prototype.showModal = () => {};
-
-    await TestBed.configureTestingModule({
-      imports: [CalendarComponent, TranslateModule.forRoot()],
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        provideStore({
-          [tripsFeature.name]: tripsFeature.reducer,
-          [settingsFeature.name]: settingsFeature.reducer,
-        }),
-        provideEffects(tripEffects, settingsEffects),
-      ],
-    }).compileComponents();
-
-    const translate = TestBed.inject(TranslateService);
-    translate.setTranslation('en', EN_TRANSLATIONS);
-    translate.use('en');
-
-    httpMock = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => {
-    // Flush any pending /api/travel-constraints requests (opened when the trip form is shown)
-    httpMock.match('/api/travel-constraints').forEach((req) =>
-      req.flush(null, { status: 204, statusText: 'No Content' }),
-    );
-    httpMock.expectOne('/api/trips').flush([]);
-    httpMock.verify();
+    actions$ = new Subject<Action>();
+    await setupWithMockStore([], actions$);
   });
 
   it('should have a "New trip" button', async () => {
@@ -518,3 +454,4 @@ describe('CalendarComponent — trip form', () => {
     expect(component['editingTrip']()).toEqual(trip);
   });
 });
+

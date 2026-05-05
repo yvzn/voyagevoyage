@@ -153,123 +153,21 @@ Recommended rule of thumb:
 - form state: Reactive Forms
 - shared business state: NgRx store
 
-#### 4.5.1 NgRx feature stores
+#### 4.5.1 Feature store architecture
 
-The application uses NgRx feature stores for all shared business state. Each feature store is co-located with the feature code it manages.
+Each NgRx feature store is co-located with the feature code it manages. A feature store is a self-contained folder with consistent structure: typed action creators, a reducer with explicit state shape and API status tracking, functional effects, and selector functions.
 
-Current feature stores:
+**Responsibilities are split as follows:**
 
-| Feature key  | Location                           | Managed state                                 |
-|--------------|------------------------------------|-----------------------------------------------|
-| `trips`      | `front/src/app/trip/store/`        | Trip list, CRUD API statuses                  |
-| `settings`   | `front/src/app/constraints/store/` | Travel constraint settings, update API status |
+- **Services** handle the HTTP layer. They make API calls and return Observables. They do not know about the NgRx store.
+- **Effects** call services, react to API outcomes, and dispatch the corresponding success or failure actions.
+- **Components** dispatch actions to trigger operations and use selectors to read state from the store. Components do not call services directly.
 
-Each feature store folder contains:
-- `*.actions.ts` — action group with typed action creators
-- `*.reducer.ts` — state shape, initial state, reducer, and `createFeature()` registration
-- `*.effects.ts` — functional effects that make HTTP calls
-- `*.selectors.ts` — selector functions for reading state
-- `*.effects.spec.ts` — unit tests for effects (HTTP interactions)
+This separation ensures testability at each layer: services are tested against the HTTP layer, effects are tested by mocking services, and component tests use the mock store.
 
-#### 4.5.2 State shapes
+#### 4.5.2 API status tracking
 
-**Trips state** (`TripsState`):
-
-```typescript
-interface TripsState {
-  trips: Trip[];
-  loadStatus: ApiStatus;    // status of the initial GET /api/trips
-  createStatus: ApiStatus;  // status of POST /api/trips
-  updateStatus: ApiStatus;  // status of PUT /api/trips/:id
-  deleteStatus: ApiStatus;  // status of DELETE /api/trips/:id
-  error: string | null;
-}
-
-type ApiStatus = 'idle' | 'loading' | 'success' | 'failure';
-```
-
-**Settings state** (`SettingsState`):
-
-```typescript
-interface SettingsState {
-  constraints: TravelConstraints | null;
-  loadStatus: ApiStatus;    // status of GET /api/travel-constraints
-  updateStatus: ApiStatus;  // status of PUT /api/travel-constraints
-  error: string | null;
-}
-```
-
-#### 4.5.3 Action flows
-
-**Trips:**
-
-| Action                  | Triggered by                        | Effect dispatches             |
-|-------------------------|-------------------------------------|-------------------------------|
-| `loadTrips`             | `TripService` constructor           | `loadTripsSuccess` / `loadTripsFailure` |
-| `createTrip`            | `TripService.create()`              | `createTripSuccess` / `createTripFailure` |
-| `updateTrip`            | `TripService.update()`              | `updateTripSuccess` / `updateTripFailure` |
-| `deleteTrip`            | `TripService.delete()`              | `deleteTripSuccess` / `deleteTripFailure` |
-
-**Settings:**
-
-| Action                  | Triggered by                          | Effect dispatches                       |
-|-------------------------|---------------------------------------|-----------------------------------------|
-| `loadSettings`          | `ConstraintsService` constructor      | `loadSettingsSuccess` / `loadSettingsEmpty` / `loadSettingsFailure` |
-| `updateSettings`        | `ConstraintsService.update()`         | `updateSettingsSuccess` / `updateSettingsFailure` |
-
-#### 4.5.4 Facade services
-
-`TripService` and `ConstraintsService` are **facade services** that wrap the NgRx store and expose a stable API to components and other services.
-
-The facades:
-- select from the store and expose reactive data as Angular signals (via `toSignal`)
-- dispatch actions when mutation methods are called
-- return `Observable<T>` from mutation methods for components that need to react to success/error
-
-```typescript
-// Reading trips via the facade (same API as before NgRx migration)
-const trips = tripService.trips(); // Signal<Trip[]>
-
-// Mutating via the facade — dispatches createTrip action internally
-tripService.create(request).subscribe({
-  next: (trip) => { /* success */ },
-  error: () => { /* failure */ },
-});
-```
-
-To consume the store directly (e.g., to observe API status):
-
-```typescript
-import { selectTripsLoadStatus } from './trip/store/trip.selectors';
-import { selectSettingsUpdateStatus } from './constraints/store/settings.selectors';
-
-// Observe trips loading status
-readonly loadStatus = toSignal(this.store.select(selectTripsLoadStatus));
-
-// Observe settings update status
-readonly updateStatus = toSignal(this.store.select(selectSettingsUpdateStatus));
-```
-
-#### 4.5.5 Testing NgRx code
-
-- **Effect tests**: use `provideMockActions`, `provideHttpClient()`, and `HttpTestingController`. See `*.effects.spec.ts` files for examples.
-- **Facade service tests**: use `provideMockStore` with pre-configured selectors and `provideMockActions` to verify dispatch and resolve behavior. See `*.service.spec.ts` files for examples.
-- **Component tests**: mock facade services with plain objects to keep test setup simple. The NgRx store is not needed when services are mocked.
-
-```typescript
-// Mocking TripService in component tests
-providers: [
-  {
-    provide: TripService,
-    useValue: {
-      trips: signal<Trip[]>([]).asReadonly(),
-      create: () => of(trip),
-      update: () => of(trip),
-      delete: () => of(undefined),
-    },
-  },
-]
-```
+Each async operation exposes a dedicated status field in the store state (e.g., `loadStatus`, `createStatus`). This allows any component to observe whether an operation is `idle`, `loading`, has succeeded (`success`), or has failed (`failure`).
 
 ### 4.6 Signals
 

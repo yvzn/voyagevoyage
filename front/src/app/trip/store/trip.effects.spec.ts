@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, of, throwError } from 'rxjs';
 import { Action } from '@ngrx/store';
+import { vi } from 'vitest';
 import { Trip, TripStatus, CreateTripRequest, UpdateTripRequest } from '../trip.model';
 import { TripActions } from './trip.actions';
+import { TripService } from '../trip.service';
 import * as TripEffects from './trip.effects';
 
 const MOCK_TRIPS: Trip[] = [
@@ -13,28 +13,34 @@ const MOCK_TRIPS: Trip[] = [
   { id: '2', startDate: '2026-04-14', endDate: '2026-04-16', destination: 'Bordeaux', status: TripStatus.Planned },
 ];
 
+function makeMockTripService() {
+  return {
+    getAll: vi.fn().mockReturnValue(of([])),
+    create: vi.fn().mockReturnValue(of({})),
+    update: vi.fn().mockReturnValue(of({})),
+    delete: vi.fn().mockReturnValue(of(undefined)),
+  };
+}
+
 describe('Trip Effects', () => {
   let actions$: Subject<Action>;
-  let httpMock: HttpTestingController;
+  let mockTripService: ReturnType<typeof makeMockTripService>;
 
   beforeEach(() => {
     actions$ = new Subject<Action>();
+    mockTripService = makeMockTripService();
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
+        { provide: TripService, useValue: mockTripService },
         provideMockActions(() => actions$),
       ],
     });
-    httpMock = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => {
-    httpMock.verify();
   });
 
   describe('loadTripsEffect', () => {
-    it('should dispatch loadTripsSuccess with trips on HTTP success', () => {
+    it('should dispatch loadTripsSuccess when service returns trips', () => {
+      mockTripService.getAll.mockReturnValue(of(MOCK_TRIPS));
+
       const effect$: Observable<Action> = TestBed.runInInjectionContext(() =>
         TripEffects.loadTripsEffect(),
       );
@@ -43,12 +49,13 @@ describe('Trip Effects', () => {
       effect$.subscribe((action) => (result = action));
 
       actions$.next(TripActions.loadTrips());
-      httpMock.expectOne('/api/trips').flush(MOCK_TRIPS);
 
       expect(result).toEqual(TripActions.loadTripsSuccess({ trips: MOCK_TRIPS }));
     });
 
-    it('should dispatch loadTripsFailure on HTTP error', () => {
+    it('should dispatch loadTripsFailure when service throws', () => {
+      mockTripService.getAll.mockReturnValue(throwError(() => new Error('Network error')));
+
       const effect$: Observable<Action> = TestBed.runInInjectionContext(() =>
         TripEffects.loadTripsEffect(),
       );
@@ -57,7 +64,6 @@ describe('Trip Effects', () => {
       effect$.subscribe((action) => (result = action));
 
       actions$.next(TripActions.loadTrips());
-      httpMock.expectOne('/api/trips').error(new ProgressEvent('error'));
 
       expect(result).toBeDefined();
       expect((result as ReturnType<typeof TripActions.loadTripsFailure>).type).toBe(
@@ -67,7 +73,7 @@ describe('Trip Effects', () => {
   });
 
   describe('createTripEffect', () => {
-    it('should dispatch createTripSuccess on HTTP success', () => {
+    it('should dispatch createTripSuccess when service creates trip', () => {
       const request: CreateTripRequest = {
         destination: 'Paris',
         startDate: '2026-05-10',
@@ -75,6 +81,7 @@ describe('Trip Effects', () => {
         status: TripStatus.Planned,
       };
       const created: Trip = { id: 'new-1', ...request };
+      mockTripService.create.mockReturnValue(of(created));
 
       const effect$: Observable<Action> = TestBed.runInInjectionContext(() =>
         TripEffects.createTripEffect(),
@@ -84,18 +91,18 @@ describe('Trip Effects', () => {
       effect$.subscribe((action) => (result = action));
 
       actions$.next(TripActions.createTrip({ request }));
-      httpMock.expectOne({ method: 'POST', url: '/api/trips' }).flush(created);
 
       expect(result).toEqual(TripActions.createTripSuccess({ trip: created }));
     });
 
-    it('should dispatch createTripFailure on HTTP error', () => {
+    it('should dispatch createTripFailure when service throws', () => {
       const request: CreateTripRequest = {
         destination: 'Paris',
         startDate: '2026-05-10',
         endDate: '2026-05-12',
         status: TripStatus.Planned,
       };
+      mockTripService.create.mockReturnValue(throwError(() => new Error('Server error')));
 
       const effect$: Observable<Action> = TestBed.runInInjectionContext(() =>
         TripEffects.createTripEffect(),
@@ -105,7 +112,6 @@ describe('Trip Effects', () => {
       effect$.subscribe((action) => (result = action));
 
       actions$.next(TripActions.createTrip({ request }));
-      httpMock.expectOne({ method: 'POST', url: '/api/trips' }).error(new ProgressEvent('error'));
 
       expect(result).toBeDefined();
       expect((result as ReturnType<typeof TripActions.createTripFailure>).type).toBe(
@@ -115,7 +121,7 @@ describe('Trip Effects', () => {
   });
 
   describe('updateTripEffect', () => {
-    it('should dispatch updateTripSuccess on HTTP success', () => {
+    it('should dispatch updateTripSuccess when service updates trip', () => {
       const request: UpdateTripRequest = {
         destination: 'Lyon-Updated',
         startDate: '2026-04-06',
@@ -123,6 +129,7 @@ describe('Trip Effects', () => {
         status: TripStatus.Confirmed,
       };
       const updated: Trip = { id: '1', ...request };
+      mockTripService.update.mockReturnValue(of(updated));
 
       const effect$: Observable<Action> = TestBed.runInInjectionContext(() =>
         TripEffects.updateTripEffect(),
@@ -132,18 +139,18 @@ describe('Trip Effects', () => {
       effect$.subscribe((action) => (result = action));
 
       actions$.next(TripActions.updateTrip({ id: '1', request }));
-      httpMock.expectOne({ method: 'PUT', url: '/api/trips/1' }).flush(updated);
 
       expect(result).toEqual(TripActions.updateTripSuccess({ trip: updated }));
     });
 
-    it('should dispatch updateTripFailure on HTTP error', () => {
+    it('should dispatch updateTripFailure when service throws', () => {
       const request: UpdateTripRequest = {
         destination: 'Lyon-Updated',
         startDate: '2026-04-06',
         endDate: '2026-04-09',
         status: TripStatus.Confirmed,
       };
+      mockTripService.update.mockReturnValue(throwError(() => new Error('Server error')));
 
       const effect$: Observable<Action> = TestBed.runInInjectionContext(() =>
         TripEffects.updateTripEffect(),
@@ -153,9 +160,6 @@ describe('Trip Effects', () => {
       effect$.subscribe((action) => (result = action));
 
       actions$.next(TripActions.updateTrip({ id: '1', request }));
-      httpMock
-        .expectOne({ method: 'PUT', url: '/api/trips/1' })
-        .error(new ProgressEvent('error'));
 
       expect(result).toBeDefined();
       expect((result as ReturnType<typeof TripActions.updateTripFailure>).type).toBe(
@@ -165,7 +169,9 @@ describe('Trip Effects', () => {
   });
 
   describe('deleteTripEffect', () => {
-    it('should dispatch deleteTripSuccess on HTTP success', () => {
+    it('should dispatch deleteTripSuccess when service deletes trip', () => {
+      mockTripService.delete.mockReturnValue(of(undefined));
+
       const effect$: Observable<Action> = TestBed.runInInjectionContext(() =>
         TripEffects.deleteTripEffect(),
       );
@@ -174,12 +180,13 @@ describe('Trip Effects', () => {
       effect$.subscribe((action) => (result = action));
 
       actions$.next(TripActions.deleteTrip({ id: '2' }));
-      httpMock.expectOne({ method: 'DELETE', url: '/api/trips/2' }).flush(null);
 
       expect(result).toEqual(TripActions.deleteTripSuccess({ id: '2' }));
     });
 
-    it('should dispatch deleteTripFailure on HTTP error', () => {
+    it('should dispatch deleteTripFailure when service throws', () => {
+      mockTripService.delete.mockReturnValue(throwError(() => new Error('Server error')));
+
       const effect$: Observable<Action> = TestBed.runInInjectionContext(() =>
         TripEffects.deleteTripEffect(),
       );
@@ -188,9 +195,6 @@ describe('Trip Effects', () => {
       effect$.subscribe((action) => (result = action));
 
       actions$.next(TripActions.deleteTrip({ id: '2' }));
-      httpMock
-        .expectOne({ method: 'DELETE', url: '/api/trips/2' })
-        .error(new ProgressEvent('error'));
 
       expect(result).toBeDefined();
       expect((result as ReturnType<typeof TripActions.deleteTripFailure>).type).toBe(

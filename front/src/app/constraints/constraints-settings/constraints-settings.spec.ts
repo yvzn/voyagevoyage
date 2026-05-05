@@ -1,10 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { Subject } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { signal } from '@angular/core';
+import { provideMockStore, MockStore } from '@ngrx/store/testing';
+import { provideMockActions } from '@ngrx/effects/testing';
+import { Action } from '@ngrx/store';
 import { ConstraintsSettingsComponent } from './constraints-settings';
-import { ConstraintsService } from '../constraints.service';
 import { TravelConstraints } from '../constraints.model';
+import { SettingsActions } from '../store/settings.actions';
+import { selectConstraints } from '../store/settings.selectors';
 
 const EN_TRANSLATIONS = {
   constraints: {
@@ -37,31 +40,31 @@ const EN_TRANSLATIONS = {
   },
 };
 
-function makeMockConstraintsService(
+async function setupModule(
+  actions$: Subject<Action>,
   constraints: TravelConstraints | null = null,
-  overrides: Partial<ConstraintsService> = {},
-): ConstraintsService {
-  return {
-    constraints: signal(constraints).asReadonly(),
-    update: () => of(constraints ?? ({} as TravelConstraints)),
-    ...overrides,
-  } as unknown as ConstraintsService;
-}
-
-async function setupModule(mockService: ConstraintsService): Promise<void> {
+): Promise<MockStore> {
   await TestBed.configureTestingModule({
     imports: [ConstraintsSettingsComponent, TranslateModule.forRoot()],
-    providers: [{ provide: ConstraintsService, useValue: mockService }],
+    providers: [
+      provideMockStore({ selectors: [{ selector: selectConstraints, value: constraints }] }),
+      provideMockActions(() => actions$),
+    ],
   }).compileComponents();
 
   const translate = TestBed.inject(TranslateService);
   translate.setTranslation('en', EN_TRANSLATIONS);
   translate.use('en');
+
+  return TestBed.inject(MockStore);
 }
 
 describe('ConstraintsSettingsComponent — display', () => {
+  let actions$: Subject<Action>;
+
   beforeEach(async () => {
-    await setupModule(makeMockConstraintsService());
+    actions$ = new Subject<Action>();
+    await setupModule(actions$);
   });
 
   it('should create', () => {
@@ -109,9 +112,11 @@ describe('ConstraintsSettingsComponent — pre-fill', () => {
     considerVacationDays: false,
     isStrict: true,
   };
+  let actions$: Subject<Action>;
 
   beforeEach(async () => {
-    await setupModule(makeMockConstraintsService(existingConstraints));
+    actions$ = new Subject<Action>();
+    await setupModule(actions$, existingConstraints);
   });
 
   it('should pre-fill form from existing constraints', async () => {
@@ -130,10 +135,11 @@ describe('ConstraintsSettingsComponent — pre-fill', () => {
 });
 
 describe('ConstraintsSettingsComponent — save success', () => {
+  let actions$: Subject<Action>;
+
   beforeEach(async () => {
-    await setupModule(makeMockConstraintsService(null, {
-      update: () => of({} as TravelConstraints),
-    }));
+    actions$ = new Subject<Action>();
+    await setupModule(actions$);
   });
 
   it('should show success message after saving', async () => {
@@ -142,6 +148,7 @@ describe('ConstraintsSettingsComponent — save success', () => {
 
     const component = fixture.componentInstance;
     component['onSubmit']();
+    actions$.next(SettingsActions.updateSettingsSuccess({ constraints: {} as TravelConstraints }));
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -153,10 +160,11 @@ describe('ConstraintsSettingsComponent — save success', () => {
 });
 
 describe('ConstraintsSettingsComponent — save error', () => {
+  let actions$: Subject<Action>;
+
   beforeEach(async () => {
-    await setupModule(makeMockConstraintsService(null, {
-      update: () => throwError(() => new Error('Server error')),
-    }));
+    actions$ = new Subject<Action>();
+    await setupModule(actions$);
   });
 
   it('should show error message when save fails', async () => {
@@ -165,6 +173,7 @@ describe('ConstraintsSettingsComponent — save error', () => {
 
     const component = fixture.componentInstance;
     component['onSubmit']();
+    actions$.next(SettingsActions.updateSettingsFailure({ error: 'Server error' }));
     fixture.detectChanges();
     await fixture.whenStable();
 

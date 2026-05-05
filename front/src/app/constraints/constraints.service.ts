@@ -1,40 +1,27 @@
 import { Injectable, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
-import { Actions, ofType } from '@ngrx/effects';
-import { Observable, first, mergeMap, of, throwError } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, catchError, map, of } from 'rxjs';
 import { TravelConstraints, UpdateTravelConstraintsRequest } from './constraints.model';
-import { SettingsActions } from './store/settings.actions';
-import { selectConstraints } from './store/settings.selectors';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ConstraintsService {
-  private readonly store = inject(Store);
-  private readonly actions$ = inject(Actions);
+  private readonly http = inject(HttpClient);
 
-  readonly constraints = toSignal(this.store.select(selectConstraints), {
-    initialValue: null as TravelConstraints | null,
-  });
-
-  constructor() {
-    this.store.dispatch(SettingsActions.loadSettings());
+  get(): Observable<TravelConstraints | null> {
+    return this.http.get<TravelConstraints | null>('/api/travel-constraints').pipe(
+      map((constraints) => constraints ?? null),
+      catchError((error: unknown) => {
+        // 204 No Content — no constraints configured yet
+        if ((error as { status?: number })?.status === 204) return of(null);
+        throw error;
+      }),
+    );
   }
 
   update(request: UpdateTravelConstraintsRequest): Observable<TravelConstraints> {
-    this.store.dispatch(SettingsActions.updateSettings({ request }));
-    return this.actions$.pipe(
-      ofType(SettingsActions.updateSettingsSuccess, SettingsActions.updateSettingsFailure),
-      first(),
-      mergeMap((action) =>
-        action.type === SettingsActions.updateSettingsSuccess.type
-          ? of(
-              (action as ReturnType<typeof SettingsActions.updateSettingsSuccess>).constraints,
-            )
-          : throwError(() => new Error('Update settings failed')),
-      ),
-    );
+    return this.http.put<TravelConstraints>('/api/travel-constraints', request);
   }
 }
 

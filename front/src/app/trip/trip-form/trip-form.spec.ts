@@ -1,11 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { Subject } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { signal } from '@angular/core';
+import { provideMockStore, MockStore } from '@ngrx/store/testing';
+import { provideMockActions } from '@ngrx/effects/testing';
+import { Action } from '@ngrx/store';
 import { TripFormComponent } from './trip-form';
-import { TripService } from '../trip.service';
 import { Trip, TripStatus } from '../trip.model';
-import { ConstraintsService } from '../../constraints/constraints.service';
+import { TripActions } from '../store/trip.actions';
+import { selectConstraints } from '../../constraints/store/settings.selectors';
 import { TravelConstraints, DayOfWeek } from '../../constraints/constraints.model';
 
 const EN_TRANSLATIONS = {
@@ -34,34 +36,20 @@ const EN_TRANSLATIONS = {
   },
 };
 
-function makeMockTripService(overrides: Partial<TripService> = {}): TripService {
-  return {
-    trips: signal<Trip[]>([]).asReadonly(),
-    create: () => of({} as Trip),
-    update: () => of({} as Trip),
-    delete: () => of(undefined),
-    ...overrides,
-  } as unknown as TripService;
-}
-
-function makeMockConstraintsService(constraints: TravelConstraints | null = null): ConstraintsService {
-  return {
-    constraints: signal(constraints).asReadonly(),
-    update: () => of({}),
-  } as unknown as ConstraintsService;
-}
-
 // JSDOM does not implement HTMLDialogElement.showModal(); stub it globally
 beforeEach(() => {
   HTMLDialogElement.prototype.showModal = () => {};
 });
 
-async function setupModule(mockService: TripService, constraintsMock = makeMockConstraintsService()): Promise<void> {
+async function setupModule(
+  actions$: Subject<Action>,
+  constraints: TravelConstraints | null = null,
+): Promise<void> {
   await TestBed.configureTestingModule({
     imports: [TripFormComponent, TranslateModule.forRoot()],
     providers: [
-      { provide: TripService, useValue: mockService },
-      { provide: ConstraintsService, useValue: constraintsMock },
+      provideMockStore({ selectors: [{ selector: selectConstraints, value: constraints }] }),
+      provideMockActions(() => actions$),
     ],
   }).compileComponents();
 
@@ -71,8 +59,11 @@ async function setupModule(mockService: TripService, constraintsMock = makeMockC
 }
 
 describe('TripFormComponent — display', () => {
+  let actions$: Subject<Action>;
+
   beforeEach(async () => {
-    await setupModule(makeMockTripService());
+    actions$ = new Subject<Action>();
+    await setupModule(actions$);
   });
 
   it('should create', () => {
@@ -195,8 +186,11 @@ describe('TripFormComponent — display', () => {
 });
 
 describe('TripFormComponent — validation', () => {
+  let actions$: Subject<Action>;
+
   beforeEach(async () => {
-    await setupModule(makeMockTripService());
+    actions$ = new Subject<Action>();
+    await setupModule(actions$);
   });
 
   it('should be invalid when destination is empty', () => {
@@ -241,12 +235,14 @@ describe('TripFormComponent — create operation', () => {
     endDate: '2026-08-03',
     status: TripStatus.Planned,
   };
+  let actions$: Subject<Action>;
 
   beforeEach(async () => {
-    await setupModule(makeMockTripService({ create: () => of(createdTrip) }));
+    actions$ = new Subject<Action>();
+    await setupModule(actions$);
   });
 
-  it('should call create and emit saved on submit', () => {
+  it('should dispatch createTrip and emit saved on success action', () => {
     const fixture = TestBed.createComponent(TripFormComponent);
     fixture.componentRef.setInput('trip', null);
     fixture.detectChanges();
@@ -262,6 +258,8 @@ describe('TripFormComponent — create operation', () => {
       status: TripStatus.Planned,
     });
     component['onSubmit']();
+
+    actions$.next(TripActions.createTripSuccess({ trip: createdTrip }));
 
     expect(saved).toBe(true);
   });
@@ -275,12 +273,14 @@ describe('TripFormComponent — update operation', () => {
     endDate: '2026-06-03',
     status: TripStatus.Planned,
   };
+  let actions$: Subject<Action>;
 
   beforeEach(async () => {
-    await setupModule(makeMockTripService({ update: () => of({ ...trip }) }));
+    actions$ = new Subject<Action>();
+    await setupModule(actions$);
   });
 
-  it('should call update and emit saved on submit in edit mode', () => {
+  it('should dispatch updateTrip and emit saved on success action', () => {
     const fixture = TestBed.createComponent(TripFormComponent);
     fixture.componentRef.setInput('trip', trip);
     fixture.detectChanges();
@@ -289,6 +289,7 @@ describe('TripFormComponent — update operation', () => {
     fixture.componentInstance.saved.subscribe(() => (saved = true));
 
     fixture.componentInstance['onSubmit']();
+    actions$.next(TripActions.updateTripSuccess({ trip: { ...trip } }));
 
     expect(saved).toBe(true);
   });
@@ -302,12 +303,14 @@ describe('TripFormComponent — delete operation', () => {
     endDate: '2026-09-02',
     status: TripStatus.Cancelled,
   };
+  let actions$: Subject<Action>;
 
   beforeEach(async () => {
-    await setupModule(makeMockTripService({ delete: () => of(undefined) }));
+    actions$ = new Subject<Action>();
+    await setupModule(actions$);
   });
 
-  it('should call delete and emit deleted', () => {
+  it('should dispatch deleteTrip and emit deleted on success action', () => {
     const fixture = TestBed.createComponent(TripFormComponent);
     fixture.componentRef.setInput('trip', trip);
     fixture.detectChanges();
@@ -316,19 +319,21 @@ describe('TripFormComponent — delete operation', () => {
     fixture.componentInstance.deleted.subscribe(() => (deleted = true));
 
     fixture.componentInstance['onDelete']();
+    actions$.next(TripActions.deleteTripSuccess({ id: trip.id }));
 
     expect(deleted).toBe(true);
   });
 });
 
 describe('TripFormComponent — error handling', () => {
+  let actions$: Subject<Action>;
+
   beforeEach(async () => {
-    await setupModule(
-      makeMockTripService({ create: () => throwError(() => new Error('server error')) }),
-    );
+    actions$ = new Subject<Action>();
+    await setupModule(actions$);
   });
 
-  it('should show error message on save failure', () => {
+  it('should show error message on save failure action', () => {
     const fixture = TestBed.createComponent(TripFormComponent);
     fixture.componentRef.setInput('trip', null);
     fixture.detectChanges();
@@ -341,6 +346,7 @@ describe('TripFormComponent — error handling', () => {
       status: TripStatus.Planned,
     });
     component['onSubmit']();
+    actions$.next(TripActions.createTripFailure({ error: 'server error' }));
     fixture.detectChanges();
 
     expect(component['errorKey']()).toBe('tripForm.saveError');
@@ -359,7 +365,8 @@ describe('TripFormComponent — constraint violation', () => {
   const strictConstraints: TravelConstraints = { ...flexibleConstraints, isStrict: true };
 
   it('should set constraintWarning error for flexible constraint violation', async () => {
-    await setupModule(makeMockTripService(), makeMockConstraintsService(flexibleConstraints));
+    const actions$ = new Subject<Action>();
+    await setupModule(actions$, flexibleConstraints);
 
     const fixture = TestBed.createComponent(TripFormComponent);
     fixture.componentRef.setInput('trip', null);
@@ -378,10 +385,8 @@ describe('TripFormComponent — constraint violation', () => {
   });
 
   it('should allow submission when only constraintWarning is present', async () => {
-    await setupModule(
-      makeMockTripService({ create: () => of({} as Trip) }),
-      makeMockConstraintsService(flexibleConstraints),
-    );
+    const actions$ = new Subject<Action>();
+    await setupModule(actions$, flexibleConstraints);
 
     const fixture = TestBed.createComponent(TripFormComponent);
     fixture.componentRef.setInput('trip', null);
@@ -398,12 +403,14 @@ describe('TripFormComponent — constraint violation', () => {
       status: TripStatus.Planned,
     });
     component['onSubmit']();
+    actions$.next(TripActions.createTripSuccess({ trip: {} as Trip }));
 
     expect(saved).toBe(true);
   });
 
   it('should set constraintError for strict constraint violation', async () => {
-    await setupModule(makeMockTripService(), makeMockConstraintsService(strictConstraints));
+    const actions$ = new Subject<Action>();
+    await setupModule(actions$, strictConstraints);
 
     const fixture = TestBed.createComponent(TripFormComponent);
     fixture.componentRef.setInput('trip', null);
@@ -422,10 +429,8 @@ describe('TripFormComponent — constraint violation', () => {
   });
 
   it('should block submission when constraintError is present', async () => {
-    await setupModule(
-      makeMockTripService({ create: () => of({} as Trip) }),
-      makeMockConstraintsService(strictConstraints),
-    );
+    const actions$ = new Subject<Action>();
+    await setupModule(actions$, strictConstraints);
 
     const fixture = TestBed.createComponent(TripFormComponent);
     fixture.componentRef.setInput('trip', null);
