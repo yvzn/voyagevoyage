@@ -48,7 +48,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseCosmos(cosmosConnectionString, ApplicationDbContext.DatabaseName));
 
 builder.Services.AddScoped<ITripService, CosmosDbTripService>();
-builder.Services.AddScoped<DbInitializer>();
+builder.Services.AddScoped<ITravelConstraintsService, CosmosDbTravelConstraintsService>();
+builder.Services.AddHostedService<DbInitializerHostedService>();
 
 builder.Services.AddHealthChecks()
     .AddCheck<DatabaseHealthCheck>("cosmos-db");
@@ -95,13 +96,6 @@ else
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
-
-// Initialize the database: ensure it exists and seed example data in development.
-using (var scope = app.Services.CreateScope())
-{
-    var initializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
-    await initializer.InitAsync();
-}
 
 if (app.Environment.IsDevelopment())
 {

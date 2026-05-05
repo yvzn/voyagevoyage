@@ -15,6 +15,8 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { Trip, TripStatus } from '../trip.model';
 import { TripService } from '../trip.service';
 import { LocaleService } from '../../locale.service';
+import { ConstraintsService } from '../../constraints/constraints.service';
+import { constraintViolationValidator } from './constraint-violation.validator';
 
 function endDateAfterStartDate(group: AbstractControl): ValidationErrors | null {
   const start = group.get('startDate')?.value as string;
@@ -45,6 +47,7 @@ export class TripFormComponent implements AfterViewInit {
   private readonly tripService = inject(TripService);
   private readonly fb = inject(FormBuilder);
   protected readonly localeService = inject(LocaleService);
+  private readonly constraintsService = inject(ConstraintsService);
 
   protected readonly TripStatus = TripStatus;
   protected readonly tripStatuses = [TripStatus.Planned, TripStatus.Confirmed, TripStatus.Cancelled];
@@ -59,7 +62,7 @@ export class TripFormComponent implements AfterViewInit {
       endDate: ['', Validators.required],
       status: [TripStatus.Planned as TripStatus, Validators.required],
     },
-    { validators: endDateAfterStartDate },
+    { validators: [endDateAfterStartDate, constraintViolationValidator(() => this.constraintsService.constraints())] },
   );
 
   constructor() {
@@ -121,7 +124,13 @@ export class TripFormComponent implements AfterViewInit {
   }
 
   protected onSubmit(): void {
-    if (this.form.invalid || this.isLoading()) return;
+    // constraintWarning (flexible mode) is informational — it must not block submission.
+    // Check field-level errors and specific group errors explicitly instead of form.invalid.
+    const fieldInvalid = ['destination', 'startDate', 'endDate', 'status'].some(
+      (name) => this.form.get(name)?.invalid,
+    );
+    const groupInvalid = this.form.hasError('endBeforeStart') || this.form.hasError('constraintError');
+    if (fieldInvalid || groupInvalid || this.isLoading()) return;
 
     const { destination, startDate, endDate, status } = this.form.getRawValue();
     const request = {

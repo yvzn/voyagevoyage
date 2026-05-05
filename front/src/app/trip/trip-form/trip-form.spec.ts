@@ -5,6 +5,8 @@ import { signal } from '@angular/core';
 import { TripFormComponent } from './trip-form';
 import { TripService } from '../trip.service';
 import { Trip, TripStatus } from '../trip.model';
+import { ConstraintsService } from '../../constraints/constraints.service';
+import { TravelConstraints, DayOfWeek } from '../../constraints/constraints.model';
 
 const EN_TRANSLATIONS = {
   tripForm: {
@@ -22,6 +24,8 @@ const EN_TRANSLATIONS = {
     cancel: 'Cancel',
     saveError: 'An error occurred while saving the trip. Please try again.',
     deleteError: 'An error occurred while deleting the trip. Please try again.',
+    constraintWarning: 'One or more selected days are outside your allowed travel days (flexible mode).',
+    constraintError: 'One or more selected days are outside your allowed travel days (strict mode). Please adjust your dates.',
   },
   tripStatus: {
     planned: 'Planned',
@@ -40,15 +44,25 @@ function makeMockTripService(overrides: Partial<TripService> = {}): TripService 
   } as unknown as TripService;
 }
 
+function makeMockConstraintsService(constraints: TravelConstraints | null = null): ConstraintsService {
+  return {
+    constraints: signal(constraints).asReadonly(),
+    update: () => of({}),
+  } as unknown as ConstraintsService;
+}
+
 // JSDOM does not implement HTMLDialogElement.showModal(); stub it globally
 beforeEach(() => {
   HTMLDialogElement.prototype.showModal = () => {};
 });
 
-async function setupModule(mockService: TripService): Promise<void> {
+async function setupModule(mockService: TripService, constraintsMock = makeMockConstraintsService()): Promise<void> {
   await TestBed.configureTestingModule({
     imports: [TripFormComponent, TranslateModule.forRoot()],
-    providers: [{ provide: TripService, useValue: mockService }],
+    providers: [
+      { provide: TripService, useValue: mockService },
+      { provide: ConstraintsService, useValue: constraintsMock },
+    ],
   }).compileComponents();
 
   const translate = TestBed.inject(TranslateService);
@@ -330,5 +344,105 @@ describe('TripFormComponent — error handling', () => {
     fixture.detectChanges();
 
     expect(component['errorKey']()).toBe('tripForm.saveError');
+  });
+});
+
+describe('TripFormComponent — constraint violation', () => {
+  const flexibleConstraints: TravelConstraints = {
+    allowedDaysOfWeek: [DayOfWeek.Tuesday], // 2026-08-03 is a Monday → violation
+    maxDaysPerMonth: null,
+    considerPublicHolidays: false,
+    considerVacationDays: false,
+    isStrict: false,
+  };
+
+  const strictConstraints: TravelConstraints = { ...flexibleConstraints, isStrict: true };
+
+  it('should set constraintWarning error for flexible constraint violation', async () => {
+    await setupModule(makeMockTripService(), makeMockConstraintsService(flexibleConstraints));
+
+    const fixture = TestBed.createComponent(TripFormComponent);
+    fixture.componentRef.setInput('trip', null);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    component['form'].setValue({
+      destination: 'Paris',
+      startDate: '2026-08-03', // Monday — not in allowedDaysOfWeek
+      endDate: '2026-08-03',
+      status: TripStatus.Planned,
+    });
+
+    expect(component['form'].hasError('constraintWarning')).toBe(true);
+    expect(component['form'].hasError('constraintError')).toBe(false);
+  });
+
+  it('should allow submission when only constraintWarning is present', async () => {
+    await setupModule(
+      makeMockTripService({ create: () => of({} as Trip) }),
+      makeMockConstraintsService(flexibleConstraints),
+    );
+
+    const fixture = TestBed.createComponent(TripFormComponent);
+    fixture.componentRef.setInput('trip', null);
+    fixture.detectChanges();
+
+    let saved = false;
+    fixture.componentInstance.saved.subscribe(() => (saved = true));
+
+    const component = fixture.componentInstance;
+    component['form'].setValue({
+      destination: 'Paris',
+      startDate: '2026-08-03', // Monday — flexible violation
+      endDate: '2026-08-03',
+      status: TripStatus.Planned,
+    });
+    component['onSubmit']();
+
+    expect(saved).toBe(true);
+  });
+
+  it('should set constraintError for strict constraint violation', async () => {
+    await setupModule(makeMockTripService(), makeMockConstraintsService(strictConstraints));
+
+    const fixture = TestBed.createComponent(TripFormComponent);
+    fixture.componentRef.setInput('trip', null);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    component['form'].setValue({
+      destination: 'Paris',
+      startDate: '2026-08-03', // Monday — not in allowedDaysOfWeek, strict mode
+      endDate: '2026-08-03',
+      status: TripStatus.Planned,
+    });
+
+    expect(component['form'].hasError('constraintError')).toBe(true);
+    expect(component['form'].hasError('constraintWarning')).toBe(false);
+  });
+
+  it('should block submission when constraintError is present', async () => {
+    await setupModule(
+      makeMockTripService({ create: () => of({} as Trip) }),
+      makeMockConstraintsService(strictConstraints),
+    );
+
+    const fixture = TestBed.createComponent(TripFormComponent);
+    fixture.componentRef.setInput('trip', null);
+    fixture.detectChanges();
+
+    let saved = false;
+    fixture.componentInstance.saved.subscribe(() => (saved = true));
+
+    const component = fixture.componentInstance;
+    component['form'].setValue({
+      destination: 'Paris',
+      startDate: '2026-08-03', // Monday — strict violation
+      endDate: '2026-08-03',
+      status: TripStatus.Planned,
+    });
+    component['onSubmit']();
+
+    expect(saved).toBe(false);
   });
 });
