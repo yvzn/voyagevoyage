@@ -23,9 +23,10 @@ export class TripDetailComponent {
   private readonly route = inject(ActivatedRoute);
 
   private readonly routeParamId = toSignal(
-    this.route.paramMap.pipe(map((p) => p.get('id') ?? ''))
+    this.route.paramMap.pipe(map((p) => p.get('id') ?? '')),
+    { initialValue: '' }
   );
-  protected readonly tripId = computed(() => this.routeParamId() ?? '');
+  protected readonly tripId = this.routeParamId;
 
   private readonly allTrips = this.store.selectSignal(selectAllTrips);
   protected readonly trip = computed(() =>
