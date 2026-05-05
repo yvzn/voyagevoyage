@@ -85,6 +85,31 @@
     </div>
   </nav>
 
+  <!-- Loading / error status area — non-blocking: navigation and grid remain interactive -->
+  <div class="mb-4 min-h-[2rem]" aria-live="polite" aria-atomic="true">
+    @if (tripsLoadStatus() === 'loading') {
+      <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400" role="status">
+        <svg class="inline h-4 w-4 animate-spin flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.036l3-2.745z"/>
+        </svg>
+        <span>{{ 'calendarLoading' | translate }}</span>
+      </div>
+    }
+    @if (tripsLoadStatus() === 'failure') {
+      <div class="flex flex-wrap items-center gap-2 text-sm" role="alert">
+        <span class="text-red-600 dark:text-red-400">{{ 'calendarLoadError' | translate }}</span>
+        <button
+          type="button"
+          (click)="retryLoadTrips()"
+          class="rounded-lg border border-red-300 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300 dark:border-red-600 dark:text-red-400 dark:hover:bg-red-900/20"
+        >
+          {{ 'calendarRetryButton' | translate }}
+        </button>
+      </div>
+    }
+  </div>
+
   <!-- Calendar grid -->
   <div class="overflow-x-auto rounded-lg bg-white shadow-sm dark:bg-gray-800" role="grid" aria-labelledby="calendar-heading">
     <table class="w-full text-sm">

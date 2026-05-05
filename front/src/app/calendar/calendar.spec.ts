@@ -3,7 +3,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { provideMockStore } from '@ngrx/store/testing';
 import { CalendarComponent } from './calendar';
 import { Trip, TripStatus } from '../trip/trip.model';
-import { selectAllTrips, selectTripsCreateStatus, selectTripsDeleteStatus, selectTripsUpdateStatus } from '../trip/store/trip.selectors';
+import { selectAllTrips, selectTripsCreateStatus, selectTripsDeleteStatus, selectTripsLoadStatus, selectTripsUpdateStatus } from '../trip/store/trip.selectors';
+import { selectTripsError } from '../trip/store/trip.selectors';
 import { selectConstraints } from '../constraints/store/settings.selectors';
 import { ApiStatus } from '../trip/store/trip.reducer';
 
@@ -16,6 +17,9 @@ const EN_TRANSLATIONS = {
   yearInputLabel: 'Year',
   todayButton: 'Today',
   newTripButton: 'New trip',
+  calendarLoading: 'Loading trips…',
+  calendarLoadError: 'Failed to load trips. Please try again.',
+  calendarRetryButton: 'Retry',
   addTripForDay: 'Add a trip on {{month}} {{date}}, {{year}}',
   tripEventsForDay: 'Trip events for {{month}} {{date}}, {{year}}',
   tripStatusLegendLabel: 'Trip status legend',
@@ -49,6 +53,8 @@ async function setupWithMockStore(trips: Trip[] = []): Promise<void> {
       provideMockStore({
         selectors: [
           { selector: selectAllTrips, value: trips },
+          { selector: selectTripsLoadStatus, value: 'idle' as ApiStatus },
+          { selector: selectTripsError, value: null },
           { selector: selectConstraints, value: null },
           { selector: selectTripsCreateStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsUpdateStatus, value: 'idle' as ApiStatus },

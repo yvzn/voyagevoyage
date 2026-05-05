@@ -3,23 +3,57 @@
     {{ 'constraints.heading' | translate }}
   </h2>
 
+  <!-- Load error with retry -->
+  @if (loadErrorKey()) {
+    <div
+      role="alert"
+      class="mb-4 flex flex-wrap items-center gap-3 rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-400"
+    >
+      <span>{{ loadErrorKey()! | translate }}</span>
+      <button
+        type="button"
+        (click)="retryLoad()"
+        class="rounded-lg border border-red-300 px-3 py-1 text-xs font-medium hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-300 dark:border-red-600 dark:hover:bg-red-900/40"
+      >
+        {{ 'constraints.retry' | translate }}
+      </button>
+    </div>
+  }
+
   <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <form
+      [formGroup]="form"
+      (ngSubmit)="onSubmit()"
+      novalidate
+      [attr.aria-busy]="isDataLoading() ? 'true' : null"
+    >
+    <fieldset [disabled]="isDataLoading()">
     <!-- Allowed days of week -->
     <fieldset class="mb-6 rounded-lg border border-gray-200 p-4 dark:border-gray-600">
       <legend class="px-2 text-sm font-semibold text-gray-900 dark:text-white">
         {{ 'constraints.allowedDaysLabel' | translate }}
       </legend>
       <div class="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        @for (day of allDays; track day) {
-          <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-            <input
-              type="checkbox"
-              [formControlName]="getDayControlName(day)"
-              class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
-            />
-            {{ getDayTranslationKey(day) | translate }}
-          </label>
+        @if (isDataLoading()) {
+          <!-- CLS-stable placeholder while loading -->
+          <div class="col-span-2 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 sm:col-span-4" role="status">
+            <svg class="inline h-4 w-4 animate-spin flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.036l3-2.745z"/>
+            </svg>
+            <span>{{ 'constraints.loading' | translate }}</span>
+          </div>
+        } @else {
+          @for (day of allDays; track day) {
+            <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+              <input
+                type="checkbox"
+                [formControlName]="getDayControlName(day)"
+                class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
+              />
+              {{ getDayTranslationKey(day) | translate }}
+            </label>
+          }
         }
       </div>
       <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
@@ -148,7 +182,7 @@
       </div>
     }
 
-    <!-- Error message -->
+    <!-- Save error message -->
     @if (errorKey()) {
       <div
         role="alert"
@@ -163,15 +197,19 @@
       <button
         type="submit"
         [disabled]="isLoading() || form.invalid"
-        class="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
+        [attr.aria-busy]="isLoading() ? 'true' : null"
+        class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
       >
         @if (isLoading()) {
-          {{ 'constraints.saving' | translate }}
-        } @else {
-          {{ 'constraints.save' | translate }}
+          <svg class="inline h-4 w-4 animate-spin" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.036l3-2.745z"/>
+          </svg>
         }
+        {{ (isLoading() ? 'constraints.saving' : 'constraints.save') | translate }}
       </button>
     </div>
+    </fieldset>
     </form>
   </div>
 </div>

@@ -176,7 +176,90 @@ These UX guidelines must be applied in:
 
 Any deviation should be intentional, documented, and justified by a concrete functional or technical constraint.
 
-## 9. Definition of done for UX
+## 9. Loading and saving feedback patterns
+
+These patterns ensure consistent, accessible, and layout-stable feedback during async operations.
+
+### 9.1 Non-blocking loading (calendar, dashboards)
+
+Use when content should remain interactive while data loads in the background.
+
+- Show a compact informative spinner in a **fixed-height placeholder area** (`min-h-[2rem]`) to prevent CLS.
+- Use `aria-live="polite"` and `aria-atomic="true"` on the container so screen readers announce the change without interrupting current activity.
+- Use `role="status"` on the spinner message.
+- **Do not disable navigation or grid controls** while loading is in progress.
+- If loading fails, replace the spinner with an error message (`role="alert"`) and a **Retry** button that re-dispatches the load action.
+
+Example (calendar):
+```html
+<div class="mb-4 min-h-[2rem]" aria-live="polite" aria-atomic="true">
+  @if (tripsLoadStatus() === 'loading') {
+    <div role="status" class="flex items-center gap-2 text-sm text-gray-500">
+      <svg class="inline h-4 w-4 animate-spin" aria-hidden="true" .../>
+      <span>{{ 'calendarLoading' | translate }}</span>
+    </div>
+  }
+  @if (tripsLoadStatus() === 'failure') {
+    <div role="alert" class="flex items-center gap-2 text-sm">
+      <span>{{ 'calendarLoadError' | translate }}</span>
+      <button type="button" (click)="retryLoadTrips()">{{ 'calendarRetryButton' | translate }}</button>
+    </div>
+  }
+</div>
+```
+
+### 9.2 Blocking loading (forms)
+
+Use when a form must not be submitted while its initial data is loading.
+
+- Wrap all form controls in a `<fieldset [disabled]="isDataLoading()">` to prevent interaction.
+- Set `[attr.aria-busy]="isDataLoading() ? 'true' : null"` on the `<form>` element.
+- Show a spinner inside the fieldset (e.g. in the first control group) as a loading indicator.
+- On load failure, show a visible error banner above the form with a **Retry** button (`role="alert"`).
+
+### 9.3 Inline spinner for save actions
+
+Use when a user triggers a save/update/delete and the form should remain visible but clearly indicate progress.
+
+- Place a spinner SVG **inline inside the triggering button**, before the button label.
+- Set `[attr.aria-busy]="isLoading() ? 'true' : null"` on the button.
+- **Do not visually disable the full form** during saving; prevent duplicate submissions in component logic (`if (this.isLoading()) return;`).
+- The delete/cancel buttons may remain disabled while a save is in flight, since concurrent operations are semantically unsafe.
+
+Example (button):
+```html
+<button
+  type="submit"
+  [attr.aria-busy]="isLoading() ? 'true' : null"
+  class="inline-flex items-center gap-1.5 ..."
+>
+  @if (isLoading()) {
+    <svg class="inline h-4 w-4 animate-spin" aria-hidden="true" .../>
+  }
+  {{ (isLoading() ? 'form.saving' : 'form.save') | translate }}
+</button>
+```
+
+### 9.4 Spinner SVG
+
+Use the following standard Tailwind-animated spinner (no custom CSS required):
+
+```html
+<svg class="inline h-4 w-4 animate-spin" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.036l3-2.745z"/>
+</svg>
+```
+
+Always set `aria-hidden="true"` since the button/container already has a text label or `aria-label`.
+
+### 9.5 CLS prevention
+
+- Always wrap the spinner/error area in a **fixed minimum-height container** so layout does not shift when the state changes.
+- Use `min-h-[2rem]` (or similar) as the stable height reservation.
+- Prefer `flex` layout inside spinner containers to keep icon and text aligned without affecting surrounding layout.
+
+## 10. Definition of done for UX
 
 A feature is not complete unless:
 

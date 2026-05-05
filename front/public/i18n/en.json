@@ -13,6 +13,9 @@
   "yearInputLabel": "Year",
   "todayButton": "Today",
   "newTripButton": "New trip",
+  "calendarLoading": "Loading trips…",
+  "calendarLoadError": "Failed to load trips. Please try again.",
+  "calendarRetryButton": "Retry",
   "addTripForDay": "Add a trip on {{month}} {{date}}, {{year}}",
   "tripEventsForDay": "Trip events for {{month}} {{date}}, {{year}}",
   "tripStatusLegendLabel": "Trip status legend",
@@ -65,6 +68,9 @@
     "save": "Save",
     "saving": "Saving…",
     "saveSuccess": "Your travel constraints have been saved.",
-    "saveError": "An error occurred while saving the constraints. Please try again."
+    "saveError": "An error occurred while saving the constraints. Please try again.",
+    "loadError": "Failed to load travel constraints. Please try again.",
+    "loading": "Loading…",
+    "retry": "Retry"
   }
 }

@@ -13,6 +13,9 @@
   "yearInputLabel": "Année",
   "todayButton": "Aujourd'hui",
   "newTripButton": "Nouveau déplacement",
+  "calendarLoading": "Chargement des déplacements…",
+  "calendarLoadError": "Impossible de charger les déplacements. Veuillez réessayer.",
+  "calendarRetryButton": "Réessayer",
   "addTripForDay": "Ajouter un déplacement le {{date}} {{month}} {{year}}",
   "tripEventsForDay": "Déplacements du {{date}} {{month}} {{year}}",
   "tripStatusLegendLabel": "Légende des statuts de déplacement",
@@ -65,6 +68,9 @@
     "save": "Enregistrer",
     "saving": "Enregistrement…",
     "saveSuccess": "Vos contraintes de déplacement ont été enregistrées.",
-    "saveError": "Une erreur est survenue lors de l'enregistrement des contraintes. Veuillez réessayer."
+    "saveError": "Une erreur est survenue lors de l'enregistrement des contraintes. Veuillez réessayer.",
+    "loadError": "Impossible de charger les contraintes de déplacement. Veuillez réessayer.",
+    "loading": "Chargement…",
+    "retry": "Réessayer"
   }
 }

@@ -1,11 +1,11 @@
-import { Component, OnInit, computed, inject } from '@angular/core';
+import { Component, OnInit, computed, effect, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { DayOfWeek, TravelConstraints } from '../constraints.model';
 import { SettingsActions } from '../store/settings.actions';
-import { selectConstraints, selectSettingsUpdateStatus } from '../store/settings.selectors';
+import { selectConstraints, selectSettingsLoadStatus, selectSettingsUpdateStatus } from '../store/settings.selectors';
 
 @Component({
   selector: 'app-constraints-settings',
@@ -18,6 +18,7 @@ export class ConstraintsSettingsComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   private readonly storeConstraints = this.store.selectSignal(selectConstraints);
+  private readonly loadStatus = this.store.selectSignal(selectSettingsLoadStatus);
   private readonly updateStatus = this.store.selectSignal(selectSettingsUpdateStatus);
 
   protected readonly DayOfWeek = DayOfWeek;
@@ -31,8 +32,12 @@ export class ConstraintsSettingsComponent implements OnInit {
     DayOfWeek.Sunday,
   ];
 
+  protected readonly isDataLoading = computed(() => this.loadStatus() === 'loading');
   protected readonly isLoading = computed(() => this.updateStatus() === 'loading');
   protected readonly isSaved = computed(() => this.updateStatus() === 'success');
+  protected readonly loadErrorKey = computed<string | null>(() =>
+    this.loadStatus() === 'failure' ? 'constraints.loadError' : null,
+  );
   protected readonly errorKey = computed<string | null>(() =>
     this.updateStatus() === 'failure' ? 'constraints.saveError' : null,
   );
@@ -51,12 +56,22 @@ export class ConstraintsSettingsComponent implements OnInit {
     isStrict: [false],
   });
 
+  constructor() {
+    // Re-apply form values whenever constraints arrive from the store (e.g. after async load or retry).
+    effect(() => {
+      const c = this.storeConstraints();
+      if (c) {
+        this.applyConstraints(c);
+      }
+    });
+  }
+
   ngOnInit(): void {
     this.store.dispatch(SettingsActions.loadSettings());
-    const existing = this.storeConstraints();
-    if (existing) {
-      this.applyConstraints(existing);
-    }
+  }
+
+  retryLoad(): void {
+    this.store.dispatch(SettingsActions.loadSettings());
   }
 
   private applyConstraints(constraints: TravelConstraints): void {
