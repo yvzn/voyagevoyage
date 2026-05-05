@@ -5,6 +5,7 @@ import { NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { Actions, ofType } from '@ngrx/effects';
+import { first } from 'rxjs';
 import { DayOfWeek, TravelConstraints } from '../constraints.model';
 import { SettingsActions } from '../store/settings.actions';
 import { selectConstraints } from '../store/settings.selectors';
@@ -135,6 +136,7 @@ export class ConstraintsSettingsComponent implements OnInit {
 
     this.actions$.pipe(
       ofType(SettingsActions.updateSettingsSuccess, SettingsActions.updateSettingsFailure),
+      first(),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe((action) => {
       this.isLoading.set(false);

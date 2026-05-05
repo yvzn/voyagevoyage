@@ -16,6 +16,7 @@ import { NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { Actions, ofType } from '@ngrx/effects';
+import { first } from 'rxjs';
 import { Trip, TripStatus } from '../trip.model';
 import { TripActions } from '../store/trip.actions';
 import { LocaleService } from '../../locale.service';
@@ -166,6 +167,7 @@ export class TripFormComponent implements AfterViewInit {
         TripActions.updateTripSuccess,
         TripActions.updateTripFailure,
       ),
+      first(),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe((action) => {
       this.isLoading.set(false);
@@ -191,6 +193,7 @@ export class TripFormComponent implements AfterViewInit {
 
     this.actions$.pipe(
       ofType(TripActions.deleteTripSuccess, TripActions.deleteTripFailure),
+      first(),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe((action) => {
       this.isLoading.set(false);
