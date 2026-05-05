@@ -16,3 +16,6 @@ export const selectTripsDeleteStatus = createSelector(
   (state) => state.deleteStatus,
 );
 export const selectTripsError = createSelector(selectTripsState, (state) => state.error);
+
+export const selectTripById = (id: string) =>
+  createSelector(selectAllTrips, (trips) => trips.find((t) => t.id === id) ?? null);

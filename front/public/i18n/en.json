@@ -42,6 +42,18 @@
     "constraintWarning": "The selected dates do not comply with your travel constraints.",
     "constraintError": "The selected dates violate your mandatory travel constraints."
   },
+  "tripDetail": {
+    "backToCalendar": "Back to calendar",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "editButton": "Edit",
+    "deleteButton": "Delete",
+    "deleting": "Deleting…",
+    "deleteError": "An error occurred while deleting the trip. Please try again.",
+    "expensesHeading": "Expenses",
+    "noExpenses": "No expenses recorded for this trip.",
+    "notFound": "Trip not found."
+  },
   "constraints": {
     "heading": "Travel constraints",
     "allowedDaysLabel": "Allowed days of the week",

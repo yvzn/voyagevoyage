@@ -42,6 +42,18 @@
     "constraintWarning": "Les dates sélectionnées ne respectent pas vos contraintes de déplacement.",
     "constraintError": "Les dates sélectionnées violent vos contraintes de déplacement obligatoires."
   },
+  "tripDetail": {
+    "backToCalendar": "Retour au calendrier",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "editButton": "Modifier",
+    "deleteButton": "Supprimer",
+    "deleting": "Suppression…",
+    "deleteError": "Une erreur est survenue lors de la suppression du déplacement. Veuillez réessayer.",
+    "expensesHeading": "Dépenses",
+    "noExpenses": "Aucune dépense enregistrée pour ce déplacement.",
+    "notFound": "Déplacement introuvable."
+  },
   "constraints": {
     "heading": "Contraintes de déplacement",
     "allowedDaysLabel": "Jours de la semaine autorisés",

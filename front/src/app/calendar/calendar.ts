@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import {
@@ -26,6 +27,7 @@ export class CalendarComponent {
   protected readonly localeService = inject(LocaleService);
   private readonly translateService = inject(TranslateService);
   private readonly store = inject(Store);
+  private readonly router = inject(Router);
 
   constructor() {
     this.store.dispatch(TripActions.loadTrips());
@@ -143,10 +145,8 @@ export class CalendarComponent {
     this.isFormOpen.set(true);
   }
 
-  openEditForm(trip: Trip): void {
-    this.editingTrip.set(trip);
-    this.formDefaultDate.set(null);
-    this.isFormOpen.set(true);
+  navigateToTrip(trip: Trip): void {
+    this.router.navigate(['/trip', trip.id]);
   }
 
   closeForm(): void {
