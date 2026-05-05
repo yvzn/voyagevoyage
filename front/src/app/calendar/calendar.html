@@ -4,7 +4,7 @@
   <!-- Calendar navigation -->
   <nav [attr.aria-label]="'calendarNavLabel' | translate" class="mb-4">
     <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
-      <!-- Previous / Next month buttons -->
+      <!-- Previous / Next month buttons + loading indicator -->
       <div class="flex items-center gap-1">
         <button
           type="button"
@@ -27,6 +27,30 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
           </svg>
         </button>
+
+        <!-- Loading / error indicator — inline, non-blocking, fixed width to prevent horizontal CLS -->
+        <div class="ml-1 min-w-[6rem]" aria-live="polite" aria-atomic="true">
+          @if (tripsLoadStatus() === 'loading') {
+            <div class="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400" role="status">
+              <svg class="h-4 w-4 animate-spin flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.036l3-2.745z"/>
+              </svg>
+              <span class="sr-only">{{ 'calendarLoading' | translate }}</span>
+            </div>
+          }
+          @if (tripsLoadStatus() === 'failure') {
+            <div class="flex items-center" role="alert">
+              <button
+                type="button"
+                (click)="retryLoadTrips()"
+                class="rounded-lg border border-red-300 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300 dark:border-red-600 dark:text-red-400 dark:hover:bg-red-900/20"
+              >
+                {{ 'calendarRetryButton' | translate }}
+              </button>
+            </div>
+          }
+        </div>
       </div>
 
       <!-- Month and year selectors -->

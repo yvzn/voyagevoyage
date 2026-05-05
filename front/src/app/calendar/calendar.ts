@@ -14,7 +14,7 @@ import { Trip, TripStatus } from '../trip/trip.model';
 import { TripFormComponent } from '../trip/trip-form/trip-form';
 import { TripActions } from '../trip/store/trip.actions';
 import { SettingsActions } from '../constraints/store/settings.actions';
-import { selectAllTrips } from '../trip/store/trip.selectors';
+import { selectAllTrips, selectTripsLoadStatus, selectTripsError } from '../trip/store/trip.selectors';
 
 @Component({
   selector: 'app-calendar',
@@ -33,6 +33,8 @@ export class CalendarComponent {
   }
 
   private readonly trips = this.store.selectSignal(selectAllTrips);
+  protected readonly tripsLoadStatus = this.store.selectSignal(selectTripsLoadStatus);
+  protected readonly tripsError = this.store.selectSignal(selectTripsError);
 
   protected readonly currentYear = signal(new Date().getFullYear());
   protected readonly currentMonth = signal(new Date().getMonth());
@@ -149,6 +151,10 @@ export class CalendarComponent {
 
   closeForm(): void {
     this.isFormOpen.set(false);
+  }
+
+  retryLoadTrips(): void {
+    this.store.dispatch(TripActions.loadTrips());
   }
 
   goToPreviousMonth(): void {

@@ -3,7 +3,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { ConstraintsSettingsComponent } from './constraints-settings';
 import { TravelConstraints } from '../constraints.model';
-import { selectConstraints, selectSettingsUpdateStatus } from '../store/settings.selectors';
+import { selectConstraints, selectSettingsLoadStatus, selectSettingsUpdateStatus } from '../store/settings.selectors';
 import { ApiStatus } from '../store/settings.reducer';
 
 const EN_TRANSLATIONS = {
@@ -34,11 +34,15 @@ const EN_TRANSLATIONS = {
     saving: 'Saving…',
     saveSuccess: 'Your travel constraints have been saved.',
     saveError: 'An error occurred while saving the constraints. Please try again.',
+    loadError: 'Failed to load travel constraints. Please try again.',
+    loading: 'Loading…',
+    retry: 'Retry',
   },
 };
 
 async function setupModule(
   constraints: TravelConstraints | null = null,
+  loadStatus: ApiStatus = 'idle',
 ): Promise<MockStore> {
   await TestBed.configureTestingModule({
     imports: [ConstraintsSettingsComponent, TranslateModule.forRoot()],
@@ -46,6 +50,7 @@ async function setupModule(
       provideMockStore({
         selectors: [
           { selector: selectConstraints, value: constraints },
+          { selector: selectSettingsLoadStatus, value: loadStatus },
           { selector: selectSettingsUpdateStatus, value: 'idle' as ApiStatus },
         ],
       }),
@@ -110,7 +115,8 @@ describe('ConstraintsSettingsComponent — pre-fill', () => {
     isStrict: true,
   };
   beforeEach(async () => {
-    await setupModule(existingConstraints);
+    // loadStatus 'success' matches the real state when constraints are already in the store
+    await setupModule(existingConstraints, 'success');
   });
 
   it('should pre-fill form from existing constraints', async () => {

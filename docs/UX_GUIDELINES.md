@@ -176,7 +176,48 @@ These UX guidelines must be applied in:
 
 Any deviation should be intentional, documented, and justified by a concrete functional or technical constraint.
 
-## 9. Definition of done for UX
+## 9. Loading and saving feedback patterns
+
+These patterns ensure consistent, accessible, and layout-stable feedback during async operations.
+
+### 9.1 Non-blocking loading (calendar, dashboards)
+
+Use when content should remain interactive while data loads in the background.
+
+- Show a compact informative spinner in a **stable placeholder area** sized to prevent CLS (see section 9.5).
+- Use `aria-live="polite"` and `aria-atomic="true"` on the container so screen readers announce the change without interrupting current activity.
+- Use `role="status"` on the spinner message.
+- **Do not disable navigation or grid controls** while loading is in progress.
+- If loading fails, replace the spinner with an error message (`role="alert"`) and a **Retry** button that re-dispatches the load action.
+
+### 9.2 Blocking loading (forms)
+
+Use when a form must not be submitted while its initial data is loading.
+
+- Wrap all form controls in a `<fieldset [disabled]="isDataLoading()">` to prevent interaction.
+- Set `[attr.aria-busy]="isDataLoading() ? 'true' : null"` on the `<form>` element.
+- Show a spinner inside the fieldset (e.g. in the first control group) as a loading indicator.
+- On load failure, show a visible error banner above the form with a **Retry** button (`role="alert"`).
+
+### 9.3 Inline spinner for save actions
+
+Use when a user triggers a save/update/delete and the form should remain visible but clearly indicate progress.
+
+- Place a spinner SVG **inline inside the triggering button**, before the button label.
+- Set `aria-busy` on the button while the operation is in flight.
+- **Disable form controls** during saving using a `<fieldset [disabled]>` wrapper; prevent duplicate submissions in component logic as well.
+- When multiple action buttons exist (e.g. Save and Delete), track each operation separately so the spinner appears only on the button that was actually clicked.
+
+### 9.4 Spinner SVG
+
+Use a standard CSS-animated SVG spinner that inherits the button's `currentColor`, set `aria-hidden="true"` since the button or container already has a text label or `aria-label`.
+
+### 9.5 CLS prevention
+
+- Always reserve space for the spinner/error area so that the surrounding layout does not shift when the loading state changes. The appropriate technique depends on context: a minimum dimension (`min-w`, `min-h`), a fixed flex or grid slot, or a reserved column in a flex row all work.
+- Prefer `flex` layout inside spinner containers to keep icon and text aligned without affecting surrounding layout.
+
+## 10. Definition of done for UX
 
 A feature is not complete unless:
 
