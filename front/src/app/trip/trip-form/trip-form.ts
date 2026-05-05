@@ -58,11 +58,16 @@ export class TripFormComponent implements AfterViewInit {
   protected readonly TripStatus = TripStatus;
   protected readonly tripStatuses = [TripStatus.Planned, TripStatus.Confirmed, TripStatus.Cancelled];
 
+  protected readonly isSaving = computed(
+    () => this.createStatus() === 'loading' || this.updateStatus() === 'loading',
+  );
+
+  protected readonly isDeleting = computed(
+    () => this.deleteStatus() === 'loading',
+  );
+
   protected readonly isLoading = computed(
-    () =>
-      this.createStatus() === 'loading' ||
-      this.updateStatus() === 'loading' ||
-      this.deleteStatus() === 'loading',
+    () => this.isSaving() || this.isDeleting(),
   );
 
   protected readonly errorKey = computed<string | null>(() => {
