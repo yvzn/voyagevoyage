@@ -57,8 +57,11 @@ export class ConstraintsSettingsComponent implements OnInit {
   });
 
   constructor() {
-    // Apply form values when settings finish loading (load or retry).
-    // Gated on loadStatus === 'success' so user edits are not overwritten during save operations.
+    // Populate the form whenever constraints arrive from a successful load.
+    // Gated on loadStatus === 'success' so user edits are not disrupted while
+    // an update (save) is in flight — loadStatus stays 'success' during saves,
+    // but storeConstraints only changes on load or save completion, so the
+    // re-apply after save is intentional (reflects what was just persisted).
     effect(() => {
       if (this.loadStatus() === 'success') {
         const c = this.storeConstraints();
