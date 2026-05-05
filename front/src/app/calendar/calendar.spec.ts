@@ -1,13 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { provideMockStore } from '@ngrx/store/testing';
-import { provideMockActions } from '@ngrx/effects/testing';
-import { Subject } from 'rxjs';
-import { Action } from '@ngrx/store';
 import { CalendarComponent } from './calendar';
 import { Trip, TripStatus } from '../trip/trip.model';
-import { selectAllTrips } from '../trip/store/trip.selectors';
+import { selectAllTrips, selectTripsCreateStatus, selectTripsDeleteStatus, selectTripsUpdateStatus } from '../trip/store/trip.selectors';
 import { selectConstraints } from '../constraints/store/settings.selectors';
+import { ApiStatus } from '../trip/store/trip.reducer';
 
 const EN_TRANSLATIONS = {
   calendarHeading: 'Trip calendar',
@@ -44,8 +42,7 @@ const EN_TRANSLATIONS = {
   },
 };
 
-async function setupWithMockStore(trips: Trip[] = [], actions$?: Subject<Action>): Promise<void> {
-  const actionsSubject = actions$ ?? new Subject<Action>();
+async function setupWithMockStore(trips: Trip[] = []): Promise<void> {
   await TestBed.configureTestingModule({
     imports: [CalendarComponent, TranslateModule.forRoot()],
     providers: [
@@ -53,9 +50,11 @@ async function setupWithMockStore(trips: Trip[] = [], actions$?: Subject<Action>
         selectors: [
           { selector: selectAllTrips, value: trips },
           { selector: selectConstraints, value: null },
+          { selector: selectTripsCreateStatus, value: 'idle' as ApiStatus },
+          { selector: selectTripsUpdateStatus, value: 'idle' as ApiStatus },
+          { selector: selectTripsDeleteStatus, value: 'idle' as ApiStatus },
         ],
       }),
-      provideMockActions(() => actionsSubject),
     ],
   }).compileComponents();
 
@@ -377,13 +376,10 @@ describe('CalendarComponent — no trips', () => {
 });
 
 describe('CalendarComponent — trip form', () => {
-  let actions$: Subject<Action>;
-
   beforeEach(async () => {
     // JSDOM does not implement HTMLDialogElement.showModal(); stub it
     HTMLDialogElement.prototype.showModal = () => {};
-    actions$ = new Subject<Action>();
-    await setupWithMockStore([], actions$);
+    await setupWithMockStore([]);
   });
 
   it('should have a "New trip" button', async () => {

@@ -1,12 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { Subject } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
-import { provideMockActions } from '@ngrx/effects/testing';
-import { Action } from '@ngrx/store';
 import { TripFormComponent } from './trip-form';
 import { Trip, TripStatus } from '../trip.model';
-import { TripActions } from '../store/trip.actions';
+import { ApiStatus } from '../store/trip.reducer';
+import { selectTripsCreateStatus, selectTripsUpdateStatus, selectTripsDeleteStatus } from '../store/trip.selectors';
 import { selectConstraints } from '../../constraints/store/settings.selectors';
 import { TravelConstraints, DayOfWeek } from '../../constraints/constraints.model';
 
@@ -42,28 +40,32 @@ beforeEach(() => {
 });
 
 async function setupModule(
-  actions$: Subject<Action>,
   constraints: TravelConstraints | null = null,
-): Promise<void> {
+): Promise<MockStore> {
   await TestBed.configureTestingModule({
     imports: [TripFormComponent, TranslateModule.forRoot()],
     providers: [
-      provideMockStore({ selectors: [{ selector: selectConstraints, value: constraints }] }),
-      provideMockActions(() => actions$),
+      provideMockStore({
+        selectors: [
+          { selector: selectConstraints, value: constraints },
+          { selector: selectTripsCreateStatus, value: 'idle' as ApiStatus },
+          { selector: selectTripsUpdateStatus, value: 'idle' as ApiStatus },
+          { selector: selectTripsDeleteStatus, value: 'idle' as ApiStatus },
+        ],
+      }),
     ],
   }).compileComponents();
 
   const translate = TestBed.inject(TranslateService);
   translate.setTranslation('en', EN_TRANSLATIONS);
   translate.use('en');
+
+  return TestBed.inject(MockStore);
 }
 
 describe('TripFormComponent — display', () => {
-  let actions$: Subject<Action>;
-
   beforeEach(async () => {
-    actions$ = new Subject<Action>();
-    await setupModule(actions$);
+    await setupModule();
   });
 
   it('should create', () => {
@@ -186,11 +188,8 @@ describe('TripFormComponent — display', () => {
 });
 
 describe('TripFormComponent — validation', () => {
-  let actions$: Subject<Action>;
-
   beforeEach(async () => {
-    actions$ = new Subject<Action>();
-    await setupModule(actions$);
+    await setupModule();
   });
 
   it('should be invalid when destination is empty', () => {
@@ -235,11 +234,10 @@ describe('TripFormComponent — create operation', () => {
     endDate: '2026-08-03',
     status: TripStatus.Planned,
   };
-  let actions$: Subject<Action>;
+  let store: MockStore;
 
   beforeEach(async () => {
-    actions$ = new Subject<Action>();
-    await setupModule(actions$);
+    store = await setupModule();
   });
 
   it('should dispatch createTrip and emit saved on success action', () => {
@@ -259,7 +257,9 @@ describe('TripFormComponent — create operation', () => {
     });
     component['onSubmit']();
 
-    actions$.next(TripActions.createTripSuccess({ trip: createdTrip }));
+    store.overrideSelector(selectTripsCreateStatus, 'success');
+    store.refreshState();
+    TestBed.flushEffects();
 
     expect(saved).toBe(true);
   });
@@ -273,11 +273,10 @@ describe('TripFormComponent — update operation', () => {
     endDate: '2026-06-03',
     status: TripStatus.Planned,
   };
-  let actions$: Subject<Action>;
+  let store: MockStore;
 
   beforeEach(async () => {
-    actions$ = new Subject<Action>();
-    await setupModule(actions$);
+    store = await setupModule();
   });
 
   it('should dispatch updateTrip and emit saved on success action', () => {
@@ -289,7 +288,10 @@ describe('TripFormComponent — update operation', () => {
     fixture.componentInstance.saved.subscribe(() => (saved = true));
 
     fixture.componentInstance['onSubmit']();
-    actions$.next(TripActions.updateTripSuccess({ trip: { ...trip } }));
+
+    store.overrideSelector(selectTripsUpdateStatus, 'success');
+    store.refreshState();
+    TestBed.flushEffects();
 
     expect(saved).toBe(true);
   });
@@ -303,11 +305,10 @@ describe('TripFormComponent — delete operation', () => {
     endDate: '2026-09-02',
     status: TripStatus.Cancelled,
   };
-  let actions$: Subject<Action>;
+  let store: MockStore;
 
   beforeEach(async () => {
-    actions$ = new Subject<Action>();
-    await setupModule(actions$);
+    store = await setupModule();
   });
 
   it('should dispatch deleteTrip and emit deleted on success action', () => {
@@ -319,18 +320,20 @@ describe('TripFormComponent — delete operation', () => {
     fixture.componentInstance.deleted.subscribe(() => (deleted = true));
 
     fixture.componentInstance['onDelete']();
-    actions$.next(TripActions.deleteTripSuccess({ id: trip.id }));
+
+    store.overrideSelector(selectTripsDeleteStatus, 'success');
+    store.refreshState();
+    TestBed.flushEffects();
 
     expect(deleted).toBe(true);
   });
 });
 
 describe('TripFormComponent — error handling', () => {
-  let actions$: Subject<Action>;
+  let store: MockStore;
 
   beforeEach(async () => {
-    actions$ = new Subject<Action>();
-    await setupModule(actions$);
+    store = await setupModule();
   });
 
   it('should show error message on save failure action', () => {
@@ -346,8 +349,9 @@ describe('TripFormComponent — error handling', () => {
       status: TripStatus.Planned,
     });
     component['onSubmit']();
-    actions$.next(TripActions.createTripFailure({ error: 'server error' }));
-    fixture.detectChanges();
+
+    store.overrideSelector(selectTripsCreateStatus, 'failure');
+    store.refreshState();
 
     expect(component['errorKey']()).toBe('tripForm.saveError');
   });
@@ -365,8 +369,7 @@ describe('TripFormComponent — constraint violation', () => {
   const strictConstraints: TravelConstraints = { ...flexibleConstraints, isStrict: true };
 
   it('should set constraintWarning error for flexible constraint violation', async () => {
-    const actions$ = new Subject<Action>();
-    await setupModule(actions$, flexibleConstraints);
+    await setupModule(flexibleConstraints);
 
     const fixture = TestBed.createComponent(TripFormComponent);
     fixture.componentRef.setInput('trip', null);
@@ -385,8 +388,7 @@ describe('TripFormComponent — constraint violation', () => {
   });
 
   it('should allow submission when only constraintWarning is present', async () => {
-    const actions$ = new Subject<Action>();
-    await setupModule(actions$, flexibleConstraints);
+    const store = await setupModule(flexibleConstraints);
 
     const fixture = TestBed.createComponent(TripFormComponent);
     fixture.componentRef.setInput('trip', null);
@@ -403,14 +405,16 @@ describe('TripFormComponent — constraint violation', () => {
       status: TripStatus.Planned,
     });
     component['onSubmit']();
-    actions$.next(TripActions.createTripSuccess({ trip: {} as Trip }));
+
+    store.overrideSelector(selectTripsCreateStatus, 'success');
+    store.refreshState();
+    TestBed.flushEffects();
 
     expect(saved).toBe(true);
   });
 
   it('should set constraintError for strict constraint violation', async () => {
-    const actions$ = new Subject<Action>();
-    await setupModule(actions$, strictConstraints);
+    await setupModule(strictConstraints);
 
     const fixture = TestBed.createComponent(TripFormComponent);
     fixture.componentRef.setInput('trip', null);
@@ -429,8 +433,7 @@ describe('TripFormComponent — constraint violation', () => {
   });
 
   it('should block submission when constraintError is present', async () => {
-    const actions$ = new Subject<Action>();
-    await setupModule(actions$, strictConstraints);
+    await setupModule(strictConstraints);
 
     const fixture = TestBed.createComponent(TripFormComponent);
     fixture.componentRef.setInput('trip', null);

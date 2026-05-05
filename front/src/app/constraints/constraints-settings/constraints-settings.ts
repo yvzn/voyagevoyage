@@ -1,14 +1,11 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { Component, OnInit, computed, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
-import { Actions, ofType } from '@ngrx/effects';
-import { first } from 'rxjs';
 import { DayOfWeek, TravelConstraints } from '../constraints.model';
 import { SettingsActions } from '../store/settings.actions';
-import { selectConstraints } from '../store/settings.selectors';
+import { selectConstraints, selectSettingsUpdateStatus } from '../store/settings.selectors';
 
 @Component({
   selector: 'app-constraints-settings',
@@ -18,13 +15,10 @@ import { selectConstraints } from '../store/settings.selectors';
 })
 export class ConstraintsSettingsComponent implements OnInit {
   private readonly store = inject(Store);
-  private readonly actions$ = inject(Actions);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
 
-  private readonly storeConstraints = toSignal(this.store.select(selectConstraints), {
-    initialValue: null as TravelConstraints | null,
-  });
+  private readonly storeConstraints = this.store.selectSignal(selectConstraints);
+  private readonly updateStatus = this.store.selectSignal(selectSettingsUpdateStatus);
 
   protected readonly DayOfWeek = DayOfWeek;
   protected readonly allDays: DayOfWeek[] = [
@@ -37,9 +31,11 @@ export class ConstraintsSettingsComponent implements OnInit {
     DayOfWeek.Sunday,
   ];
 
-  protected readonly isLoading = signal(false);
-  protected readonly isSaved = signal(false);
-  protected readonly errorKey = signal<string | null>(null);
+  protected readonly isLoading = computed(() => this.updateStatus() === 'loading');
+  protected readonly isSaved = computed(() => this.updateStatus() === 'success');
+  protected readonly errorKey = computed<string | null>(() =>
+    this.updateStatus() === 'failure' ? 'constraints.saveError' : null,
+  );
 
   protected readonly form = this.fb.group({
     monday: [false],
@@ -128,23 +124,6 @@ export class ConstraintsSettingsComponent implements OnInit {
       isStrict: v.isStrict ?? false,
     };
 
-    this.isLoading.set(true);
-    this.errorKey.set(null);
-    this.isSaved.set(false);
-
     this.store.dispatch(SettingsActions.updateSettings({ request }));
-
-    this.actions$.pipe(
-      ofType(SettingsActions.updateSettingsSuccess, SettingsActions.updateSettingsFailure),
-      first(),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe((action) => {
-      this.isLoading.set(false);
-      if (action.type === SettingsActions.updateSettingsSuccess.type) {
-        this.isSaved.set(true);
-      } else {
-        this.errorKey.set('constraints.saveError');
-      }
-    });
   }
 }

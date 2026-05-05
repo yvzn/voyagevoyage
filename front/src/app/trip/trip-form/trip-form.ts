@@ -1,24 +1,21 @@
 import {
   AfterViewInit,
   Component,
-  DestroyRef,
   ElementRef,
+  computed,
   effect,
   inject,
   input,
   output,
-  signal,
   viewChild,
 } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
-import { Actions, ofType } from '@ngrx/effects';
-import { first } from 'rxjs';
 import { Trip, TripStatus } from '../trip.model';
 import { TripActions } from '../store/trip.actions';
+import { selectTripsCreateStatus, selectTripsUpdateStatus, selectTripsDeleteStatus } from '../store/trip.selectors';
 import { LocaleService } from '../../locale.service';
 import { selectConstraints } from '../../constraints/store/settings.selectors';
 import { constraintViolationValidator } from './constraint-violation.validator';
@@ -50,20 +47,35 @@ export class TripFormComponent implements AfterViewInit {
 
   private readonly dialogEl = viewChild.required<ElementRef<HTMLDialogElement>>('dialogEl');
   private readonly store = inject(Store);
-  private readonly actions$ = inject(Actions);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
   protected readonly localeService = inject(LocaleService);
 
-  private readonly constraints = toSignal(this.store.select(selectConstraints), {
-    initialValue: null,
-  });
+  private readonly constraints = this.store.selectSignal(selectConstraints);
+  private readonly createStatus = this.store.selectSignal(selectTripsCreateStatus);
+  private readonly updateStatus = this.store.selectSignal(selectTripsUpdateStatus);
+  private readonly deleteStatus = this.store.selectSignal(selectTripsDeleteStatus);
 
   protected readonly TripStatus = TripStatus;
   protected readonly tripStatuses = [TripStatus.Planned, TripStatus.Confirmed, TripStatus.Cancelled];
 
-  protected readonly isLoading = signal(false);
-  protected readonly errorKey = signal<string | null>(null);
+  protected readonly isLoading = computed(
+    () =>
+      this.createStatus() === 'loading' ||
+      this.updateStatus() === 'loading' ||
+      this.deleteStatus() === 'loading',
+  );
+
+  protected readonly errorKey = computed<string | null>(() => {
+    if (this.createStatus() === 'failure' || this.updateStatus() === 'failure')
+      return 'tripForm.saveError';
+    if (this.deleteStatus() === 'failure') return 'tripForm.deleteError';
+    return null;
+  });
+
+  /** Tracks which save operation (create/update) was last dispatched by this instance. */
+  private saveOp: 'create' | 'update' | null = null;
+  /** True while a delete dispatched by this instance is in flight. */
+  private deletePending = false;
 
   protected readonly form = this.fb.group(
     {
@@ -76,29 +88,50 @@ export class TripFormComponent implements AfterViewInit {
   );
 
   constructor() {
-    effect(
-      () => {
-        const t = this.trip();
-        const d = this.defaultDate();
-        this.errorKey.set(null);
-        if (t) {
-          this.form.setValue({
-            destination: t.destination,
-            startDate: t.startDate,
-            endDate: t.endDate,
-            status: t.status,
-          });
-        } else {
-          this.form.reset({
-            destination: '',
-            startDate: d ?? '',
-            endDate: d ?? '',
-            status: TripStatus.Planned,
-          });
-        }
-      },
-      { allowSignalWrites: true },
-    );
+    effect(() => {
+      const t = this.trip();
+      const d = this.defaultDate();
+      if (t) {
+        this.form.setValue({
+          destination: t.destination,
+          startDate: t.startDate,
+          endDate: t.endDate,
+          status: t.status,
+        });
+      } else {
+        this.form.reset({
+          destination: '',
+          startDate: d ?? '',
+          endDate: d ?? '',
+          status: TripStatus.Planned,
+        });
+      }
+    });
+
+    // React to save (create/update) completion via store status
+    effect(() => {
+      const cs = this.createStatus();
+      if (this.saveOp === 'create') {
+        if (cs === 'success') { this.saveOp = null; this.saved.emit(); }
+        else if (cs === 'failure') { this.saveOp = null; }
+      }
+    });
+    effect(() => {
+      const us = this.updateStatus();
+      if (this.saveOp === 'update') {
+        if (us === 'success') { this.saveOp = null; this.saved.emit(); }
+        else if (us === 'failure') { this.saveOp = null; }
+      }
+    });
+
+    // React to delete completion via store status
+    effect(() => {
+      const ds = this.deleteStatus();
+      if (this.deletePending) {
+        if (ds === 'success') { this.deletePending = false; this.deleted.emit(); }
+        else if (ds === 'failure') { this.deletePending = false; }
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -150,59 +183,22 @@ export class TripFormComponent implements AfterViewInit {
       status: status!,
     };
 
-    this.isLoading.set(true);
-    this.errorKey.set(null);
-
     const trip = this.trip();
     if (trip) {
+      this.saveOp = 'update';
       this.store.dispatch(TripActions.updateTrip({ id: trip.id, request }));
     } else {
+      this.saveOp = 'create';
       this.store.dispatch(TripActions.createTrip({ request }));
     }
-
-    this.actions$.pipe(
-      ofType(
-        TripActions.createTripSuccess,
-        TripActions.createTripFailure,
-        TripActions.updateTripSuccess,
-        TripActions.updateTripFailure,
-      ),
-      first(),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe((action) => {
-      this.isLoading.set(false);
-      const isSuccess =
-        action.type === TripActions.createTripSuccess.type ||
-        action.type === TripActions.updateTripSuccess.type;
-      if (isSuccess) {
-        this.saved.emit();
-      } else {
-        this.errorKey.set('tripForm.saveError');
-      }
-    });
   }
 
   protected onDelete(): void {
     const trip = this.trip();
     if (!trip || this.isLoading()) return;
 
-    this.isLoading.set(true);
-    this.errorKey.set(null);
-
+    this.deletePending = true;
     this.store.dispatch(TripActions.deleteTrip({ id: trip.id }));
-
-    this.actions$.pipe(
-      ofType(TripActions.deleteTripSuccess, TripActions.deleteTripFailure),
-      first(),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe((action) => {
-      this.isLoading.set(false);
-      if (action.type === TripActions.deleteTripSuccess.type) {
-        this.deleted.emit();
-      } else {
-        this.errorKey.set('tripForm.deleteError');
-      }
-    });
   }
 
   protected onCancel(): void {

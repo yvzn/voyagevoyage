@@ -1,13 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { Subject } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
-import { provideMockActions } from '@ngrx/effects/testing';
-import { Action } from '@ngrx/store';
 import { ConstraintsSettingsComponent } from './constraints-settings';
 import { TravelConstraints } from '../constraints.model';
-import { SettingsActions } from '../store/settings.actions';
-import { selectConstraints } from '../store/settings.selectors';
+import { selectConstraints, selectSettingsUpdateStatus } from '../store/settings.selectors';
+import { ApiStatus } from '../store/settings.reducer';
 
 const EN_TRANSLATIONS = {
   constraints: {
@@ -41,14 +38,17 @@ const EN_TRANSLATIONS = {
 };
 
 async function setupModule(
-  actions$: Subject<Action>,
   constraints: TravelConstraints | null = null,
 ): Promise<MockStore> {
   await TestBed.configureTestingModule({
     imports: [ConstraintsSettingsComponent, TranslateModule.forRoot()],
     providers: [
-      provideMockStore({ selectors: [{ selector: selectConstraints, value: constraints }] }),
-      provideMockActions(() => actions$),
+      provideMockStore({
+        selectors: [
+          { selector: selectConstraints, value: constraints },
+          { selector: selectSettingsUpdateStatus, value: 'idle' as ApiStatus },
+        ],
+      }),
     ],
   }).compileComponents();
 
@@ -60,11 +60,8 @@ async function setupModule(
 }
 
 describe('ConstraintsSettingsComponent — display', () => {
-  let actions$: Subject<Action>;
-
   beforeEach(async () => {
-    actions$ = new Subject<Action>();
-    await setupModule(actions$);
+    await setupModule();
   });
 
   it('should create', () => {
@@ -112,11 +109,8 @@ describe('ConstraintsSettingsComponent — pre-fill', () => {
     considerVacationDays: false,
     isStrict: true,
   };
-  let actions$: Subject<Action>;
-
   beforeEach(async () => {
-    actions$ = new Subject<Action>();
-    await setupModule(actions$, existingConstraints);
+    await setupModule(existingConstraints);
   });
 
   it('should pre-fill form from existing constraints', async () => {
@@ -135,11 +129,10 @@ describe('ConstraintsSettingsComponent — pre-fill', () => {
 });
 
 describe('ConstraintsSettingsComponent — save success', () => {
-  let actions$: Subject<Action>;
+  let store: MockStore;
 
   beforeEach(async () => {
-    actions$ = new Subject<Action>();
-    await setupModule(actions$);
+    store = await setupModule();
   });
 
   it('should show success message after saving', async () => {
@@ -148,7 +141,9 @@ describe('ConstraintsSettingsComponent — save success', () => {
 
     const component = fixture.componentInstance;
     component['onSubmit']();
-    actions$.next(SettingsActions.updateSettingsSuccess({ constraints: {} as TravelConstraints }));
+
+    store.overrideSelector(selectSettingsUpdateStatus, 'success');
+    store.refreshState();
     fixture.detectChanges();
     await fixture.whenStable();
 
@@ -160,11 +155,10 @@ describe('ConstraintsSettingsComponent — save success', () => {
 });
 
 describe('ConstraintsSettingsComponent — save error', () => {
-  let actions$: Subject<Action>;
+  let store: MockStore;
 
   beforeEach(async () => {
-    actions$ = new Subject<Action>();
-    await setupModule(actions$);
+    store = await setupModule();
   });
 
   it('should show error message when save fails', async () => {
@@ -173,7 +167,9 @@ describe('ConstraintsSettingsComponent — save error', () => {
 
     const component = fixture.componentInstance;
     component['onSubmit']();
-    actions$.next(SettingsActions.updateSettingsFailure({ error: 'Server error' }));
+
+    store.overrideSelector(selectSettingsUpdateStatus, 'failure');
+    store.refreshState();
     fixture.detectChanges();
     await fixture.whenStable();
 

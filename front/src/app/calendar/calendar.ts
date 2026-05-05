@@ -1,6 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import {
@@ -33,9 +32,7 @@ export class CalendarComponent {
     this.store.dispatch(SettingsActions.loadSettings());
   }
 
-  private readonly trips = toSignal(this.store.select(selectAllTrips), {
-    initialValue: [] as Trip[],
-  });
+  private readonly trips = this.store.selectSignal(selectAllTrips);
 
   protected readonly currentYear = signal(new Date().getFullYear());
   protected readonly currentMonth = signal(new Date().getMonth());
