@@ -40,6 +40,23 @@ describe('ConstraintsService (NgRx facade)', () => {
     expect(service).toBeTruthy();
   });
 
+  it('should dispatch loadSettings on construction', () => {
+    TestBed.resetTestingModule();
+    actions$ = new Subject<Action>();
+    TestBed.configureTestingModule({
+      providers: [
+        provideMockStore({ selectors: [{ selector: selectConstraints, value: null }] }),
+        provideMockActions(() => actions$),
+      ],
+    });
+    store = TestBed.inject(MockStore);
+    const capturedActions: Action[] = [];
+    store.scannedActions$.subscribe((a) => capturedActions.push(a));
+    TestBed.inject(ConstraintsService);
+
+    expect(capturedActions.some((a) => a.type === SettingsActions.loadSettings.type)).toBe(true);
+  });
+
   it('should expose constraints from the store selector', () => {
     store.overrideSelector(selectConstraints, MOCK_CONSTRAINTS);
     store.refreshState();
