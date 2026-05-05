@@ -153,6 +153,124 @@ Recommended rule of thumb:
 - form state: Reactive Forms
 - shared business state: NgRx store
 
+#### 4.5.1 NgRx feature stores
+
+The application uses NgRx feature stores for all shared business state. Each feature store is co-located with the feature code it manages.
+
+Current feature stores:
+
+| Feature key  | Location                           | Managed state                                 |
+|--------------|------------------------------------|-----------------------------------------------|
+| `trips`      | `front/src/app/trip/store/`        | Trip list, CRUD API statuses                  |
+| `settings`   | `front/src/app/constraints/store/` | Travel constraint settings, update API status |
+
+Each feature store folder contains:
+- `*.actions.ts` — action group with typed action creators
+- `*.reducer.ts` — state shape, initial state, reducer, and `createFeature()` registration
+- `*.effects.ts` — functional effects that make HTTP calls
+- `*.selectors.ts` — selector functions for reading state
+- `*.effects.spec.ts` — unit tests for effects (HTTP interactions)
+
+#### 4.5.2 State shapes
+
+**Trips state** (`TripsState`):
+
+```typescript
+interface TripsState {
+  trips: Trip[];
+  loadStatus: ApiStatus;    // status of the initial GET /api/trips
+  createStatus: ApiStatus;  // status of POST /api/trips
+  updateStatus: ApiStatus;  // status of PUT /api/trips/:id
+  deleteStatus: ApiStatus;  // status of DELETE /api/trips/:id
+  error: string | null;
+}
+
+type ApiStatus = 'idle' | 'loading' | 'success' | 'failure';
+```
+
+**Settings state** (`SettingsState`):
+
+```typescript
+interface SettingsState {
+  constraints: TravelConstraints | null;
+  loadStatus: ApiStatus;    // status of GET /api/travel-constraints
+  updateStatus: ApiStatus;  // status of PUT /api/travel-constraints
+  error: string | null;
+}
+```
+
+#### 4.5.3 Action flows
+
+**Trips:**
+
+| Action                  | Triggered by                        | Effect dispatches             |
+|-------------------------|-------------------------------------|-------------------------------|
+| `loadTrips`             | `TripService` constructor           | `loadTripsSuccess` / `loadTripsFailure` |
+| `createTrip`            | `TripService.create()`              | `createTripSuccess` / `createTripFailure` |
+| `updateTrip`            | `TripService.update()`              | `updateTripSuccess` / `updateTripFailure` |
+| `deleteTrip`            | `TripService.delete()`              | `deleteTripSuccess` / `deleteTripFailure` |
+
+**Settings:**
+
+| Action                  | Triggered by                          | Effect dispatches                       |
+|-------------------------|---------------------------------------|-----------------------------------------|
+| `loadSettings`          | `ConstraintsService` constructor      | `loadSettingsSuccess` / `loadSettingsEmpty` / `loadSettingsFailure` |
+| `updateSettings`        | `ConstraintsService.update()`         | `updateSettingsSuccess` / `updateSettingsFailure` |
+
+#### 4.5.4 Facade services
+
+`TripService` and `ConstraintsService` are **facade services** that wrap the NgRx store and expose a stable API to components and other services.
+
+The facades:
+- select from the store and expose reactive data as Angular signals (via `toSignal`)
+- dispatch actions when mutation methods are called
+- return `Observable<T>` from mutation methods for components that need to react to success/error
+
+```typescript
+// Reading trips via the facade (same API as before NgRx migration)
+const trips = tripService.trips(); // Signal<Trip[]>
+
+// Mutating via the facade — dispatches createTrip action internally
+tripService.create(request).subscribe({
+  next: (trip) => { /* success */ },
+  error: () => { /* failure */ },
+});
+```
+
+To consume the store directly (e.g., to observe API status):
+
+```typescript
+import { selectTripsLoadStatus } from './trip/store/trip.selectors';
+import { selectSettingsUpdateStatus } from './constraints/store/settings.selectors';
+
+// Observe trips loading status
+readonly loadStatus = toSignal(this.store.select(selectTripsLoadStatus));
+
+// Observe settings update status
+readonly updateStatus = toSignal(this.store.select(selectSettingsUpdateStatus));
+```
+
+#### 4.5.5 Testing NgRx code
+
+- **Effect tests**: use `provideMockActions`, `provideHttpClient()`, and `HttpTestingController`. See `*.effects.spec.ts` files for examples.
+- **Facade service tests**: use `provideMockStore` with pre-configured selectors and `provideMockActions` to verify dispatch and resolve behavior. See `*.service.spec.ts` files for examples.
+- **Component tests**: mock facade services with plain objects to keep test setup simple. The NgRx store is not needed when services are mocked.
+
+```typescript
+// Mocking TripService in component tests
+providers: [
+  {
+    provide: TripService,
+    useValue: {
+      trips: signal<Trip[]>([]).asReadonly(),
+      create: () => of(trip),
+      update: () => of(trip),
+      delete: () => of(undefined),
+    },
+  },
+]
+```
+
 ### 4.6 Signals
 
 Signals are the preferred primitive for local reactive state inside Angular components and lightweight UI services.

@@ -3,9 +3,15 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { signal } from '@angular/core';
+import { provideStore } from '@ngrx/store';
+import { provideEffects } from '@ngrx/effects';
 import { CalendarComponent } from './calendar';
 import { TripService } from '../trip/trip.service';
 import { Trip, TripStatus } from '../trip/trip.model';
+import { tripsFeature } from '../trip/store/trip.reducer';
+import { settingsFeature } from '../constraints/store/settings.reducer';
+import * as tripEffects from '../trip/store/trip.effects';
+import * as settingsEffects from '../constraints/store/settings.effects';
 
 const EN_TRANSLATIONS = {
   calendarHeading: 'Trip calendar',
@@ -43,24 +49,26 @@ const EN_TRANSLATIONS = {
 };
 
 describe('CalendarComponent', () => {
-  let httpMock: HttpTestingController;
-
   beforeEach(async () => {
+    const tripSignal = signal<Trip[]>([]);
     await TestBed.configureTestingModule({
       imports: [CalendarComponent, TranslateModule.forRoot()],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        {
+          provide: TripService,
+          useValue: {
+            trips: tripSignal.asReadonly(),
+            create: () => { throw new Error('not implemented'); },
+            update: () => { throw new Error('not implemented'); },
+            delete: () => { throw new Error('not implemented'); },
+          },
+        },
+      ],
     }).compileComponents();
 
     const translate = TestBed.inject(TranslateService);
     translate.setTranslation('en', EN_TRANSLATIONS);
     translate.use('en');
-
-    httpMock = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => {
-    httpMock.expectOne('/api/trips').flush([]);
-    httpMock.verify();
   });
 
   it('should create', () => {
@@ -415,7 +423,15 @@ describe('CalendarComponent — trip form', () => {
 
     await TestBed.configureTestingModule({
       imports: [CalendarComponent, TranslateModule.forRoot()],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideStore({
+          [tripsFeature.name]: tripsFeature.reducer,
+          [settingsFeature.name]: settingsFeature.reducer,
+        }),
+        provideEffects(tripEffects, settingsEffects),
+      ],
     }).compileComponents();
 
     const translate = TestBed.inject(TranslateService);

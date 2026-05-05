@@ -1,33 +1,40 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Store } from '@ngrx/store';
+import { Actions, ofType } from '@ngrx/effects';
+import { Observable, first, mergeMap, of, throwError } from 'rxjs';
 import { TravelConstraints, UpdateTravelConstraintsRequest } from './constraints.model';
+import { SettingsActions } from './store/settings.actions';
+import { selectConstraints } from './store/settings.selectors';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ConstraintsService {
-  private readonly http = inject(HttpClient);
+  private readonly store = inject(Store);
+  private readonly actions$ = inject(Actions);
 
-  private readonly _constraints = signal<TravelConstraints | null>(null);
-
-  readonly constraints = this._constraints.asReadonly();
+  readonly constraints = toSignal(this.store.select(selectConstraints), {
+    initialValue: null as TravelConstraints | null,
+  });
 
   constructor() {
-    this.http.get<TravelConstraints>('/api/travel-constraints').subscribe({
-      next: (constraints) => this._constraints.set(constraints),
-      error: (err) => {
-        // 204 No Content is not an error; the signal stays null
-        if (err?.status !== 204) {
-          console.error('Failed to load travel constraints:', err);
-        }
-      },
-    });
+    this.store.dispatch(SettingsActions.loadSettings());
   }
 
   update(request: UpdateTravelConstraintsRequest): Observable<TravelConstraints> {
-    return this.http.put<TravelConstraints>('/api/travel-constraints', request).pipe(
-      tap((constraints) => this._constraints.set(constraints)),
+    this.store.dispatch(SettingsActions.updateSettings({ request }));
+    return this.actions$.pipe(
+      ofType(SettingsActions.updateSettingsSuccess, SettingsActions.updateSettingsFailure),
+      first(),
+      mergeMap((action) =>
+        action.type === SettingsActions.updateSettingsSuccess.type
+          ? of(
+              (action as ReturnType<typeof SettingsActions.updateSettingsSuccess>).constraints,
+            )
+          : throwError(() => new Error('Update settings failed')),
+      ),
     );
   }
 }
+

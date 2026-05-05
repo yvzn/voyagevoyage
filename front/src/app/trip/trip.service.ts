@@ -1,42 +1,62 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Store } from '@ngrx/store';
+import { Actions, ofType } from '@ngrx/effects';
+import { Observable, first, mergeMap, of, throwError } from 'rxjs';
 import { Trip, CreateTripRequest, UpdateTripRequest } from './trip.model';
+import { TripActions } from './store/trip.actions';
+import { selectAllTrips } from './store/trip.selectors';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TripService {
-  private readonly http = inject(HttpClient);
+  private readonly store = inject(Store);
+  private readonly actions$ = inject(Actions);
 
-  private readonly _trips = signal<Trip[]>([]);
-
-  readonly trips = this._trips.asReadonly();
+  readonly trips = toSignal(this.store.select(selectAllTrips), { initialValue: [] as Trip[] });
 
   constructor() {
-    this.http.get<Trip[]>('/api/trips').subscribe({
-      next: (trips) => this._trips.set(trips),
-      error: (err) => console.error('Failed to load trips:', err),
-    });
+    this.store.dispatch(TripActions.loadTrips());
   }
 
   create(request: CreateTripRequest): Observable<Trip> {
-    return this.http.post<Trip>('/api/trips', request).pipe(
-      tap((trip) => this._trips.update((trips) => [...trips, trip])),
+    this.store.dispatch(TripActions.createTrip({ request }));
+    return this.actions$.pipe(
+      ofType(TripActions.createTripSuccess, TripActions.createTripFailure),
+      first(),
+      mergeMap((action) =>
+        action.type === TripActions.createTripSuccess.type
+          ? of((action as ReturnType<typeof TripActions.createTripSuccess>).trip)
+          : throwError(() => new Error('Create trip failed')),
+      ),
     );
   }
 
   update(id: string, request: UpdateTripRequest): Observable<Trip> {
-    return this.http.put<Trip>(`/api/trips/${id}`, request).pipe(
-      tap((updated) =>
-        this._trips.update((trips) => trips.map((t) => (t.id === id ? updated : t))),
+    this.store.dispatch(TripActions.updateTrip({ id, request }));
+    return this.actions$.pipe(
+      ofType(TripActions.updateTripSuccess, TripActions.updateTripFailure),
+      first(),
+      mergeMap((action) =>
+        action.type === TripActions.updateTripSuccess.type
+          ? of((action as ReturnType<typeof TripActions.updateTripSuccess>).trip)
+          : throwError(() => new Error('Update trip failed')),
       ),
     );
   }
 
   delete(id: string): Observable<void> {
-    return this.http.delete<void>(`/api/trips/${id}`).pipe(
-      tap(() => this._trips.update((trips) => trips.filter((t) => t.id !== id))),
+    this.store.dispatch(TripActions.deleteTrip({ id }));
+    return this.actions$.pipe(
+      ofType(TripActions.deleteTripSuccess, TripActions.deleteTripFailure),
+      first(),
+      mergeMap((action) =>
+        action.type === TripActions.deleteTripSuccess.type
+          ? of(undefined)
+          : throwError(() => new Error('Delete trip failed')),
+      ),
     );
   }
 }
+
