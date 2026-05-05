@@ -57,11 +57,14 @@ export class ConstraintsSettingsComponent implements OnInit {
   });
 
   constructor() {
-    // Re-apply form values whenever constraints arrive from the store (e.g. after async load or retry).
+    // Apply form values when settings finish loading (load or retry).
+    // Gated on loadStatus === 'success' so user edits are not overwritten during save operations.
     effect(() => {
-      const c = this.storeConstraints();
-      if (c) {
-        this.applyConstraints(c);
+      if (this.loadStatus() === 'success') {
+        const c = this.storeConstraints();
+        if (c) {
+          this.applyConstraints(c);
+        }
       }
     });
   }

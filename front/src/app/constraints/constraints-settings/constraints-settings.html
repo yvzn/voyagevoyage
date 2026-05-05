@@ -28,6 +28,7 @@
       [attr.aria-busy]="isDataLoading() ? 'true' : null"
     >
     <fieldset [disabled]="isDataLoading()">
+      <legend class="sr-only">{{ 'constraints.heading' | translate }}</legend>
     <!-- Allowed days of week -->
     <fieldset class="mb-6 rounded-lg border border-gray-200 p-4 dark:border-gray-600">
       <legend class="px-2 text-sm font-semibold text-gray-900 dark:text-white">

@@ -42,6 +42,7 @@ const EN_TRANSLATIONS = {
 
 async function setupModule(
   constraints: TravelConstraints | null = null,
+  loadStatus: ApiStatus = 'idle',
 ): Promise<MockStore> {
   await TestBed.configureTestingModule({
     imports: [ConstraintsSettingsComponent, TranslateModule.forRoot()],
@@ -49,7 +50,7 @@ async function setupModule(
       provideMockStore({
         selectors: [
           { selector: selectConstraints, value: constraints },
-          { selector: selectSettingsLoadStatus, value: 'idle' as ApiStatus },
+          { selector: selectSettingsLoadStatus, value: loadStatus },
           { selector: selectSettingsUpdateStatus, value: 'idle' as ApiStatus },
         ],
       }),
@@ -114,7 +115,8 @@ describe('ConstraintsSettingsComponent — pre-fill', () => {
     isStrict: true,
   };
   beforeEach(async () => {
-    await setupModule(existingConstraints);
+    // loadStatus 'success' matches the real state when constraints are already in the store
+    await setupModule(existingConstraints, 'success');
   });
 
   it('should pre-fill form from existing constraints', async () => {
