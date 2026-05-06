@@ -10,6 +10,7 @@ import { TripActions } from '../store/trip.actions';
 import { selectAllTrips, selectTripsDeleteStatus } from '../store/trip.selectors';
 import { TripFormComponent } from '../trip-form/trip-form';
 import { getTripStatusClass, getTripStatusTranslationKey } from '../trip-status.utils';
+import { LocaleService } from '../../locale.service';
 
 @Component({
   selector: 'app-trip-detail',
@@ -21,6 +22,7 @@ export class TripDetailComponent {
   private readonly store = inject(Store);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  protected readonly localeService = inject(LocaleService);
 
   private readonly routeParamId = toSignal(
     this.route.paramMap.pipe(map((p) => p.get('id') ?? '')),
@@ -35,6 +37,9 @@ export class TripDetailComponent {
 
   /** Whether the edit form modal is open */
   protected readonly isFormOpen = signal(false);
+
+  /** Whether the inline delete confirmation prompt is shown */
+  protected readonly showDeleteConfirm = signal(false);
 
   private readonly deleteStatus = this.store.selectSignal(selectTripsDeleteStatus);
   protected readonly isDeleting = computed(() => this.deleteStatus() === 'loading');
@@ -63,6 +68,16 @@ export class TripDetailComponent {
     });
   }
 
+  protected formatDate(dateStr: string): string {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Intl.DateTimeFormat(this.localeService.currentLocale(), {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(Date.UTC(year, month - 1, day)));
+  }
+
   protected openEditForm(): void {
     this.isFormOpen.set(true);
   }
@@ -71,10 +86,19 @@ export class TripDetailComponent {
     this.isFormOpen.set(false);
   }
 
+  protected requestDelete(): void {
+    this.showDeleteConfirm.set(true);
+  }
+
+  protected cancelDelete(): void {
+    this.showDeleteConfirm.set(false);
+  }
+
   protected onDelete(): void {
     const trip = this.trip();
     if (!trip || this.isDeleting()) return;
 
+    this.showDeleteConfirm.set(false);
     this.deletePending = true;
     this.store.dispatch(TripActions.deleteTrip({ id: trip.id }));
   }

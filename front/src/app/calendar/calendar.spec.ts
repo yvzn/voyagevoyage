@@ -42,10 +42,8 @@ const EN_TRANSLATIONS = {
     status: 'Status',
     save: 'Save',
     saving: 'Saving…',
-    delete: 'Delete',
     cancel: 'Cancel',
     saveError: 'An error occurred while saving the trip. Please try again.',
-    deleteError: 'An error occurred while deleting the trip. Please try again.',
   },
 };
 

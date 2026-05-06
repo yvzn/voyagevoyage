@@ -21,6 +21,9 @@ const EN_TRANSLATIONS = {
     editButton: 'Edit',
     deleteButton: 'Delete',
     deleting: 'Deleting…',
+    deleteConfirmMessage: 'Are you sure you want to delete this trip? This action cannot be undone.',
+    deleteConfirmButton: 'Confirm deletion',
+    deleteCancelButton: 'Cancel',
     deleteError: 'An error occurred while deleting the trip. Please try again.',
     expensesHeading: 'Expenses',
     noExpenses: 'No expenses recorded for this trip.',
@@ -112,15 +115,18 @@ describe('TripDetailComponent — trip found', () => {
     expect(heading?.textContent?.trim()).toBe('Lyon');
   });
 
-  it('should display trip start and end dates', async () => {
+  it('should display trip start and end dates in locale format', async () => {
     const fixture = TestBed.createComponent(TripDetailComponent);
     fixture.detectChanges();
     await fixture.whenStable();
 
     const compiled = fixture.nativeElement as HTMLElement;
     const text = compiled.textContent ?? '';
-    expect(text).toContain('2026-06-10');
-    expect(text).toContain('2026-06-12');
+    // Dates are formatted with Intl.DateTimeFormat — check they contain the year at minimum
+    expect(text).toContain('2026');
+    // Raw ISO strings should not appear
+    expect(text).not.toContain('2026-06-10');
+    expect(text).not.toContain('2026-06-12');
   });
 
   it('should display the trip status badge', async () => {
@@ -245,6 +251,36 @@ describe('TripDetailComponent — delete operation', () => {
     store = await setupModule();
   });
 
+  it('should show delete confirmation when delete button is clicked', async () => {
+    const fixture = TestBed.createComponent(TripDetailComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance['showDeleteConfirm']()).toBe(false);
+
+    fixture.componentInstance['requestDelete']();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance['showDeleteConfirm']()).toBe(true);
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const confirmDialog = compiled.querySelector('[role="alertdialog"]');
+    expect(confirmDialog).toBeTruthy();
+  });
+
+  it('should hide confirmation when cancel is clicked', async () => {
+    const fixture = TestBed.createComponent(TripDetailComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance['requestDelete']();
+    fixture.detectChanges();
+
+    fixture.componentInstance['cancelDelete']();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance['showDeleteConfirm']()).toBe(false);
+  });
+
   it('should dispatch deleteTrip and navigate to calendar on success', () => {
     const fixture = TestBed.createComponent(TripDetailComponent);
     fixture.detectChanges();
@@ -252,6 +288,7 @@ describe('TripDetailComponent — delete operation', () => {
     const router = TestBed.inject(Router);
     const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
 
+    fixture.componentInstance['requestDelete']();
     fixture.componentInstance['onDelete']();
 
     store.overrideSelector(selectTripsDeleteStatus, 'success');
@@ -265,6 +302,7 @@ describe('TripDetailComponent — delete operation', () => {
     const fixture = TestBed.createComponent(TripDetailComponent);
     fixture.detectChanges();
 
+    fixture.componentInstance['requestDelete']();
     fixture.componentInstance['onDelete']();
 
     store.overrideSelector(selectTripsDeleteStatus, 'failure');
