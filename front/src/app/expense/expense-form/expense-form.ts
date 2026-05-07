@@ -108,8 +108,12 @@ export class ExpenseFormComponent implements AfterViewInit {
     effect(() => {
       const cs = this.createStatus();
       if (this.saveOp === 'create') {
-        if (cs === 'success') { this.saveOp = null; this.saved.emit(); }
-        else if (cs === 'failure') { this.saveOp = null; }
+        if (cs === 'success') {
+          this.saveOp = null;
+          this.saved.emit();
+        } else if (cs === 'failure') {
+          this.saveOp = null;
+        }
       }
     });
 
@@ -117,8 +121,12 @@ export class ExpenseFormComponent implements AfterViewInit {
     effect(() => {
       const us = this.updateStatus();
       if (this.saveOp === 'update') {
-        if (us === 'success') { this.saveOp = null; this.saved.emit(); }
-        else if (us === 'failure') { this.saveOp = null; }
+        if (us === 'success') {
+          this.saveOp = null;
+          this.saved.emit();
+        } else if (us === 'failure') {
+          this.saveOp = null;
+        }
       }
     });
   }
