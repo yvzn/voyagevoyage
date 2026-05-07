@@ -50,6 +50,9 @@ export class ExpenseDetailComponent {
   /** True while a delete dispatched by this instance is in flight. */
   private deletePending = false;
 
+  /** TripId to navigate to after successful deletion; saved before dispatching to avoid reading cleared store state. */
+  private deleteTripId: string | null = null;
+
   constructor() {
     // Load expense when the id is known
     effect(() => {
@@ -65,7 +68,8 @@ export class ExpenseDetailComponent {
       if (this.deletePending) {
         if (ds === 'success') {
           this.deletePending = false;
-          const tripId = this.expense()?.tripId ?? null;
+          const tripId = this.deleteTripId;
+          this.deleteTripId = null;
           if (tripId) {
             this.router.navigate(['/trip', tripId]);
           } else {
@@ -110,6 +114,7 @@ export class ExpenseDetailComponent {
 
     this.showDeleteConfirm.set(false);
     this.deletePending = true;
+    this.deleteTripId = expense.tripId;
     this.store.dispatch(ExpenseActions.deleteExpense({ id: expense.id }));
   }
 }

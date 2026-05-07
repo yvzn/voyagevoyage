@@ -143,6 +143,13 @@ The application should also follow the usability recommendations popularized by 
 - Preserve user input during validation failures or recoverable errors.
 - Make destructive actions explicit and confirm them when risk is significant.
 
+### 6.4 Cursor affordance
+
+- Always add `cursor-pointer` (Tailwind) to every `<button>` element that acts as a clickable affordance, even when it receives a native button role. Browsers apply `cursor: default` to buttons by default; this makes clickable elements unmistakably interactive.
+- This applies equally to icon-only buttons, list-item navigation buttons, and any other interactive `<button>` that is not disabled.
+- Disabled buttons must use `cursor-not-allowed` or `disabled:cursor-not-allowed` via Tailwind to signal non-interactivity.
+- Never use a `<div>` or `<span>` as a clickable element. Use a semantic `<button>` or `<a>` and apply `cursor-pointer`.
+
 ## 7. Application rules by area
 
 ### 7.1 Navigation
