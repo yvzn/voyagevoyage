@@ -12,7 +12,7 @@ import { ApiStatus } from '../store/trip.reducer';
 import { selectAllTrips, selectTripsDeleteStatus } from '../store/trip.selectors';
 import { selectTripsCreateStatus, selectTripsUpdateStatus } from '../store/trip.selectors';
 import { selectConstraints } from '../../constraints/store/settings.selectors';
-import { selectAllExpenses, selectExpensesCreateStatus, selectExpensesLoadStatus } from '../../expense/store/expense.selectors';
+import { selectAllExpenses, selectExpensesCreateStatus, selectExpensesLoadStatus, selectExpensesUpdateStatus } from '../../expense/store/expense.selectors';
 
 const EN_TRANSLATIONS = {
   tripDetail: {
@@ -53,7 +53,8 @@ const EN_TRANSLATIONS = {
     constraintError: 'The selected dates violate your mandatory travel constraints.',
   },
   expenseForm: {
-    title: 'New expense',
+    createTitle: 'New expense',
+    editTitle: 'Edit expense',
     date: 'Date',
     dateRequired: 'Date is required.',
     category: 'Category',
@@ -108,6 +109,7 @@ async function setupModule(trips: Trip[] = [MOCK_TRIP], tripId = 'trip-1'): Prom
           { selector: selectAllExpenses, value: [] },
           { selector: selectExpensesLoadStatus, value: 'idle' as ApiStatus },
           { selector: selectExpensesCreateStatus, value: 'idle' as ApiStatus },
+          { selector: selectExpensesUpdateStatus, value: 'idle' as ApiStatus },
         ],
       }),
     ],

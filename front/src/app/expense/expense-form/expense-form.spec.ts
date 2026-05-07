@@ -1,15 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
+import { vi } from 'vitest';
 import { ApiStatus as ExpenseApiStatus } from '../store/expense.reducer';
-import { selectExpensesCreateStatus } from '../store/expense.selectors';
+import { selectExpensesCreateStatus, selectExpensesUpdateStatus } from '../store/expense.selectors';
 import { ExpenseFormComponent } from './expense-form';
 import { ExpenseActions } from '../store/expense.actions';
-import { ExpenseCategory } from '../expense.model';
+import { Expense, ExpenseCategory } from '../expense.model';
 
 const EN_TRANSLATIONS = {
   expenseForm: {
-    title: 'New expense',
+    createTitle: 'New expense',
+    editTitle: 'Edit expense',
     date: 'Date',
     dateRequired: 'Date is required.',
     category: 'Category',
@@ -30,6 +32,15 @@ const EN_TRANSLATIONS = {
   },
 };
 
+const MOCK_EXPENSE: Expense = {
+  id: 'expense-1',
+  tripId: 'trip-1',
+  date: '2026-06-15',
+  category: ExpenseCategory.Train,
+  amount: 42.5,
+  description: 'TGV Paris-Lyon',
+};
+
 // JSDOM does not implement HTMLDialogElement.showModal(); stub it globally
 beforeEach(() => {
   HTMLDialogElement.prototype.showModal = () => {};
@@ -42,6 +53,7 @@ async function setupModule(): Promise<MockStore> {
       provideMockStore({
         selectors: [
           { selector: selectExpensesCreateStatus, value: 'idle' as ExpenseApiStatus },
+          { selector: selectExpensesUpdateStatus, value: 'idle' as ExpenseApiStatus },
         ],
       }),
     ],
@@ -185,7 +197,7 @@ describe('ExpenseFormComponent', () => {
     fixture.detectChanges();
 
     const component = fixture.componentInstance;
-    component['savePending'] = true;
+    component['saveOp'] = 'create';
 
     let savedEmitted = false;
     component.saved.subscribe(() => {
@@ -197,6 +209,65 @@ describe('ExpenseFormComponent', () => {
     TestBed.flushEffects();
 
     expect(savedEmitted).toBe(true);
+  });
+
+  it('should emit saved when updateStatus becomes success (edit mode)', () => {
+    const store = TestBed.inject(MockStore);
+    const fixture = TestBed.createComponent(ExpenseFormComponent);
+    fixture.componentRef.setInput('expense', MOCK_EXPENSE);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance;
+    component['saveOp'] = 'update';
+
+    let savedEmitted = false;
+    component.saved.subscribe(() => {
+      savedEmitted = true;
+    });
+
+    store.overrideSelector(selectExpensesUpdateStatus, 'success');
+    store.refreshState();
+    TestBed.flushEffects();
+
+    expect(savedEmitted).toBe(true);
+  });
+
+  it('should pre-fill form fields when expense input is provided (edit mode)', async () => {
+    const fixture = TestBed.createComponent(ExpenseFormComponent);
+    fixture.componentRef.setInput('expense', MOCK_EXPENSE);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    expect(component['form'].get('date')?.value).toBe('2026-06-15');
+    expect(component['form'].get('category')?.value).toBe(ExpenseCategory.Train);
+    expect(component['form'].get('amount')?.value).toBe(42.5);
+    expect(component['form'].get('description')?.value).toBe('TGV Paris-Lyon');
+  });
+
+  it('should dispatch updateExpense in edit mode on submit', async () => {
+    const fixture = TestBed.createComponent(ExpenseFormComponent);
+    fixture.componentRef.setInput('expense', MOCK_EXPENSE);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    const store = TestBed.inject(MockStore);
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+
+    component['onSubmit']();
+
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      ExpenseActions.updateExpense({
+        id: 'expense-1',
+        request: {
+          date: '2026-06-15',
+          category: ExpenseCategory.Train,
+          amount: 42.5,
+          description: 'TGV Paris-Lyon',
+        },
+      }),
+    );
   });
 
   it('should emit cancelled when onCancel is called', () => {

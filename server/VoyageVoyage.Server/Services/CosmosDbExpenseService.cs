@@ -34,14 +34,24 @@ public class CosmosDbExpenseService(ApplicationDbContext db, ICurrentUserService
             .FirstOrDefaultAsync();
     }
 
+    public async Task<Expense?> GetByIdForUserAsync(string id)
+    {
+        var userId = GetCurrentUserId();
+        return await db.Expenses
+            .Where(e => e.Id == id && e.UserId == userId)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<Expense?> CreateAsync(string tripId, CreateExpenseRequest request)
     {
         var userId = GetCurrentUserId();
 
-        // Verify that the trip exists and belongs to the current user
-        var tripExists = await db.Trips
-            .AnyAsync(t => t.Id == tripId && t.UserId == userId);
-        if (!tripExists)
+        // Verify that the trip exists and belongs to the current user.
+        // Note: AnyAsync() can produce unreliable queries in EF Core for Cosmos DB.
+        // FirstOrDefaultAsync() translates more reliably and is preferred.
+        var tripOwned = await db.Trips
+            .FirstOrDefaultAsync(t => t.Id == tripId && t.UserId == userId);
+        if (tripOwned is null)
             return null;
 
         var expense = new Expense
@@ -64,6 +74,39 @@ public class CosmosDbExpenseService(ApplicationDbContext db, ICurrentUserService
         var userId = GetCurrentUserId();
         var expense = await db.Expenses
             .Where(e => e.Id == id && e.TripId == tripId && e.UserId == userId)
+            .FirstOrDefaultAsync();
+
+        if (expense is null)
+            return false;
+
+        db.Expenses.Remove(expense);
+        await db.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<Expense?> UpdateAsync(string id, UpdateExpenseRequest request)
+    {
+        var userId = GetCurrentUserId();
+        var expense = await db.Expenses
+            .Where(e => e.Id == id && e.UserId == userId)
+            .FirstOrDefaultAsync();
+
+        if (expense is null)
+            return null;
+
+        expense.Date = request.Date;
+        expense.Category = request.Category;
+        expense.Amount = request.Amount;
+        expense.Description = request.Description;
+        await db.SaveChangesAsync();
+        return expense;
+    }
+
+    public async Task<bool> DeleteByIdForUserAsync(string id)
+    {
+        var userId = GetCurrentUserId();
+        var expense = await db.Expenses
+            .Where(e => e.Id == id && e.UserId == userId)
             .FirstOrDefaultAsync();
 
         if (expense is null)

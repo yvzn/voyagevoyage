@@ -13,9 +13,9 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
-import { ExpenseCategory, CreateExpenseRequest } from '../expense.model';
+import { Expense, ExpenseCategory, CreateExpenseRequest, UpdateExpenseRequest } from '../expense.model';
 import { ExpenseActions } from '../store/expense.actions';
-import { selectExpensesCreateStatus } from '../store/expense.selectors';
+import { selectExpensesCreateStatus, selectExpensesUpdateStatus } from '../store/expense.selectors';
 import { LocaleService } from '../../locale.service';
 
 @Component({
@@ -26,10 +26,13 @@ import { LocaleService } from '../../locale.service';
 })
 export class ExpenseFormComponent implements AfterViewInit {
   /**
-   * When set, the expense is attached to this trip (trip-detail flow).
+   * When set, the expense is attached to this trip (trip-detail create flow).
    * When null, the effect finds or creates a trip for the expense date (calendar flow).
    */
   readonly tripId = input<string | null>(null);
+
+  /** When set, the form is in edit mode for this expense. */
+  readonly expense = input<Expense | null>(null);
 
   /** Pre-fill the date field when opening from the calendar. */
   readonly defaultDate = input<string | null>(null);
@@ -43,6 +46,7 @@ export class ExpenseFormComponent implements AfterViewInit {
   protected readonly localeService = inject(LocaleService);
 
   private readonly createStatus = this.store.selectSignal(selectExpensesCreateStatus);
+  private readonly updateStatus = this.store.selectSignal(selectExpensesUpdateStatus);
 
   protected readonly ExpenseCategory = ExpenseCategory;
   protected readonly expenseCategories = [
@@ -53,15 +57,23 @@ export class ExpenseFormComponent implements AfterViewInit {
     ExpenseCategory.Other,
   ];
 
-  protected readonly isSaving = computed(() => this.createStatus() === 'loading');
+  protected readonly isSaving = computed(
+    () => this.createStatus() === 'loading' || this.updateStatus() === 'loading',
+  );
   protected readonly isLoading = computed(() => this.isSaving());
 
-  protected readonly errorKey = computed<string | null>(() =>
-    this.createStatus() === 'failure' ? 'expenseForm.saveError' : null,
-  );
+  protected readonly errorKey = computed<string | null>(() => {
+    if (this.createStatus() === 'failure' || this.updateStatus() === 'failure')
+      return 'expenseForm.saveError';
+    return null;
+  });
 
-  /** Whether this instance is waiting for a save to complete. */
-  private savePending = false;
+  get isEditMode(): boolean {
+    return this.expense() !== null;
+  }
+
+  /** Tracks which save operation (create/update) was last dispatched by this instance. */
+  private saveOp: 'create' | 'update' | null = null;
 
   protected readonly form = this.fb.group({
     date: ['', Validators.required],
@@ -71,20 +83,42 @@ export class ExpenseFormComponent implements AfterViewInit {
   });
 
   constructor() {
+    // Populate form when inputs change
     effect(() => {
+      const e = this.expense();
       const d = this.defaultDate();
-      this.form.patchValue({ date: d ?? '' });
+      if (e) {
+        this.form.setValue({
+          date: e.date,
+          category: e.category,
+          amount: e.amount,
+          description: e.description,
+        });
+      } else {
+        this.form.reset({
+          date: d ?? '',
+          category: ExpenseCategory.Other,
+          amount: null,
+          description: '',
+        });
+      }
     });
 
+    // React to create completion
     effect(() => {
       const cs = this.createStatus();
-      if (this.savePending) {
-        if (cs === 'success') {
-          this.savePending = false;
-          this.saved.emit();
-        } else if (cs === 'failure') {
-          this.savePending = false;
-        }
+      if (this.saveOp === 'create') {
+        if (cs === 'success') { this.saveOp = null; this.saved.emit(); }
+        else if (cs === 'failure') { this.saveOp = null; }
+      }
+    });
+
+    // React to update completion
+    effect(() => {
+      const us = this.updateStatus();
+      if (this.saveOp === 'update') {
+        if (us === 'success') { this.saveOp = null; this.saved.emit(); }
+        else if (us === 'failure') { this.saveOp = null; }
       }
     });
   }
@@ -108,20 +142,33 @@ export class ExpenseFormComponent implements AfterViewInit {
     if (this.form.invalid || this.isLoading()) return;
 
     const { date, category, amount, description } = this.form.getRawValue();
-    const request: CreateExpenseRequest = {
-      date: date!,
-      category: category!,
-      amount: amount!,
-      description: description ?? '',
-    };
 
-    const tripId = this.tripId();
-    this.savePending = true;
-
-    if (tripId) {
-      this.store.dispatch(ExpenseActions.createExpense({ tripId, request }));
+    const expense = this.expense();
+    if (expense) {
+      // Edit mode
+      const request: UpdateExpenseRequest = {
+        date: date!,
+        category: category!,
+        amount: amount!,
+        description: description ?? '',
+      };
+      this.saveOp = 'update';
+      this.store.dispatch(ExpenseActions.updateExpense({ id: expense.id, request }));
     } else {
-      this.store.dispatch(ExpenseActions.createExpenseForDate({ date: date!, request }));
+      // Create mode
+      const request: CreateExpenseRequest = {
+        date: date!,
+        category: category!,
+        amount: amount!,
+        description: description ?? '',
+      };
+      const tripId = this.tripId();
+      this.saveOp = 'create';
+      if (tripId) {
+        this.store.dispatch(ExpenseActions.createExpense({ tripId, request }));
+      } else {
+        this.store.dispatch(ExpenseActions.createExpenseForDate({ date: date!, request }));
+      }
     }
   }
 

@@ -11,12 +11,12 @@
       id="expense-form-title"
       class="mb-6 text-lg font-semibold text-gray-900 dark:text-white"
     >
-      {{ 'expenseForm.title' | translate }}
+      {{ (isEditMode ? 'expenseForm.editTitle' : 'expenseForm.createTitle') | translate }}
     </h3>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate [attr.aria-busy]="isLoading() ? 'true' : null">
       <fieldset [disabled]="isLoading()">
-        <legend class="sr-only">{{ 'expenseForm.title' | translate }}</legend>
+        <legend class="sr-only">{{ (isEditMode ? 'expenseForm.editTitle' : 'expenseForm.createTitle') | translate }}</legend>
 
         <!-- Date -->
         <div class="mb-4">

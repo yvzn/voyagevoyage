@@ -21,3 +21,10 @@ export interface CreateExpenseRequest {
   amount: number;
   description: string;
 }
+
+export interface UpdateExpenseRequest {
+  date: string; // ISO 8601 date: YYYY-MM-DD
+  category: ExpenseCategory;
+  amount: number;
+  description: string;
+}

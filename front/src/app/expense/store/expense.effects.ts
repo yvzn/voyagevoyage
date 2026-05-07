@@ -25,6 +25,22 @@ export const loadExpensesEffect = createEffect(
   { functional: true },
 );
 
+export const loadExpenseByIdEffect = createEffect(
+  (actions$ = inject(Actions), expenseService = inject(ExpenseService)) =>
+    actions$.pipe(
+      ofType(ExpenseActions.loadExpenseById),
+      mergeMap(({ id }) =>
+        expenseService.getById(id).pipe(
+          map((expense) => ExpenseActions.loadExpenseByIdSuccess({ expense })),
+          catchError((error: unknown) =>
+            of(ExpenseActions.loadExpenseByIdFailure({ error: String(error) })),
+          ),
+        ),
+      ),
+    ),
+  { functional: true },
+);
+
 export const createExpenseEffect = createEffect(
   (actions$ = inject(Actions), expenseService = inject(ExpenseService)) =>
     actions$.pipe(
@@ -106,6 +122,38 @@ export const createExpenseForDateEffect = createEffect(
             ),
           );
       }),
+    ),
+  { functional: true },
+);
+
+export const updateExpenseEffect = createEffect(
+  (actions$ = inject(Actions), expenseService = inject(ExpenseService)) =>
+    actions$.pipe(
+      ofType(ExpenseActions.updateExpense),
+      mergeMap(({ id, request }) =>
+        expenseService.update(id, request).pipe(
+          map((expense) => ExpenseActions.updateExpenseSuccess({ expense })),
+          catchError((error: unknown) =>
+            of(ExpenseActions.updateExpenseFailure({ error: String(error) })),
+          ),
+        ),
+      ),
+    ),
+  { functional: true },
+);
+
+export const deleteExpenseEffect = createEffect(
+  (actions$ = inject(Actions), expenseService = inject(ExpenseService)) =>
+    actions$.pipe(
+      ofType(ExpenseActions.deleteExpense),
+      mergeMap(({ id }) =>
+        expenseService.deleteById(id).pipe(
+          map(() => ExpenseActions.deleteExpenseSuccess({ id })),
+          catchError((error: unknown) =>
+            of(ExpenseActions.deleteExpenseFailure({ error: String(error) })),
+          ),
+        ),
+      ),
     ),
   { functional: true },
 );

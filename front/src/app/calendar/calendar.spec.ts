@@ -10,7 +10,7 @@ import { selectAllTrips, selectTripsCreateStatus, selectTripsDeleteStatus, selec
 import { selectTripsError } from '../trip/store/trip.selectors';
 import { selectConstraints } from '../constraints/store/settings.selectors';
 import { ApiStatus } from '../trip/store/trip.reducer';
-import { selectExpensesCreateStatus, selectExpensesLastCreatedTripId } from '../expense/store/expense.selectors';
+import { selectExpensesCreateStatus, selectExpensesLastCreatedTripId, selectExpensesUpdateStatus } from '../expense/store/expense.selectors';
 
 const EN_TRANSLATIONS = {
   calendarHeading: 'Trip calendar',
@@ -48,7 +48,8 @@ const EN_TRANSLATIONS = {
     saveError: 'An error occurred while saving the trip. Please try again.',
   },
   expenseForm: {
-    title: 'New expense',
+    createTitle: 'New expense',
+    editTitle: 'Edit expense',
     date: 'Date',
     dateRequired: 'Date is required.',
     category: 'Category',
@@ -84,6 +85,7 @@ async function setupWithMockStore(trips: Trip[] = []): Promise<void> {
           { selector: selectTripsUpdateStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsDeleteStatus, value: 'idle' as ApiStatus },
           { selector: selectExpensesCreateStatus, value: 'idle' as ApiStatus },
+          { selector: selectExpensesUpdateStatus, value: 'idle' as ApiStatus },
           { selector: selectExpensesLastCreatedTripId, value: null },
         ],
       }),

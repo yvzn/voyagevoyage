@@ -13,7 +13,7 @@ import { getTripStatusClass, getTripStatusTranslationKey } from '../trip-status.
 import { LocaleService } from '../../locale.service';
 import { ExpenseFormComponent } from '../../expense/expense-form/expense-form';
 import { ExpenseActions } from '../../expense/store/expense.actions';
-import { selectAllExpenses, selectExpensesCreateStatus, selectExpensesLoadStatus } from '../../expense/store/expense.selectors';
+import { selectAllExpenses, selectExpensesLoadStatus } from '../../expense/store/expense.selectors';
 import { ExpenseCategory } from '../../expense/expense.model';
 
 @Component({
@@ -57,8 +57,6 @@ export class TripDetailComponent {
   protected readonly expenses = this.store.selectSignal(selectAllExpenses);
   protected readonly expensesLoadStatus = this.store.selectSignal(selectExpensesLoadStatus);
 
-  private readonly expenseCreateStatus = this.store.selectSignal(selectExpensesCreateStatus);
-
   protected readonly TripStatus = TripStatus;
   protected readonly ExpenseCategory = ExpenseCategory;
   protected readonly getTripStatusClass = getTripStatusClass;
@@ -87,14 +85,6 @@ export class TripDetailComponent {
         this.store.dispatch(ExpenseActions.loadExpenses({ tripId: id }));
       }
     });
-
-    // Close expense form on successful save
-    effect(() => {
-      const cs = this.expenseCreateStatus();
-      if (this.isExpenseFormOpen() && cs === 'success') {
-        this.isExpenseFormOpen.set(false);
-      }
-    });
   }
 
   protected formatDate(dateStr: string): string {
@@ -121,6 +111,10 @@ export class TripDetailComponent {
 
   protected closeExpenseForm(): void {
     this.isExpenseFormOpen.set(false);
+  }
+
+  protected navigateToExpense(expenseId: string): void {
+    this.router.navigate(['/expense', expenseId]);
   }
 
   protected requestDelete(): void {

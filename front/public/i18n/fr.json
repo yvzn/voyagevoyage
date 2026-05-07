@@ -58,7 +58,8 @@
     "notFound": "Déplacement introuvable."
   },
   "expenseForm": {
-    "title": "Nouvelle dépense",
+    "createTitle": "Nouvelle dépense",
+    "editTitle": "Modifier la dépense",
     "date": "Date",
     "dateRequired": "La date est obligatoire.",
     "category": "Catégorie",
@@ -69,6 +70,21 @@
     "saving": "Enregistrement…",
     "cancel": "Annuler",
     "saveError": "Une erreur est survenue lors de l'enregistrement de la dépense. Veuillez réessayer."
+  },
+  "expenseDetail": {
+    "backToTrip": "Retour au déplacement",
+    "backToCalendar": "Retour au calendrier",
+    "date": "Date",
+    "description": "Description",
+    "editButton": "Modifier",
+    "deleteButton": "Supprimer",
+    "deleting": "Suppression…",
+    "deleteConfirmMessage": "Êtes-vous sûr de vouloir supprimer cette dépense ? Cette action est irréversible.",
+    "deleteConfirmButton": "Confirmer la suppression",
+    "deleteCancelButton": "Annuler",
+    "deleteError": "Une erreur est survenue lors de la suppression de la dépense. Veuillez réessayer.",
+    "loading": "Chargement…",
+    "notFound": "Dépense introuvable."
   },
   "expenseCategory": {
     "train": "Train",
