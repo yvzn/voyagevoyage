@@ -123,16 +123,51 @@
     <!-- Expenses section -->
     <section aria-labelledby="expenses-heading" class="mt-6 rounded-xl bg-white shadow-sm dark:bg-gray-800">
       <div class="p-6">
-        <h2
-          id="expenses-heading"
-          class="text-lg font-semibold text-gray-900 dark:text-white"
-        >
-          {{ 'tripDetail.expensesHeading' | translate }}
-        </h2>
+        <div class="flex items-center justify-between">
+          <h2
+            id="expenses-heading"
+            class="text-lg font-semibold text-gray-900 dark:text-white"
+          >
+            {{ 'tripDetail.expensesHeading' | translate }}
+          </h2>
+          <button
+            type="button"
+            (click)="openExpenseForm()"
+            class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600"
+          >
+            <svg class="h-4 w-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            {{ 'tripDetail.addExpenseButton' | translate }}
+          </button>
+        </div>
 
-        <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
-          {{ 'tripDetail.noExpenses' | translate }}
-        </p>
+        @if (expenses().length === 0) {
+          <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+            {{ 'tripDetail.noExpenses' | translate }}
+          </p>
+        } @else {
+          <ul class="mt-4 divide-y divide-gray-100 dark:divide-gray-700" aria-label="{{ 'tripDetail.expensesHeading' | translate }}">
+            @for (expense of expenses(); track expense.id) {
+              <li class="flex items-center justify-between py-3">
+                <div class="flex flex-col">
+                  <span class="text-sm font-medium text-gray-900 dark:text-white">
+                    {{ 'expenseCategory.' + expense.category | translate }}
+                  </span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ formatDate(expense.date) }}
+                    @if (expense.description) {
+                      · {{ expense.description }}
+                    }
+                  </span>
+                </div>
+                <span class="ml-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-white">
+                  {{ expense.amount | number: '1.2-2' }}
+                </span>
+              </li>
+            }
+          </ul>
+        }
       </div>
     </section>
 
@@ -159,5 +194,14 @@
     [trip]="trip()"
     (saved)="closeForm()"
     (cancelled)="closeForm()"
+  />
+}
+
+<!-- Expense form modal -->
+@if (isExpenseFormOpen()) {
+  <app-expense-form
+    [tripId]="tripId()"
+    (saved)="closeExpenseForm()"
+    (cancelled)="closeExpenseForm()"
   />
 }

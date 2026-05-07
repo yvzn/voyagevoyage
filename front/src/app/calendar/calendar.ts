@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -17,11 +17,14 @@ import { TripActions } from '../trip/store/trip.actions';
 import { SettingsActions } from '../constraints/store/settings.actions';
 import { selectAllTrips, selectTripsLoadStatus, selectTripsError } from '../trip/store/trip.selectors';
 import { getTripStatusClass, getTripStatusDotClass, getTripStatusTranslationKey } from '../trip/trip-status.utils';
+import { ExpenseFormComponent } from '../expense/expense-form/expense-form';
+import { ExpenseActions } from '../expense/store/expense.actions';
+import { selectExpensesCreateStatus, selectExpensesLastCreatedTripId } from '../expense/store/expense.selectors';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [NgClass, TranslatePipe, TripFormComponent],
+  imports: [NgClass, TranslatePipe, TripFormComponent, ExpenseFormComponent],
   templateUrl: './calendar.html',
 })
 export class CalendarComponent {
@@ -33,6 +36,25 @@ export class CalendarComponent {
   constructor() {
     this.store.dispatch(TripActions.loadTrips());
     this.store.dispatch(SettingsActions.loadSettings());
+
+    // Navigate to trip detail after expense creation from calendar
+    effect(() => {
+      const status = this.expenseCreateStatus();
+      // Track when a submission starts while the expense form is open
+      if (this.isExpenseFormOpen() && status === 'loading') {
+        this.expenseFormPending = true;
+      }
+      if (this.expenseFormPending && status === 'success') {
+        this.expenseFormPending = false;
+        const tripId = this.expenseLastCreatedTripId();
+        this.isExpenseFormOpen.set(false);
+        if (tripId) {
+          this.router.navigate(['/trip', tripId]);
+        }
+      } else if (this.expenseFormPending && status === 'failure') {
+        this.expenseFormPending = false;
+      }
+    });
   }
 
   private readonly trips = this.store.selectSignal(selectAllTrips);
@@ -66,6 +88,18 @@ export class CalendarComponent {
 
   /** Pre-filled date for new trip creation (YYYY-MM-DD) */
   protected readonly formDefaultDate = signal<string | null>(null);
+
+  /** Whether the expense form modal is open */
+  protected readonly isExpenseFormOpen = signal(false);
+
+  /** Pre-filled date for expense creation (YYYY-MM-DD) */
+  protected readonly expenseFormDate = signal<string | null>(null);
+
+  private readonly expenseCreateStatus = this.store.selectSignal(selectExpensesCreateStatus);
+  private readonly expenseLastCreatedTripId = this.store.selectSignal(selectExpensesLastCreatedTripId);
+
+  /** True while an expense creation dispatched from this component is in flight. */
+  private expenseFormPending = false;
 
   protected readonly getTripStatusClass = getTripStatusClass;
   protected readonly getTripStatusDotClass = getTripStatusDotClass;
@@ -117,12 +151,22 @@ export class CalendarComponent {
     this.isFormOpen.set(true);
   }
 
+  openCreateExpenseForm(day: CalendarDay): void {
+    this.expenseFormDate.set(this.formatDayKey(day));
+    this.isExpenseFormOpen.set(true);
+  }
+
   navigateToTrip(trip: Trip): void {
     this.router.navigate(['/trip', trip.id]);
   }
 
   closeForm(): void {
     this.isFormOpen.set(false);
+  }
+
+  closeExpenseForm(): void {
+    this.expenseFormPending = false;
+    this.isExpenseFormOpen.set(false);
   }
 
   retryLoadTrips(): void {

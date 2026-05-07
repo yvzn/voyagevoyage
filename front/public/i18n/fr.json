@@ -17,6 +17,7 @@
   "calendarLoadError": "Impossible de charger les déplacements. Veuillez réessayer.",
   "calendarRetryButton": "Réessayer",
   "addTripForDay": "Ajouter un déplacement le {{date}} {{month}} {{year}}",
+  "addExpenseForDay": "Ajouter une dépense le {{date}} {{month}} {{year}}",
   "tripEventsForDay": "Déplacements du {{date}} {{month}} {{year}}",
   "tripStatusLegendLabel": "Légende des statuts de déplacement",
   "tripStatus": {
@@ -52,8 +53,29 @@
     "deleteCancelButton": "Annuler",
     "deleteError": "Une erreur est survenue lors de la suppression du déplacement. Veuillez réessayer.",
     "expensesHeading": "Dépenses",
+    "addExpenseButton": "Ajouter une dépense",
     "noExpenses": "Aucune dépense enregistrée pour ce déplacement.",
     "notFound": "Déplacement introuvable."
+  },
+  "expenseForm": {
+    "title": "Nouvelle dépense",
+    "date": "Date",
+    "dateRequired": "La date est obligatoire.",
+    "category": "Catégorie",
+    "amount": "Montant",
+    "amountRequired": "Le montant doit être supérieur à 0.",
+    "description": "Description",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "cancel": "Annuler",
+    "saveError": "Une erreur est survenue lors de l'enregistrement de la dépense. Veuillez réessayer."
+  },
+  "expenseCategory": {
+    "train": "Train",
+    "hotel": "Hôtel",
+    "meal": "Repas",
+    "metroBus": "Métro / Bus",
+    "other": "Autre"
   },
   "constraints": {
     "heading": "Contraintes de déplacement",

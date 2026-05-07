@@ -12,6 +12,7 @@ import { ApiStatus } from '../store/trip.reducer';
 import { selectAllTrips, selectTripsDeleteStatus } from '../store/trip.selectors';
 import { selectTripsCreateStatus, selectTripsUpdateStatus } from '../store/trip.selectors';
 import { selectConstraints } from '../../constraints/store/settings.selectors';
+import { selectAllExpenses, selectExpensesCreateStatus, selectExpensesLoadStatus } from '../../expense/store/expense.selectors';
 
 const EN_TRANSLATIONS = {
   tripDetail: {
@@ -26,6 +27,7 @@ const EN_TRANSLATIONS = {
     deleteCancelButton: 'Cancel',
     deleteError: 'An error occurred while deleting the trip. Please try again.',
     expensesHeading: 'Expenses',
+    addExpenseButton: 'Add expense',
     noExpenses: 'No expenses recorded for this trip.',
     notFound: 'Trip not found.',
   },
@@ -49,6 +51,26 @@ const EN_TRANSLATIONS = {
     saveError: 'An error occurred while saving the trip. Please try again.',
     constraintWarning: 'The selected dates do not comply with your travel constraints.',
     constraintError: 'The selected dates violate your mandatory travel constraints.',
+  },
+  expenseForm: {
+    title: 'New expense',
+    date: 'Date',
+    dateRequired: 'Date is required.',
+    category: 'Category',
+    amount: 'Amount',
+    amountRequired: 'Amount must be greater than 0.',
+    description: 'Description',
+    save: 'Save',
+    saving: 'Saving…',
+    cancel: 'Cancel',
+    saveError: 'An error occurred while saving the expense. Please try again.',
+  },
+  expenseCategory: {
+    train: 'Train',
+    hotel: 'Hotel',
+    meal: 'Meal',
+    metroBus: 'Metro / Bus',
+    other: 'Other',
   },
 };
 
@@ -83,6 +105,9 @@ async function setupModule(trips: Trip[] = [MOCK_TRIP], tripId = 'trip-1'): Prom
           { selector: selectTripsCreateStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsUpdateStatus, value: 'idle' as ApiStatus },
           { selector: selectConstraints, value: null },
+          { selector: selectAllExpenses, value: [] },
+          { selector: selectExpensesLoadStatus, value: 'idle' as ApiStatus },
+          { selector: selectExpensesCreateStatus, value: 'idle' as ApiStatus },
         ],
       }),
     ],

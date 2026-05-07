@@ -1,5 +1,5 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
-import { NgClass } from '@angular/common';
+import { NgClass, DecimalPipe } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -11,11 +11,15 @@ import { selectAllTrips, selectTripsDeleteStatus } from '../store/trip.selectors
 import { TripFormComponent } from '../trip-form/trip-form';
 import { getTripStatusClass, getTripStatusTranslationKey } from '../trip-status.utils';
 import { LocaleService } from '../../locale.service';
+import { ExpenseFormComponent } from '../../expense/expense-form/expense-form';
+import { ExpenseActions } from '../../expense/store/expense.actions';
+import { selectAllExpenses, selectExpensesCreateStatus, selectExpensesLoadStatus } from '../../expense/store/expense.selectors';
+import { ExpenseCategory } from '../../expense/expense.model';
 
 @Component({
   selector: 'app-trip-detail',
   standalone: true,
-  imports: [NgClass, TranslatePipe, TripFormComponent, RouterLink],
+  imports: [NgClass, DecimalPipe, TranslatePipe, TripFormComponent, RouterLink, ExpenseFormComponent],
   templateUrl: './trip-detail.html',
 })
 export class TripDetailComponent {
@@ -38,6 +42,9 @@ export class TripDetailComponent {
   /** Whether the edit form modal is open */
   protected readonly isFormOpen = signal(false);
 
+  /** Whether the expense form modal is open */
+  protected readonly isExpenseFormOpen = signal(false);
+
   /** Whether the inline delete confirmation prompt is shown */
   protected readonly showDeleteConfirm = signal(false);
 
@@ -47,7 +54,13 @@ export class TripDetailComponent {
     this.deleteStatus() === 'failure' ? 'tripDetail.deleteError' : null
   );
 
+  protected readonly expenses = this.store.selectSignal(selectAllExpenses);
+  protected readonly expensesLoadStatus = this.store.selectSignal(selectExpensesLoadStatus);
+
+  private readonly expenseCreateStatus = this.store.selectSignal(selectExpensesCreateStatus);
+
   protected readonly TripStatus = TripStatus;
+  protected readonly ExpenseCategory = ExpenseCategory;
   protected readonly getTripStatusClass = getTripStatusClass;
   protected readonly getTripStatusTranslationKey = getTripStatusTranslationKey;
 
@@ -64,6 +77,22 @@ export class TripDetailComponent {
         } else if (ds === 'failure') {
           this.deletePending = false;
         }
+      }
+    });
+
+    // Load expenses when the trip id is known
+    effect(() => {
+      const id = this.tripId();
+      if (id) {
+        this.store.dispatch(ExpenseActions.loadExpenses({ tripId: id }));
+      }
+    });
+
+    // Close expense form on successful save
+    effect(() => {
+      const cs = this.expenseCreateStatus();
+      if (this.isExpenseFormOpen() && cs === 'success') {
+        this.isExpenseFormOpen.set(false);
       }
     });
   }
@@ -84,6 +113,14 @@ export class TripDetailComponent {
 
   protected closeForm(): void {
     this.isFormOpen.set(false);
+  }
+
+  protected openExpenseForm(): void {
+    this.isExpenseFormOpen.set(true);
+  }
+
+  protected closeExpenseForm(): void {
+    this.isExpenseFormOpen.set(false);
   }
 
   protected requestDelete(): void {

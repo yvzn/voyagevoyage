@@ -10,6 +10,7 @@ import { selectAllTrips, selectTripsCreateStatus, selectTripsDeleteStatus, selec
 import { selectTripsError } from '../trip/store/trip.selectors';
 import { selectConstraints } from '../constraints/store/settings.selectors';
 import { ApiStatus } from '../trip/store/trip.reducer';
+import { selectExpensesCreateStatus, selectExpensesLastCreatedTripId } from '../expense/store/expense.selectors';
 
 const EN_TRANSLATIONS = {
   calendarHeading: 'Trip calendar',
@@ -24,6 +25,7 @@ const EN_TRANSLATIONS = {
   calendarLoadError: 'Failed to load trips. Please try again.',
   calendarRetryButton: 'Retry',
   addTripForDay: 'Add a trip on {{month}} {{date}}, {{year}}',
+  addExpenseForDay: 'Add an expense on {{month}} {{date}}, {{year}}',
   tripEventsForDay: 'Trip events for {{month}} {{date}}, {{year}}',
   tripStatusLegendLabel: 'Trip status legend',
   tripStatus: {
@@ -45,6 +47,26 @@ const EN_TRANSLATIONS = {
     cancel: 'Cancel',
     saveError: 'An error occurred while saving the trip. Please try again.',
   },
+  expenseForm: {
+    title: 'New expense',
+    date: 'Date',
+    dateRequired: 'Date is required.',
+    category: 'Category',
+    amount: 'Amount',
+    amountRequired: 'Amount must be greater than 0.',
+    description: 'Description',
+    save: 'Save',
+    saving: 'Saving…',
+    cancel: 'Cancel',
+    saveError: 'An error occurred while saving the expense. Please try again.',
+  },
+  expenseCategory: {
+    train: 'Train',
+    hotel: 'Hotel',
+    meal: 'Meal',
+    metroBus: 'Metro / Bus',
+    other: 'Other',
+  },
 };
 
 async function setupWithMockStore(trips: Trip[] = []): Promise<void> {
@@ -61,6 +83,8 @@ async function setupWithMockStore(trips: Trip[] = []): Promise<void> {
           { selector: selectTripsCreateStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsUpdateStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsDeleteStatus, value: 'idle' as ApiStatus },
+          { selector: selectExpensesCreateStatus, value: 'idle' as ApiStatus },
+          { selector: selectExpensesLastCreatedTripId, value: null },
         ],
       }),
     ],
