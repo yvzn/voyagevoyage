@@ -35,12 +35,25 @@
     "status": "Statut",
     "save": "Enregistrer",
     "saving": "Enregistrement…",
-    "delete": "Supprimer",
     "cancel": "Annuler",
     "saveError": "Une erreur est survenue lors de l'enregistrement du déplacement. Veuillez réessayer.",
-    "deleteError": "Une erreur est survenue lors de la suppression du déplacement. Veuillez réessayer.",
     "constraintWarning": "Les dates sélectionnées ne respectent pas vos contraintes de déplacement.",
     "constraintError": "Les dates sélectionnées violent vos contraintes de déplacement obligatoires."
+  },
+  "tripDetail": {
+    "backToCalendar": "Retour au calendrier",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "editButton": "Modifier",
+    "deleteButton": "Supprimer",
+    "deleting": "Suppression…",
+    "deleteConfirmMessage": "Êtes-vous sûr de vouloir supprimer ce déplacement ? Cette action est irréversible.",
+    "deleteConfirmButton": "Confirmer la suppression",
+    "deleteCancelButton": "Annuler",
+    "deleteError": "Une erreur est survenue lors de la suppression du déplacement. Veuillez réessayer.",
+    "expensesHeading": "Dépenses",
+    "noExpenses": "Aucune dépense enregistrée pour ce déplacement.",
+    "notFound": "Déplacement introuvable."
   },
   "constraints": {
     "heading": "Contraintes de déplacement",

@@ -170,7 +170,7 @@
                           [ngClass]="getTripStatusClass(trip.status)"
                           [title]="trip.destination"
                           [attr.aria-label]="getTripAriaLabel(trip)"
-                          (click)="openEditForm(trip)"
+                          (click)="navigateToTrip(trip)"
                         >
                           {{ trip.destination }}
                         </button>
@@ -207,7 +207,6 @@
     [trip]="editingTrip()"
     [defaultDate]="formDefaultDate()"
     (saved)="closeForm()"
-    (deleted)="closeForm()"
     (cancelled)="closeForm()"
   />
 }

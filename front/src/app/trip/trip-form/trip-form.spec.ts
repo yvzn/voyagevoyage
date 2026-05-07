@@ -4,7 +4,7 @@ import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { TripFormComponent } from './trip-form';
 import { Trip, TripStatus } from '../trip.model';
 import { ApiStatus } from '../store/trip.reducer';
-import { selectTripsCreateStatus, selectTripsUpdateStatus, selectTripsDeleteStatus } from '../store/trip.selectors';
+import { selectTripsCreateStatus, selectTripsUpdateStatus } from '../store/trip.selectors';
 import { selectConstraints } from '../../constraints/store/settings.selectors';
 import { TravelConstraints, DayOfWeek } from '../../constraints/constraints.model';
 
@@ -20,10 +20,8 @@ const EN_TRANSLATIONS = {
     status: 'Status',
     save: 'Save',
     saving: 'Saving…',
-    delete: 'Delete',
     cancel: 'Cancel',
     saveError: 'An error occurred while saving the trip. Please try again.',
-    deleteError: 'An error occurred while deleting the trip. Please try again.',
     constraintWarning: 'One or more selected days are outside your allowed travel days (flexible mode).',
     constraintError: 'One or more selected days are outside your allowed travel days (strict mode). Please adjust your dates.',
   },
@@ -50,7 +48,6 @@ async function setupModule(
           { selector: selectConstraints, value: constraints },
           { selector: selectTripsCreateStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsUpdateStatus, value: 'idle' as ApiStatus },
-          { selector: selectTripsDeleteStatus, value: 'idle' as ApiStatus },
         ],
       }),
     ],
@@ -115,7 +112,7 @@ describe('TripFormComponent — display', () => {
     expect(deleteBtn).toBeUndefined();
   });
 
-  it('should show delete button in edit mode', async () => {
+  it('should not show delete button in edit mode', async () => {
     const trip: Trip = {
       id: 'e1',
       destination: 'Lyon',
@@ -132,7 +129,7 @@ describe('TripFormComponent — display', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     const buttons = Array.from(compiled.querySelectorAll('button'));
     const deleteBtn = buttons.find((b) => b.textContent?.trim() === 'Delete');
-    expect(deleteBtn).toBeTruthy();
+    expect(deleteBtn).toBeUndefined();
   });
 
   it('should pre-fill fields with trip values in edit mode', async () => {
@@ -294,38 +291,6 @@ describe('TripFormComponent — update operation', () => {
     TestBed.flushEffects();
 
     expect(saved).toBe(true);
-  });
-});
-
-describe('TripFormComponent — delete operation', () => {
-  const trip: Trip = {
-    id: 'del-1',
-    destination: 'Lille',
-    startDate: '2026-09-01',
-    endDate: '2026-09-02',
-    status: TripStatus.Cancelled,
-  };
-  let store: MockStore;
-
-  beforeEach(async () => {
-    store = await setupModule();
-  });
-
-  it('should dispatch deleteTrip and emit deleted on success action', () => {
-    const fixture = TestBed.createComponent(TripFormComponent);
-    fixture.componentRef.setInput('trip', trip);
-    fixture.detectChanges();
-
-    let deleted = false;
-    fixture.componentInstance.deleted.subscribe(() => (deleted = true));
-
-    fixture.componentInstance['onDelete']();
-
-    store.overrideSelector(selectTripsDeleteStatus, 'success');
-    store.refreshState();
-    TestBed.flushEffects();
-
-    expect(deleted).toBe(true);
   });
 });
 

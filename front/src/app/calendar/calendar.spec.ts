@@ -1,6 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { provideMockStore } from '@ngrx/store/testing';
+import { provideRouter } from '@angular/router';
+import { Router } from '@angular/router';
+import { vi } from 'vitest';
 import { CalendarComponent } from './calendar';
 import { Trip, TripStatus } from '../trip/trip.model';
 import { selectAllTrips, selectTripsCreateStatus, selectTripsDeleteStatus, selectTripsLoadStatus, selectTripsUpdateStatus } from '../trip/store/trip.selectors';
@@ -39,10 +42,8 @@ const EN_TRANSLATIONS = {
     status: 'Status',
     save: 'Save',
     saving: 'Saving…',
-    delete: 'Delete',
     cancel: 'Cancel',
     saveError: 'An error occurred while saving the trip. Please try again.',
-    deleteError: 'An error occurred while deleting the trip. Please try again.',
   },
 };
 
@@ -50,6 +51,7 @@ async function setupWithMockStore(trips: Trip[] = []): Promise<void> {
   await TestBed.configureTestingModule({
     imports: [CalendarComponent, TranslateModule.forRoot()],
     providers: [
+      provideRouter([]),
       provideMockStore({
         selectors: [
           { selector: selectAllTrips, value: trips },
@@ -436,10 +438,13 @@ describe('CalendarComponent — trip form', () => {
     expect(modal).toBeNull();
   });
 
-  it('should pre-fill the editing trip when opening in edit mode', () => {
+  it('should navigate to trip detail when clicking on a trip', () => {
     const fixture = TestBed.createComponent(CalendarComponent);
     const component = fixture.componentInstance;
     fixture.detectChanges();
+
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
 
     const trip: Trip = {
       id: 'edit-1',
@@ -449,11 +454,9 @@ describe('CalendarComponent — trip form', () => {
       status: TripStatus.Planned,
     };
 
-    component.openEditForm(trip);
-    fixture.detectChanges();
+    component.navigateToTrip(trip);
 
-    expect(component['isFormOpen']()).toBe(true);
-    expect(component['editingTrip']()).toEqual(trip);
+    expect(navigateSpy).toHaveBeenCalledWith(['/trip', trip.id]);
   });
 });
 

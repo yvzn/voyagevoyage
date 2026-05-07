@@ -15,10 +15,11 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { Trip, TripStatus } from '../trip.model';
 import { TripActions } from '../store/trip.actions';
-import { selectTripsCreateStatus, selectTripsUpdateStatus, selectTripsDeleteStatus } from '../store/trip.selectors';
+import { selectTripsCreateStatus, selectTripsUpdateStatus } from '../store/trip.selectors';
 import { LocaleService } from '../../locale.service';
 import { selectConstraints } from '../../constraints/store/settings.selectors';
 import { constraintViolationValidator } from './constraint-violation.validator';
+import { getTripStatusTranslationKey } from '../trip-status.utils';
 
 function endDateAfterStartDate(group: AbstractControl): ValidationErrors | null {
   const start = group.get('startDate')?.value as string;
@@ -42,7 +43,6 @@ export class TripFormComponent implements AfterViewInit {
   readonly defaultDate = input<string | null>(null);
 
   readonly saved = output<void>();
-  readonly deleted = output<void>();
   readonly cancelled = output<void>();
 
   private readonly dialogEl = viewChild.required<ElementRef<HTMLDialogElement>>('dialogEl');
@@ -53,34 +53,25 @@ export class TripFormComponent implements AfterViewInit {
   private readonly constraints = this.store.selectSignal(selectConstraints);
   private readonly createStatus = this.store.selectSignal(selectTripsCreateStatus);
   private readonly updateStatus = this.store.selectSignal(selectTripsUpdateStatus);
-  private readonly deleteStatus = this.store.selectSignal(selectTripsDeleteStatus);
 
   protected readonly TripStatus = TripStatus;
   protected readonly tripStatuses = [TripStatus.Planned, TripStatus.Confirmed, TripStatus.Cancelled];
+  protected readonly getTripStatusTranslationKey = getTripStatusTranslationKey;
 
   protected readonly isSaving = computed(
     () => this.createStatus() === 'loading' || this.updateStatus() === 'loading',
   );
 
-  protected readonly isDeleting = computed(
-    () => this.deleteStatus() === 'loading',
-  );
-
-  protected readonly isLoading = computed(
-    () => this.isSaving() || this.isDeleting(),
-  );
+  protected readonly isLoading = computed(() => this.isSaving());
 
   protected readonly errorKey = computed<string | null>(() => {
     if (this.createStatus() === 'failure' || this.updateStatus() === 'failure')
       return 'tripForm.saveError';
-    if (this.deleteStatus() === 'failure') return 'tripForm.deleteError';
     return null;
   });
 
   /** Tracks which save operation (create/update) was last dispatched by this instance. */
   private saveOp: 'create' | 'update' | null = null;
-  /** True while a delete dispatched by this instance is in flight. */
-  private deletePending = false;
 
   protected readonly form = this.fb.group(
     {
@@ -128,15 +119,6 @@ export class TripFormComponent implements AfterViewInit {
         else if (us === 'failure') { this.saveOp = null; }
       }
     });
-
-    // React to delete completion via store status
-    effect(() => {
-      const ds = this.deleteStatus();
-      if (this.deletePending) {
-        if (ds === 'success') { this.deletePending = false; this.deleted.emit(); }
-        else if (ds === 'failure') { this.deletePending = false; }
-      }
-    });
   }
 
   ngAfterViewInit(): void {
@@ -145,17 +127,6 @@ export class TripFormComponent implements AfterViewInit {
 
   get isEditMode(): boolean {
     return this.trip() !== null;
-  }
-
-  protected getTripStatusTranslationKey(status: TripStatus): string {
-    switch (status) {
-      case TripStatus.Planned:
-        return 'tripStatus.planned';
-      case TripStatus.Confirmed:
-        return 'tripStatus.confirmed';
-      case TripStatus.Cancelled:
-        return 'tripStatus.cancelled';
-    }
   }
 
   protected onDialogCancel(event: Event): void {
@@ -196,14 +167,6 @@ export class TripFormComponent implements AfterViewInit {
       this.saveOp = 'create';
       this.store.dispatch(TripActions.createTrip({ request }));
     }
-  }
-
-  protected onDelete(): void {
-    const trip = this.trip();
-    if (!trip || this.isLoading()) return;
-
-    this.deletePending = true;
-    this.store.dispatch(TripActions.deleteTrip({ id: trip.id }));
   }
 
   protected onCancel(): void {
