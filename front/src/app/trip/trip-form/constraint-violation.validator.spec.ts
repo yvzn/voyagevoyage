@@ -18,12 +18,11 @@ function makeGroup(
   startDate: string,
   endDate: string,
   constraints: TravelConstraints | null,
-  now: Date = new Date('2026-08-01T00:00:00'),
 ) {
   const fb = new FormBuilder();
   return fb.group(
     { startDate: [startDate], endDate: [endDate] },
-    { validators: constraintViolationValidator(() => constraints, () => now) },
+    { validators: constraintViolationValidator(() => constraints) },
   );
 }
 
@@ -102,20 +101,6 @@ describe('constraintViolationValidator', () => {
       });
       const group = makeGroup('2026-08-03', '2026-08-07', constraints);
       expect(group.hasError('constraintWarning')).toBe(true);
-    });
-  });
-
-  describe('when dates exceed planning horizon', () => {
-    it('should return constraintWarning in flexible mode', () => {
-      const constraints = makeConstraints({ planningHorizonDays: 30, isStrict: false });
-      const group = makeGroup('2026-09-15', '2026-09-16', constraints, new Date('2026-08-01T00:00:00'));
-      expect(group.hasError('constraintWarning')).toBe(true);
-    });
-
-    it('should return constraintError in strict mode', () => {
-      const constraints = makeConstraints({ planningHorizonDays: 30, isStrict: true });
-      const group = makeGroup('2026-09-15', '2026-09-16', constraints, new Date('2026-08-01T00:00:00'));
-      expect(group.hasError('constraintError')).toBe(true);
     });
   });
 });
