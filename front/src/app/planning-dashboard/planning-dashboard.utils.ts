@@ -17,6 +17,14 @@ export interface AvailableMonthItem {
 
 export type PlanningItem = PlannedTripItem | AvailableMonthItem;
 
+const MILLISECONDS_PER_DAY = 86400000;
+
+/** Parses a YYYY-MM-DD date string into a UTC timestamp. */
+function parseISODateUTC(dateStr: string): number {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return Date.UTC(y, m - 1, d);
+}
+
 /**
  * Computes planning items from the current trips and constraints.
  *
@@ -40,8 +48,7 @@ export function getPlanningItems(
   // 1. Planned trips whose start date falls within the horizon
   for (const trip of trips) {
     if (trip.status !== TripStatus.Planned) continue;
-    const [sy, sm, sd] = trip.startDate.split('-').map(Number);
-    const startDate = new Date(Date.UTC(sy, sm - 1, sd));
+    const startDate = new Date(parseISODateUTC(trip.startDate));
     if (startDate >= today && startDate <= horizonDate) {
       items.push({ type: 'planned-trip', trip });
     }
@@ -54,11 +61,9 @@ export function getPlanningItems(
     const tripDaysPerMonth = new Map<string, number>();
     for (const trip of trips) {
       if (trip.status === TripStatus.Cancelled) continue;
-      const [sy, sm, sd] = trip.startDate.split('-').map(Number);
-      const [ey, em, ed] = trip.endDate.split('-').map(Number);
-      const startTs = Date.UTC(sy, sm - 1, sd);
-      const endTs = Date.UTC(ey, em - 1, ed);
-      for (let ts = startTs; ts <= endTs; ts += 86400000) {
+      const startTs = parseISODateUTC(trip.startDate);
+      const endTs = parseISODateUTC(trip.endDate);
+      for (let ts = startTs; ts <= endTs; ts += MILLISECONDS_PER_DAY) {
         const d = new Date(ts);
         const key = `${d.getUTCFullYear()}-${d.getUTCMonth()}`;
         tripDaysPerMonth.set(key, (tripDaysPerMonth.get(key) ?? 0) + 1);
