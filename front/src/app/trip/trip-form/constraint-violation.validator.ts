@@ -17,10 +17,11 @@ import { TravelConstraints } from '../../constraints/constraints.model';
  */
 export function constraintViolationValidator(
   getConstraints: () => TravelConstraints | null,
+  getNow: () => Date = () => new Date(),
 ): ValidatorFn {
   return (group: AbstractControl): ValidationErrors | null => {
     const constraints = getConstraints();
-    if (!constraints || constraints.allowedDaysOfWeek.length === 0) return null;
+    if (!constraints) return null;
 
     const start = group.get('startDate')?.value as string;
     const end = group.get('endDate')?.value as string;
@@ -28,6 +29,19 @@ export function constraintViolationValidator(
 
     const startDate = new Date(start + 'T00:00:00');
     const endDate = new Date(end + 'T00:00:00');
+
+    if (constraints.planningHorizonDays > 0) {
+      const now = getNow();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const horizonEnd = new Date(today);
+      horizonEnd.setDate(horizonEnd.getDate() + constraints.planningHorizonDays);
+      if (startDate > horizonEnd || endDate > horizonEnd) {
+        return constraints.isStrict ? { constraintError: true } : { constraintWarning: true };
+      }
+    }
+
+    if (constraints.allowedDaysOfWeek.length === 0) return null;
+
     const current = new Date(startDate);
 
     while (current <= endDate) {

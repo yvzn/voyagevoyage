@@ -46,6 +46,7 @@ public class CosmosDbTravelConstraintsService(
         existing.ConsiderPublicHolidays = request.ConsiderPublicHolidays;
         existing.ConsiderVacationDays = request.ConsiderVacationDays;
         existing.IsStrict = request.IsStrict;
+        existing.PlanningHorizonDays = request.PlanningHorizonDays;
 
         await db.SaveChangesAsync();
         return existing;

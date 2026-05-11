@@ -14,6 +14,7 @@ export interface TravelConstraints {
   considerPublicHolidays: boolean;
   considerVacationDays: boolean;
   isStrict: boolean;
+  planningHorizonDays: number;
 }
 
 export interface UpdateTravelConstraintsRequest {
@@ -22,4 +23,5 @@ export interface UpdateTravelConstraintsRequest {
   considerPublicHolidays: boolean;
   considerVacationDays: boolean;
   isStrict: boolean;
+  planningHorizonDays: number;
 }

@@ -10,6 +10,7 @@ const MOCK_CONSTRAINTS: TravelConstraints = {
   considerPublicHolidays: true,
   considerVacationDays: false,
   isStrict: false,
+  planningHorizonDays: 90,
 };
 
 describe('ConstraintsService', () => {
@@ -71,6 +72,7 @@ describe('ConstraintsService', () => {
         considerPublicHolidays: false,
         considerVacationDays: true,
         isStrict: true,
+        planningHorizonDays: 60,
       };
       const updated: TravelConstraints = { ...request };
 
@@ -83,4 +85,3 @@ describe('ConstraintsService', () => {
     });
   });
 });
-

@@ -1,10 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
+import { vi } from 'vitest';
 import { ConstraintsSettingsComponent } from './constraints-settings';
 import { TravelConstraints } from '../constraints.model';
 import { selectConstraints, selectSettingsLoadStatus, selectSettingsUpdateStatus } from '../store/settings.selectors';
 import { ApiStatus } from '../store/settings.reducer';
+import { SettingsActions } from '../store/settings.actions';
 
 const EN_TRANSLATIONS = {
   constraints: {
@@ -21,6 +23,9 @@ const EN_TRANSLATIONS = {
     maxDaysPerMonth: 'Maximum travel days per month',
     maxDaysPerMonthHint: 'Leave empty for no limit.',
     maxDaysPerMonthError: 'Must be between 1 and 31.',
+    planningHorizonDays: 'Planning horizon (days)',
+    planningHorizonDaysHint: 'Suggestions are generated only within this horizon (1 to 365 days).',
+    planningHorizonDaysError: 'Must be between 1 and 365.',
     considerPublicHolidays: 'Exclude public holidays',
     considerPublicHolidaysHint: 'Public holidays will not count as allowed travel days.',
     considerVacationDays: 'Exclude vacation days',
@@ -107,16 +112,18 @@ describe('ConstraintsSettingsComponent — display', () => {
 });
 
 describe('ConstraintsSettingsComponent — pre-fill', () => {
+  let store: MockStore;
   const existingConstraints: TravelConstraints = {
     allowedDaysOfWeek: [1, 2, 3, 4, 5], // Mon-Fri
     maxDaysPerMonth: 8,
     considerPublicHolidays: true,
     considerVacationDays: false,
     isStrict: true,
+    planningHorizonDays: 60,
   };
   beforeEach(async () => {
     // loadStatus 'success' matches the real state when constraints are already in the store
-    await setupModule(existingConstraints, 'success');
+    store = await setupModule(existingConstraints, 'success');
   });
 
   it('should pre-fill form from existing constraints', async () => {
@@ -129,8 +136,32 @@ describe('ConstraintsSettingsComponent — pre-fill', () => {
     expect(component['form'].get('friday')?.value).toBe(true);
     expect(component['form'].get('saturday')?.value).toBe(false);
     expect(component['form'].get('maxDaysPerMonth')?.value).toBe(8);
+    expect(component['form'].get('planningHorizonDays')?.value).toBe(60);
     expect(component['form'].get('considerPublicHolidays')?.value).toBe(true);
     expect(component['form'].get('isStrict')?.value).toBe(true);
+  });
+
+  it('should include planning horizon in update request', async () => {
+    const fixture = TestBed.createComponent(ConstraintsSettingsComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    component['form'].patchValue({
+      planningHorizonDays: 90,
+      isStrict: false,
+      considerPublicHolidays: false,
+      considerVacationDays: false,
+    });
+
+    component['onSubmit']();
+
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      SettingsActions.updateSettings({
+        request: expect.objectContaining({ planningHorizonDays: 90 }),
+      }),
+    );
   });
 });
 
@@ -183,4 +214,3 @@ describe('ConstraintsSettingsComponent — save error', () => {
     expect(component['errorKey']()).toBe('constraints.saveError');
   });
 });
-
