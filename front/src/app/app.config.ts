@@ -9,8 +9,10 @@ import { provideEffects } from '@ngrx/effects';
 import { routes } from './app.routes';
 import { tripsFeature } from './trip/store/trip.reducer';
 import { settingsFeature } from './constraints/store/settings.reducer';
+import { expensesFeature } from './expense/store/expense.reducer';
 import * as tripEffects from './trip/store/trip.effects';
 import * as settingsEffects from './constraints/store/settings.effects';
+import * as expenseEffects from './expense/store/expense.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -28,7 +30,8 @@ export const appConfig: ApplicationConfig = {
     provideStore({
       [tripsFeature.name]: tripsFeature.reducer,
       [settingsFeature.name]: settingsFeature.reducer,
+      [expensesFeature.name]: expensesFeature.reducer,
     }),
-    provideEffects(tripEffects, settingsEffects),
+    provideEffects(tripEffects, settingsEffects, expenseEffects),
   ],
 };

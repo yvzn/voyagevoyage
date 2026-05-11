@@ -1,0 +1,140 @@
+<dialog
+  #dialogEl
+  (cancel)="onDialogCancel($event)"
+  (click)="onBackdropClick($event)"
+  aria-labelledby="expense-form-title"
+  class="m-auto w-full max-w-md rounded-xl border-0 bg-white p-0 shadow-xl backdrop:bg-black/50 dark:bg-gray-800"
+>
+  <!-- Inner wrapper stops backdrop-click propagation -->
+  <div class="p-6" (click)="$event.stopPropagation()">
+    <h3
+      id="expense-form-title"
+      class="mb-6 text-lg font-semibold text-gray-900 dark:text-white"
+    >
+      {{ (isEditMode ? 'expenseForm.editTitle' : 'expenseForm.createTitle') | translate }}
+    </h3>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate [attr.aria-busy]="isLoading() ? 'true' : null">
+      <fieldset [disabled]="isLoading()">
+        <legend class="sr-only">{{ (isEditMode ? 'expenseForm.editTitle' : 'expenseForm.createTitle') | translate }}</legend>
+
+        <!-- Date -->
+        <div class="mb-4">
+          <label
+            for="expense-date"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'expenseForm.date' | translate }}
+          </label>
+          <input
+            id="expense-date"
+            type="date"
+            formControlName="date"
+            [lang]="localeService.currentLocale()"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('date')?.invalid && form.get('date')?.touched }"
+          />
+          @if (form.get('date')?.invalid && form.get('date')?.touched) {
+            <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+              {{ 'expenseForm.dateRequired' | translate }}
+            </p>
+          }
+        </div>
+
+        <!-- Category -->
+        <div class="mb-4">
+          <label
+            for="expense-category"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'expenseForm.category' | translate }}
+          </label>
+          <select
+            id="expense-category"
+            formControlName="category"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          >
+            @for (cat of expenseCategories; track cat) {
+              <option [value]="cat">{{ 'expenseCategory.' + cat | translate }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Amount -->
+        <div class="mb-4">
+          <label
+            for="expense-amount"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'expenseForm.amount' | translate }}
+          </label>
+          <input
+            id="expense-amount"
+            type="number"
+            formControlName="amount"
+            min="0.01"
+            step="0.01"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('amount')?.invalid && form.get('amount')?.touched }"
+          />
+          @if (form.get('amount')?.invalid && form.get('amount')?.touched) {
+            <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+              {{ 'expenseForm.amountRequired' | translate }}
+            </p>
+          }
+        </div>
+
+        <!-- Description -->
+        <div class="mb-6">
+          <label
+            for="expense-description"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'expenseForm.description' | translate }}
+          </label>
+          <textarea
+            id="expense-description"
+            formControlName="description"
+            rows="3"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          ></textarea>
+        </div>
+
+      </fieldset>
+
+      <!-- Error message -->
+      @if (errorKey()) {
+        <div
+          role="alert"
+          class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-400"
+        >
+          {{ errorKey()! | translate }}
+        </div>
+      }
+
+      <!-- Actions -->
+      <div class="flex items-center justify-end gap-2">
+        <button
+          type="button"
+          (click)="onCancel()"
+          class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+        >
+          {{ 'expenseForm.cancel' | translate }}
+        </button>
+        <button
+          type="submit"
+          [attr.aria-busy]="isSaving() ? 'true' : null"
+          class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
+        >
+          @if (isSaving()) {
+            <svg class="inline h-4 w-4 animate-spin" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.036l3-2.745z"/>
+            </svg>
+          }
+          {{ (isSaving() ? 'expenseForm.saving' : 'expenseForm.save') | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</dialog>

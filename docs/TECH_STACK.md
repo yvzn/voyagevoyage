@@ -385,6 +385,24 @@ Practical rules:
 - partition keys must always be used in queries (add `.Where(e => e.PartitionKey == value)` before querying)
 - user-owned data uses `UserId` as the partition key; always filter by the current user from `ICurrentUserService`
 
+#### Known EF Core / Cosmos DB query caveats
+
+**Avoid `AnyAsync()` for existence checks.**
+`AnyAsync()` can translate to queries that do not work reliably with the EF Core Cosmos DB provider, especially during emulator initialization or on certain query shapes.
+
+Use `FirstOrDefaultAsync() != null` instead:
+
+```csharp
+// ❌ Can fail silently with EF Core for Cosmos DB
+var exists = await db.Trips.AnyAsync(t => t.Id == id && t.UserId == userId);
+
+// ✅ Preferred: translates reliably
+var entity = await db.Trips.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+if (entity is null) { /* not found */ }
+```
+
+This applies to all `DbSet<T>` queries in services. Use `FirstOrDefaultAsync`, `ToListAsync`, or `SingleOrDefaultAsync` for all data access patterns.
+
 #### Local development
 
 Use the [Azure Cosmos DB Emulator](https://aka.ms/cosmosemulator) for local development.

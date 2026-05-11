@@ -11,10 +11,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public const string DatabaseName = "voyagevoyage";
     public const string TripsContainerName = "trips";
     public const string TravelConstraintsContainerName = "travel-constraints";
+    public const string ExpensesContainerName = "expenses";
 
     public DbSet<Trip> Trips { get; set; }
 
     public DbSet<TravelConstraints> TravelConstraints { get; set; }
+
+    public DbSet<Expense> Expenses { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,6 +33,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.ToContainer(TravelConstraintsContainerName);
             entity.HasPartitionKey(c => c.UserId);
             entity.HasKey(c => c.Id);
+        });
+
+        modelBuilder.Entity<Expense>(entity =>
+        {
+            entity.ToContainer(ExpensesContainerName);
+            entity.HasPartitionKey(e => e.UserId);
+            entity.HasKey(e => e.Id);
         });
     }
 }

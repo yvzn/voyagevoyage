@@ -58,7 +58,7 @@ public class DbInitializerHostedService(
         if (!env.IsDevelopment())
             return;
 
-        if (await db.Trips.FirstOrDefaultAsync(cancellationToken) != null)
+        if (await db.Trips.OrderBy(t => t.StartDate).FirstOrDefaultAsync(cancellationToken) != null)
         {
             logger.LogInformation("Trips container already contains data. Skipping seed.");
             return;
