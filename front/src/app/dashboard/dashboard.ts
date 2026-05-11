@@ -8,6 +8,8 @@ import { SettingsActions } from '../constraints/store/settings.actions';
 import { selectAllTrips, selectTripsLoadStatus } from '../trip/store/trip.selectors';
 import { getTripStatusDotClass, getTripStatusTranslationKey } from '../trip/trip-status.utils';
 import { LocaleService } from '../locale.service';
+
+const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
 import { Trip } from '../trip/trip.model';
 import { PlanningDashboardComponent } from '../planning-dashboard/planning-dashboard';
 
@@ -89,7 +91,7 @@ export class DashboardComponent {
       const [ey, em, ed] = trip.endDate.split('-').map(Number);
       const startTs = Date.UTC(sy, sm - 1, sd);
       const endTs = Date.UTC(ey, em - 1, ed);
-      for (let ts = startTs; ts <= endTs; ts += 86400000) {
+      for (let ts = startTs; ts <= endTs; ts += MILLISECONDS_PER_DAY) {
         const d = new Date(ts);
         const key = this.dayKey(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
         const existing = map.get(key);

@@ -17,7 +17,7 @@ export interface AvailableMonthItem {
 
 export type PlanningItem = PlannedTripItem | AvailableMonthItem;
 
-const MILLISECONDS_PER_DAY = 86400000;
+const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
 
 /** Parses a YYYY-MM-DD date string into a UTC timestamp. */
 function parseISODateUTC(dateStr: string): number {
