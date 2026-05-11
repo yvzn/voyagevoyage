@@ -17,10 +17,10 @@ export interface AvailableMonthItem {
 
 export type PlanningItem = PlannedTripItem | AvailableMonthItem;
 
-const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
+export const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
 
 /** Parses a YYYY-MM-DD date string into a UTC timestamp. */
-function parseISODateUTC(dateStr: string): number {
+export function parseISODateUTC(dateStr: string): number {
   const [y, m, d] = dateStr.split('-').map(Number);
   return Date.UTC(y, m - 1, d);
 }
