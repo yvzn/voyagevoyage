@@ -54,4 +54,9 @@ public class TravelConstraints
     /// When false, constraints are flexible (derogations allowed).
     /// </summary>
     public bool IsStrict { get; set; }
+
+    /// <summary>
+    /// Number of days ahead for which planning suggestions should be generated.
+    /// </summary>
+    public int PlanningHorizonDays { get; set; } = 90;
 }

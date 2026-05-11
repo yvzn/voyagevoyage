@@ -51,6 +51,7 @@ export class ConstraintsSettingsComponent implements OnInit {
     saturday: [false],
     sunday: [false],
     maxDaysPerMonth: [null as number | null, [Validators.min(1), Validators.max(31)]],
+    planningHorizonDays: [90, [Validators.required, Validators.min(1), Validators.max(365)]],
     considerPublicHolidays: [false],
     considerVacationDays: [false],
     isStrict: [false],
@@ -90,6 +91,7 @@ export class ConstraintsSettingsComponent implements OnInit {
       saturday: constraints.allowedDaysOfWeek.includes(DayOfWeek.Saturday),
       sunday: constraints.allowedDaysOfWeek.includes(DayOfWeek.Sunday),
       maxDaysPerMonth: constraints.maxDaysPerMonth ?? null,
+      planningHorizonDays: constraints.planningHorizonDays ?? 90,
       considerPublicHolidays: constraints.considerPublicHolidays,
       considerVacationDays: constraints.considerVacationDays,
       isStrict: constraints.isStrict,
@@ -140,6 +142,7 @@ export class ConstraintsSettingsComponent implements OnInit {
     const request = {
       allowedDaysOfWeek: this.buildAllowedDays(),
       maxDaysPerMonth: v.maxDaysPerMonth ?? null,
+      planningHorizonDays: v.planningHorizonDays ?? 90,
       considerPublicHolidays: v.considerPublicHolidays ?? false,
       considerVacationDays: v.considerVacationDays ?? false,
       isStrict: v.isStrict ?? false,

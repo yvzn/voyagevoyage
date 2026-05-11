@@ -28,6 +28,7 @@ export function constraintViolationValidator(
 
     const startDate = new Date(start + 'T00:00:00');
     const endDate = new Date(end + 'T00:00:00');
+
     const current = new Date(startDate);
 
     while (current <= endDate) {

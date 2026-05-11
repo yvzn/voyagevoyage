@@ -9,11 +9,16 @@ function makeConstraints(overrides: Partial<TravelConstraints> = {}): TravelCons
     considerPublicHolidays: false,
     considerVacationDays: false,
     isStrict: false,
+    planningHorizonDays: 365,
     ...overrides,
   };
 }
 
-function makeGroup(startDate: string, endDate: string, constraints: TravelConstraints | null) {
+function makeGroup(
+  startDate: string,
+  endDate: string,
+  constraints: TravelConstraints | null,
+) {
   const fb = new FormBuilder();
   return fb.group(
     { startDate: [startDate], endDate: [endDate] },

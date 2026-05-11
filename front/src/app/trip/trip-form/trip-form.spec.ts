@@ -329,6 +329,7 @@ describe('TripFormComponent — constraint violation', () => {
     considerPublicHolidays: false,
     considerVacationDays: false,
     isStrict: false,
+    planningHorizonDays: 365,
   };
 
   const strictConstraints: TravelConstraints = { ...flexibleConstraints, isStrict: true };

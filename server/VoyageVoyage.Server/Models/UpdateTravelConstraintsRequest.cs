@@ -12,5 +12,6 @@ public record UpdateTravelConstraintsRequest(
     int? MaxDaysPerMonth,
     bool ConsiderPublicHolidays,
     bool ConsiderVacationDays,
-    bool IsStrict
+    bool IsStrict,
+    int PlanningHorizonDays
 );
