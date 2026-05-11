@@ -29,7 +29,10 @@ public class TravelConstraintsController(ITravelConstraintsService constraintsSe
     public async Task<ActionResult<TravelConstraints>> Upsert([FromBody] UpdateTravelConstraintsRequest request)
     {
         if (request.PlanningHorizonDays is < 1 or > 365)
-            return ValidationProblem("Planning horizon must be between 1 and 365 days.");
+        {
+            ModelState.AddModelError(nameof(request.PlanningHorizonDays), "validation.planningHorizonDaysOutOfRange");
+            return ValidationProblem(ModelState);
+        }
 
         var constraints = await constraintsService.UpsertAsync(request);
         return Ok(constraints);
