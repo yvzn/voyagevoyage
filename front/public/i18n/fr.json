@@ -94,6 +94,7 @@
     "other": "Autre"
   },
   "planningDashboardNavItem": "Planification",
+  "dashboardNavItem": "Tableau de bord",
   "planningDashboard": {
     "heading": "Déplacements à planifier",
     "loading": "Chargement…",
@@ -103,7 +104,7 @@
     "plannedTripLabel": "Déplacement planifié",
     "availableMonthLabel": "Mois à compléter",
     "tripDaysUsed": "{{used}} / {{max}} jours utilisés",
-    "viewAllButton": "Voir tout",
+    "viewAllButton": "Voir toute la planification",
     "viewFullCalendar": "Voir le calendrier complet"
   },
   "dashboard": {

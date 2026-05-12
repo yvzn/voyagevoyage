@@ -18,50 +18,12 @@
       </div>
 
       <!-- 2-week compact calendar grid -->
-      <div class="overflow-x-auto">
-        <table class="w-full table-fixed border-collapse text-center text-sm">
-          <thead>
-            <tr>
-              @for (dayName of dayOfWeekNames(); track $index) {
-                <th scope="col" class="pb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ dayName }}</th>
-              }
-            </tr>
-          </thead>
-          <tbody>
-            @for (week of miniCalendarWeeks(); track $index) {
-              <tr>
-                @for (day of week; track day.date + '-' + day.month + '-' + day.year) {
-                  <td class="p-0.5">
-                    <div
-                      class="relative mx-auto flex min-h-[3rem] w-full flex-col rounded-lg px-0.5 pt-1 text-xs"
-                      [ngClass]="{
-                        'bg-blue-600 text-white font-semibold': day.isToday,
-                        'text-gray-900 dark:text-white': !day.isToday
-                      }"
-                    >
-                      <span class="mb-0.5 block text-center font-medium">{{ day.date }}</span>
-                      @for (trip of getTripsForDay(day); track trip.id) {
-                        <a
-                          [routerLink]="['/trip', trip.id]"
-                          class="mb-0.5 flex items-center gap-0.5 overflow-hidden rounded px-0.5 py-px hover:opacity-80 focus:outline-none focus:ring-1 focus:ring-blue-300"
-                          [attr.aria-label]="trip.destination"
-                        >
-                          <span
-                            class="inline-block h-1.5 w-1.5 flex-shrink-0 rounded-full"
-                            [ngClass]="getTripStatusDotClass(trip.status)"
-                            aria-hidden="true"
-                          ></span>
-                          <span class="truncate text-[10px]">{{ trip.destination }}</span>
-                        </a>
-                      }
-                    </div>
-                  </td>
-                }
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+      <app-calendar-grid
+        [weeks]="miniCalendarWeeks()"
+        [trips]="allTrips()"
+        [dayNames]="dayOfWeekNames()"
+        [compact]="true"
+      />
     </section>
 
     <!-- Planning Dashboard Section -->

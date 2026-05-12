@@ -75,4 +75,14 @@ export class PlanningDashboardComponent {
       year: 'numeric',
     }).format(new Date(year, month, 1));
   }
+
+  protected formatDate(dateStr: string): string {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Intl.DateTimeFormat(this.localeService.currentLocale(), {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(Date.UTC(year, month - 1, day)));
+  }
 }

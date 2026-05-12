@@ -1,0 +1,94 @@
+import { Component, computed, inject, input, output } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { NgClass } from '@angular/common';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Trip } from '../trip/trip.model';
+import { CalendarDay, CalendarWeek } from './calendar.utils';
+import { getTripStatusClass, getTripStatusDotClass, getTripStatusTranslationKey } from '../trip/trip-status.utils';
+import { MILLISECONDS_PER_DAY, parseISODateUTC } from '../planning-dashboard/planning-dashboard.utils';
+
+/**
+ * Shared calendar grid component used by both CalendarComponent (full monthly view)
+ * and DashboardComponent (compact 2-week mini calendar).
+ *
+ * In compact mode (compact=true): renders a dense 2-week grid with trip dots and RouterLinks.
+ * In full mode (compact=false): renders the full monthly grid with add-trip/expense buttons
+ *   and emits events for trip navigation and form actions.
+ */
+@Component({
+  selector: 'app-calendar-grid',
+  standalone: true,
+  imports: [NgClass, RouterLink, TranslatePipe],
+  templateUrl: './calendar-grid.html',
+})
+export class CalendarGridComponent {
+  private readonly translateService = inject(TranslateService);
+
+  /** Rows of days to render. Each CalendarWeek has exactly 7 CalendarDay entries. */
+  readonly weeks = input<CalendarWeek[]>([]);
+
+  /** All trips to display across the grid (used to compute per-day mapping). */
+  readonly trips = input<Trip[]>([]);
+
+  /** Localized short names for days of the week, starting from Monday. */
+  readonly dayNames = input<string[]>([]);
+
+  /** When true, renders a compact 2-week grid (dashboard mini calendar). */
+  readonly compact = input<boolean>(false);
+
+  /** Localized month name for aria labels on add-trip/expense buttons (non-compact mode). */
+  readonly displayMonth = input<string>('');
+
+  /** Year string for aria labels on add-trip/expense buttons (non-compact mode). */
+  readonly displayYear = input<string>('');
+
+  /** Emitted when the user clicks a trip badge (non-compact mode). Parent handles navigation. */
+  readonly tripClicked = output<Trip>();
+
+  /** Emitted when the user clicks the add-trip button for a day (non-compact mode). */
+  readonly addTripClicked = output<CalendarDay>();
+
+  /** Emitted when the user clicks the add-expense button for a day (non-compact mode). */
+  readonly addExpenseClicked = output<CalendarDay>();
+
+  protected readonly getTripStatusClass = getTripStatusClass;
+  protected readonly getTripStatusDotClass = getTripStatusDotClass;
+  protected readonly getTripStatusTranslationKey = getTripStatusTranslationKey;
+
+  /** Map from day key (YYYY-MM-DD) to trips occurring on that day. */
+  private readonly tripsPerDay = computed(() => {
+    const map = new Map<string, Trip[]>();
+    for (const trip of this.trips()) {
+      const startTs = parseISODateUTC(trip.startDate);
+      const endTs = parseISODateUTC(trip.endDate);
+      for (let ts = startTs; ts <= endTs; ts += MILLISECONDS_PER_DAY) {
+        const d = new Date(ts);
+        const key = this.dayKey(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+        const existing = map.get(key);
+        if (existing) {
+          existing.push(trip);
+        } else {
+          map.set(key, [trip]);
+        }
+      }
+    }
+    return map;
+  });
+
+  protected getTripsForDay(day: CalendarDay): Trip[] {
+    return this.tripsPerDay().get(this.dayKey(day.year, day.month, day.date)) ?? [];
+  }
+
+  protected getTripAriaLabel(trip: Trip): string {
+    const statusLabel = this.translateService.instant(getTripStatusTranslationKey(trip.status));
+    return `${trip.destination} (${statusLabel})`;
+  }
+
+  private dayKey(year: number, month: number, date: number): string {
+    return `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+  }
+
+  protected trackByDay(_index: number, day: CalendarDay): string {
+    return `${day.year}-${day.month}-${day.date}`;
+  }
+}

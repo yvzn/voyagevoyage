@@ -1,30 +1,19 @@
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { TripActions } from '../trip/store/trip.actions';
 import { SettingsActions } from '../constraints/store/settings.actions';
-import { selectAllTrips, selectTripsLoadStatus } from '../trip/store/trip.selectors';
-import { getTripStatusDotClass, getTripStatusTranslationKey } from '../trip/trip-status.utils';
+import { selectAllTrips } from '../trip/store/trip.selectors';
 import { LocaleService } from '../locale.service';
-import { Trip } from '../trip/trip.model';
+import { CalendarDay, CalendarWeek, getDayOfWeekNames } from '../calendar/calendar.utils';
 import { PlanningDashboardComponent } from '../planning-dashboard/planning-dashboard';
-import { MILLISECONDS_PER_DAY, parseISODateUTC } from '../planning-dashboard/planning-dashboard.utils';
-
-/** A single day in the mini calendar */
-interface MiniCalendarDay {
-  date: number;
-  month: number;
-  year: number;
-  isToday: boolean;
-  isCurrentPeriod: boolean;
-}
+import { CalendarGridComponent } from '../calendar/calendar-grid';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, NgClass, TranslatePipe, PlanningDashboardComponent],
+  imports: [RouterLink, TranslatePipe, PlanningDashboardComponent, CalendarGridComponent],
   templateUrl: './dashboard.html',
 })
 export class DashboardComponent {
@@ -36,24 +25,22 @@ export class DashboardComponent {
     this.store.dispatch(SettingsActions.loadSettings());
   }
 
-  private readonly allTrips = this.store.selectSignal(selectAllTrips);
-  protected readonly tripsLoadStatus = this.store.selectSignal(selectTripsLoadStatus);
+  protected readonly allTrips = this.store.selectSignal(selectAllTrips);
 
-  protected readonly getTripStatusDotClass = getTripStatusDotClass;
-  protected readonly getTripStatusTranslationKey = getTripStatusTranslationKey;
+  protected readonly dayOfWeekNames = computed(() => getDayOfWeekNames(this.localeService.currentLocale()));
 
-  /** 14 days starting from Monday of the current week */
-  protected readonly miniCalendarDays = computed<MiniCalendarDay[]>(() => {
+  /** 14 days starting from Monday of the current ISO week */
+  protected readonly miniCalendarDays = computed<CalendarDay[]>(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Find Monday of the current week (ISO: Mon=1 … Sun=0)
+    // Find Monday of the current ISO week (Mon=1 … Sun=0)
     const dayOfWeek = today.getDay(); // 0=Sunday
     const daysFromMonday = (dayOfWeek + 6) % 7;
     const monday = new Date(today);
     monday.setDate(today.getDate() - daysFromMonday);
 
-    const days: MiniCalendarDay[] = [];
+    const days: CalendarDay[] = [];
     for (let i = 0; i < 14; i++) {
       const d = new Date(monday);
       d.setDate(monday.getDate() + i);
@@ -61,52 +48,19 @@ export class DashboardComponent {
         date: d.getDate(),
         month: d.getMonth(),
         year: d.getFullYear(),
+        isCurrentMonth: true,
         isToday: d.getTime() === today.getTime(),
-        isCurrentPeriod: true,
       });
     }
     return days;
   });
 
-  /** Weeks split from the 14-day range */
-  protected readonly miniCalendarWeeks = computed<MiniCalendarDay[][]>(() => {
+  /** Two CalendarWeek objects covering the 14-day range */
+  protected readonly miniCalendarWeeks = computed<CalendarWeek[]>(() => {
     const days = this.miniCalendarDays();
-    return [days.slice(0, 7), days.slice(7, 14)];
+    return [
+      { days: days.slice(0, 7) },
+      { days: days.slice(7, 14) },
+    ];
   });
-
-  protected readonly dayOfWeekNames = computed(() => {
-    const formatter = new Intl.DateTimeFormat(this.localeService.currentLocale(), { weekday: 'short' });
-    // Start from Monday (2024-01-01 is a Monday)
-    return Array.from({ length: 7 }, (_, i) => {
-      const date = new Date(2024, 0, 1 + i);
-      return formatter.format(date);
-    });
-  });
-
-  private readonly tripsPerDay = computed(() => {
-    const map = new Map<string, Trip[]>();
-    for (const trip of this.allTrips()) {
-      const startTs = parseISODateUTC(trip.startDate);
-      const endTs = parseISODateUTC(trip.endDate);
-      for (let ts = startTs; ts <= endTs; ts += MILLISECONDS_PER_DAY) {
-        const d = new Date(ts);
-        const key = this.dayKey(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-        const existing = map.get(key);
-        if (existing) {
-          existing.push(trip);
-        } else {
-          map.set(key, [trip]);
-        }
-      }
-    }
-    return map;
-  });
-
-  protected getTripsForDay(day: MiniCalendarDay): Trip[] {
-    return this.tripsPerDay().get(this.dayKey(day.year, day.month, day.date)) ?? [];
-  }
-
-  private dayKey(year: number, month: number, date: number): string {
-    return `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-  }
 }

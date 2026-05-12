@@ -10,6 +10,7 @@ import { ApiStatus } from '../trip/store/trip.reducer';
 import { Trip, TripStatus } from '../trip/trip.model';
 
 const EN_TRANSLATIONS = {
+  dashboardNavItem: 'Dashboard',
   dashboard: {
     heading: 'Dashboard',
     calendarSectionHeading: 'Upcoming trips',
@@ -24,7 +25,7 @@ const EN_TRANSLATIONS = {
     plannedTripLabel: 'Planned trip',
     availableMonthLabel: 'Month to fill',
     tripDaysUsed: '{{used}} / {{max}} days used',
-    viewAllButton: 'View all',
+    viewAllButton: 'View all planning',
     viewFullCalendar: 'View full calendar',
   },
   tripStatus: {
@@ -138,7 +139,7 @@ describe('DashboardComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     const link = compiled.querySelector('a[href="/planning-dashboard"]');
     expect(link).toBeTruthy();
-    expect(link?.textContent?.trim()).toBe('View all');
+    expect(link?.textContent?.trim()).toBe('View all planning');
   });
 
   it('should display trip in mini calendar when trip falls in the 2-week range', async () => {

@@ -20,7 +20,7 @@ const EN_TRANSLATIONS = {
     plannedTripLabel: 'Planned trip',
     availableMonthLabel: 'Month to fill',
     tripDaysUsed: '{{used}} / {{max}} days used',
-    viewAllButton: 'View all',
+    viewAllButton: 'View all planning',
     viewFullCalendar: 'View full calendar',
   },
   tripStatus: {

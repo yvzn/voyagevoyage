@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { Router } from '@angular/router';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import {
   CalendarDay,
@@ -16,20 +16,20 @@ import { TripFormComponent } from '../trip/trip-form/trip-form';
 import { TripActions } from '../trip/store/trip.actions';
 import { SettingsActions } from '../constraints/store/settings.actions';
 import { selectAllTrips, selectTripsLoadStatus, selectTripsError } from '../trip/store/trip.selectors';
-import { getTripStatusClass, getTripStatusDotClass, getTripStatusTranslationKey } from '../trip/trip-status.utils';
+import { getTripStatusDotClass, getTripStatusTranslationKey } from '../trip/trip-status.utils';
 import { ExpenseFormComponent } from '../expense/expense-form/expense-form';
 import { ExpenseActions } from '../expense/store/expense.actions';
 import { selectExpensesCreateStatus, selectExpensesLastCreatedTripId } from '../expense/store/expense.selectors';
+import { CalendarGridComponent } from './calendar-grid';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [NgClass, TranslatePipe, TripFormComponent, ExpenseFormComponent],
+  imports: [NgClass, TranslatePipe, TripFormComponent, ExpenseFormComponent, CalendarGridComponent],
   templateUrl: './calendar.html',
 })
 export class CalendarComponent {
   protected readonly localeService = inject(LocaleService);
-  private readonly translateService = inject(TranslateService);
   private readonly store = inject(Store);
   private readonly router = inject(Router);
 
@@ -57,7 +57,7 @@ export class CalendarComponent {
     });
   }
 
-  private readonly trips = this.store.selectSignal(selectAllTrips);
+  protected readonly trips = this.store.selectSignal(selectAllTrips);
   protected readonly tripsLoadStatus = this.store.selectSignal(selectTripsLoadStatus);
   protected readonly tripsError = this.store.selectSignal(selectTripsError);
 
@@ -101,45 +101,8 @@ export class CalendarComponent {
   /** True while an expense creation dispatched from this component is in flight. */
   private expenseFormPending = false;
 
-  protected readonly getTripStatusClass = getTripStatusClass;
   protected readonly getTripStatusDotClass = getTripStatusDotClass;
   protected readonly getTripStatusTranslationKey = getTripStatusTranslationKey;
-
-  private readonly tripsPerDay = computed(() => {
-    const map = new Map<string, Trip[]>();
-    for (const trip of this.trips()) {
-      const [sy, sm, sd] = trip.startDate.split('-').map(Number);
-      const [ey, em, ed] = trip.endDate.split('-').map(Number);
-      const startTs = Date.UTC(sy, sm - 1, sd);
-      const endTs = Date.UTC(ey, em - 1, ed);
-      for (let ts = startTs; ts <= endTs; ts += 86400000) {
-        const d = new Date(ts);
-        const key = this.dayKey(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-        const existing = map.get(key);
-        if (existing) {
-          existing.push(trip);
-        } else {
-          map.set(key, [trip]);
-        }
-      }
-    }
-    return map;
-  });
-
-  protected getTripsForDay(day: CalendarDay): Trip[] {
-    return this.tripsPerDay().get(this.dayKey(day.year, day.month, day.date)) ?? [];
-  }
-
-  protected getTripAriaLabel(trip: Trip): string {
-    const statusLabel = this.translateService.instant(
-      getTripStatusTranslationKey(trip.status)
-    );
-    return `${trip.destination} (${statusLabel})`;
-  }
-
-  private dayKey(year: number, month: number, date: number): string {
-    return `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
-  }
 
   private formatDayKey(day: CalendarDay): string {
     return `${day.year}-${String(day.month + 1).padStart(2, '0')}-${String(day.date).padStart(2, '0')}`;
@@ -212,13 +175,5 @@ export class CalendarComponent {
     if (!isNaN(value) && value >= this.minYear && value <= this.maxYear) {
       this.currentYear.set(value);
     }
-  }
-
-  trackByWeekIndex(index: number): number {
-    return index;
-  }
-
-  trackByDay(_index: number, day: CalendarDay): string {
-    return `${day.year}-${day.month}-${day.date}`;
   }
 }

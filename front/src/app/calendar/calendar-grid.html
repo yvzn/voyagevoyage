@@ -1,0 +1,123 @@
+<table class="w-full text-sm" [class]="compact() ? 'table-fixed border-collapse text-center' : ''">
+  <thead>
+    <tr role="row">
+      @for (dayName of dayNames(); track $index) {
+        @if (compact()) {
+          <th scope="col" class="pb-1 text-xs font-medium text-gray-500 dark:text-gray-400">{{ dayName }}</th>
+        } @else {
+          <th
+            scope="col"
+            role="columnheader"
+            class="border-b border-gray-200 px-2 py-3 text-center font-medium text-gray-500 dark:border-gray-700 dark:text-gray-400"
+            [attr.aria-label]="dayName"
+          >
+            {{ dayName }}
+          </th>
+        }
+      }
+    </tr>
+  </thead>
+  <tbody>
+    @for (week of weeks(); track $index) {
+      @if (compact()) {
+        <!-- Compact row (dashboard mini calendar) -->
+        <tr>
+          @for (day of week.days; track trackByDay($index, day)) {
+            <td class="p-0.5">
+              <div
+                class="relative mx-auto flex min-h-[3rem] w-full flex-col rounded-lg px-0.5 pt-1 text-xs"
+                [ngClass]="{
+                  'bg-blue-600 text-white font-semibold': day.isToday,
+                  'text-gray-900 dark:text-white': !day.isToday
+                }"
+              >
+                <span class="mb-0.5 block text-center font-medium">{{ day.date }}</span>
+                @for (trip of getTripsForDay(day); track trip.id) {
+                  <a
+                    [routerLink]="['/trip', trip.id]"
+                    class="mb-0.5 flex items-center gap-0.5 overflow-hidden rounded px-0.5 py-px hover:opacity-80 focus:outline-none focus:ring-1 focus:ring-blue-300"
+                    [attr.aria-label]="trip.destination"
+                  >
+                    <span
+                      class="inline-block h-1.5 w-1.5 flex-shrink-0 rounded-full"
+                      [ngClass]="getTripStatusDotClass(trip.status)"
+                      aria-hidden="true"
+                    ></span>
+                    <span class="truncate text-[10px]">{{ trip.destination }}</span>
+                  </a>
+                }
+              </div>
+            </td>
+          }
+        </tr>
+      } @else {
+        <!-- Full row (monthly calendar) -->
+        <tr role="row" class="border-b border-gray-200 last:border-b-0 dark:border-gray-700">
+          @for (day of week.days; track trackByDay($index, day)) {
+            <td
+              role="gridcell"
+              class="group h-16 px-2 py-1 align-top md:h-28 md:px-3 md:py-2"
+              [class.text-gray-400]="!day.isCurrentMonth"
+              [class.dark:text-gray-500]="!day.isCurrentMonth"
+              [class.text-gray-900]="day.isCurrentMonth && !day.isToday"
+              [class.dark:text-white]="day.isCurrentMonth && !day.isToday"
+            >
+              <div class="flex items-start justify-between">
+                <span
+                  class="inline-flex h-7 w-7 items-center justify-center rounded-full text-sm"
+                  [class.bg-blue-600]="day.isToday"
+                  [class.text-white]="day.isToday"
+                  [class.font-semibold]="day.isToday"
+                >
+                  {{ day.date }}
+                </span>
+                @if (day.isCurrentMonth) {
+                  <div class="flex items-center gap-1">
+                    <button
+                      type="button"
+                      (click)="addTripClicked.emit(day)"
+                      class="flex h-6 w-6 items-center justify-center rounded text-gray-400 opacity-0 hover:bg-gray-100 hover:text-gray-600 focus:opacity-100 focus:outline-none focus:ring-1 focus:ring-blue-300 group-hover:opacity-100 dark:hover:bg-gray-700 dark:hover:text-gray-300 [td:hover_&]:opacity-100"
+                      [attr.aria-label]="'addTripForDay' | translate : { date: day.date, month: displayMonth(), year: displayYear() }"
+                    >
+                      <svg class="h-4 w-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      (click)="addExpenseClicked.emit(day)"
+                      class="flex h-6 w-6 cursor-pointer items-center justify-center rounded text-gray-400 opacity-0 hover:bg-gray-100 hover:text-gray-600 focus:opacity-100 focus:outline-none focus:ring-1 focus:ring-blue-300 group-hover:opacity-100 dark:hover:bg-gray-700 dark:hover:text-gray-300 [td:hover_&]:opacity-100"
+                      [attr.aria-label]="'addExpenseForDay' | translate : { date: day.date, month: displayMonth(), year: displayYear() }"
+                    >
+                      <svg class="h-4 w-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
+                      </svg>
+                    </button>
+                  </div>
+                }
+              </div>
+              @if (getTripsForDay(day).length > 0) {
+                <ul class="mt-0.5 space-y-0.5 text-left" [attr.aria-label]="'tripEventsForDay' | translate : { date: day.date, month: displayMonth(), year: displayYear() }">
+                  @for (trip of getTripsForDay(day); track trip.id) {
+                    <li>
+                      <button
+                        type="button"
+                        class="w-full truncate rounded px-1 py-0.5 text-left text-xs leading-tight focus:outline-none focus:ring-1 focus:ring-blue-400"
+                        [ngClass]="getTripStatusClass(trip.status)"
+                        [title]="trip.destination"
+                        [attr.aria-label]="getTripAriaLabel(trip)"
+                        (click)="tripClicked.emit(trip)"
+                      >
+                        {{ trip.destination }}
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+            </td>
+          }
+        </tr>
+      }
+    }
+  </tbody>
+</table>
