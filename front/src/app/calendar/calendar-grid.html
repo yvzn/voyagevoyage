@@ -1,4 +1,9 @@
-<table class="w-full text-sm" [class]="compact() ? 'table-fixed border-collapse text-center' : ''">
+<table
+  class="w-full text-sm"
+  [class.table-fixed]="compact()"
+  [class.border-collapse]="compact()"
+  [class.text-center]="compact()"
+>
   <thead>
     <tr role="row">
       @for (dayName of dayNames(); track $index) {

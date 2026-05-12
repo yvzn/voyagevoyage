@@ -22,6 +22,11 @@ import { MILLISECONDS_PER_DAY, parseISODateUTC } from '../planning-dashboard/pla
   templateUrl: './calendar-grid.html',
 })
 export class CalendarGridComponent {
+  /**
+   * TranslateService is used only in non-compact mode for `getTripAriaLabel`, which builds
+   * accessible labels for trip buttons in the full monthly calendar. In compact mode the
+   * grid renders simple RouterLinks and this service is never called.
+   */
   private readonly translateService = inject(TranslateService);
 
   /** Rows of days to render. Each CalendarWeek has exactly 7 CalendarDay entries. */
