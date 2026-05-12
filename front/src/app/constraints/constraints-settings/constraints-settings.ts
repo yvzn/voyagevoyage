@@ -143,7 +143,7 @@ export class ConstraintsSettingsComponent implements OnInit {
   }
 
   protected getRegionTranslationKey(region: string): string {
-    return `constraints.region.${region.replace('-', '.')}`;
+    return `constraints.region.${region.replaceAll('-', '.')}`;
   }
 
   private buildAllowedDays(): DayOfWeek[] {
