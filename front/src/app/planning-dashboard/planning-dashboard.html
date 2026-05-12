@@ -1,0 +1,112 @@
+<section aria-labelledby="planning-dashboard-heading">
+  <!-- Heading with inline spinner (stable area to prevent CLS) -->
+  @if (showHeading()) {
+    <div class="mb-4 flex items-center gap-3">
+      <h2 id="planning-dashboard-heading" class="text-xl font-semibold text-gray-900 dark:text-white">
+        {{ 'planningDashboard.heading' | translate }}
+      </h2>
+      <div class="min-w-[1.5rem]" aria-live="polite" aria-atomic="true">
+        @if (isLoading()) {
+          <svg class="h-4 w-4 animate-spin text-gray-500 dark:text-gray-400" role="status" aria-label="{{ 'planningDashboard.loading' | translate }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.036l3-2.745z"/>
+          </svg>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Error state -->
+  @if (!isLoading() && hasError()) {
+    <div class="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20" role="alert" aria-live="assertive">
+      <p class="mb-2 text-sm text-red-700 dark:text-red-400">{{ 'planningDashboard.loadError' | translate }}</p>
+      <button
+        type="button"
+        (click)="retryLoad()"
+        class="rounded-lg border border-red-300 px-3 py-1 text-xs font-medium text-red-700 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-300 dark:border-red-600 dark:text-red-400 dark:hover:bg-red-900/40"
+      >
+        {{ 'planningDashboard.retry' | translate }}
+      </button>
+    </div>
+  }
+
+  <!-- Loading skeleton -->
+  @if (isLoading() && !hasError()) {
+    <ul class="space-y-3" aria-busy="true" aria-live="polite">
+      @for (_ of [1, 2, 3]; track $index) {
+        <li class="animate-pulse rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800">
+          <div class="flex items-center gap-2">
+            <div class="h-5 w-16 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+            <div class="h-4 w-32 rounded bg-gray-200 dark:bg-gray-700"></div>
+          </div>
+          <div class="mt-2 h-3 w-24 rounded bg-gray-200 dark:bg-gray-700"></div>
+        </li>
+      }
+    </ul>
+  }
+
+  <!-- Items list -->
+  @if (!isLoading() && !hasError()) {
+    @if (items().length === 0) {
+      <p class="text-sm text-gray-500 dark:text-gray-400">{{ 'planningDashboard.noItems' | translate }}</p>
+    } @else {
+      <ul class="space-y-3">
+        @for (item of items(); track $index) {
+          @if (isPlannedTripItem(item)) {
+            <!-- Planned trip item -->
+            <li class="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <span
+                    class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+                    [class]="getTripStatusClass(item.trip.status)"
+                  >
+                    {{ getTripStatusTranslationKey(item.trip.status) | translate }}
+                  </span>
+                  <span class="truncate font-medium text-gray-900 dark:text-white">{{ item.trip.destination }}</span>
+                </div>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  {{ formatDate(item.trip.startDate) }} — {{ formatDate(item.trip.endDate) }}
+                </p>
+              </div>
+              <a
+                [routerLink]="['/trip', item.trip.id]"
+                class="ml-3 flex-shrink-0 rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                [attr.aria-label]="item.trip.destination"
+              >
+                <svg class="h-4 w-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+              </a>
+            </li>
+          }
+          @if (isAvailableMonthItem(item)) {
+            <!-- Available month item -->
+            <li class="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                    {{ 'planningDashboard.availableMonthLabel' | translate }}
+                  </span>
+                  <span class="truncate font-medium text-gray-900 dark:text-white">{{ formatMonth(item.year, item.month) }}</span>
+                </div>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  {{ 'planningDashboard.tripDaysUsed' | translate : { used: item.tripDaysUsed, max: item.maxDaysPerMonth } }}
+                </p>
+              </div>
+              <a
+                routerLink="/calendar"
+                class="ml-3 flex-shrink-0 rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+                [attr.aria-label]="formatMonth(item.year, item.month)"
+              >
+                <svg class="h-4 w-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+              </a>
+            </li>
+          }
+        }
+      </ul>
+    }
+  }
+</section>

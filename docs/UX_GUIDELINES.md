@@ -196,6 +196,40 @@ Use when content should remain interactive while data loads in the background.
 - Use `role="status"` on the spinner message.
 - **Do not disable navigation or grid controls** while loading is in progress.
 - If loading fails, replace the spinner with an error message (`role="alert"`) and a **Retry** button that re-dispatches the load action.
+- On screens with a visible section heading, place the spinner **inline to the right of the heading** inside a flex row. Reserve a minimum width (e.g. `min-w-[1.5rem]`) for the spinner area to prevent layout shift.
+- While loading, show **skeleton placeholder cards** in the content area (animated with `animate-pulse`) so the layout is stable and the user understands that items will appear.
+
+### 9.1.1 Heading + spinner pattern
+
+Use this pattern for standalone dashboard screens and list pages that have a visible section heading:
+
+```html
+<div class="mb-4 flex items-center gap-3">
+  <h2>{{ 'section.heading' | translate }}</h2>
+  <!-- Stable spinner area: min-w prevents CLS when spinner appears/disappears -->
+  <div class="min-w-[1.5rem]" aria-live="polite" aria-atomic="true">
+    @if (isLoading()) {
+      <svg class="h-4 w-4 animate-spin" role="status" aria-label="...">...</svg>
+    }
+  </div>
+</div>
+```
+
+### 9.1.2 Skeleton loading pattern
+
+Use when the number of items is expected to be similar on each load. Show 3 skeleton cards with `animate-pulse`:
+
+```html
+@if (isLoading()) {
+  <ul aria-busy="true" aria-live="polite">
+    @for (_ of [1, 2, 3]; track $index) {
+      <li class="animate-pulse rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800">
+        <div class="h-5 w-16 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+        <div class="mt-2 h-3 w-24 rounded bg-gray-200 dark:bg-gray-700"></div>
+      </li>
+    }
+  </ul>
+}
 
 ### 9.2 Blocking loading (forms)
 

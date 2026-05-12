@@ -1,0 +1,48 @@
+<div>
+  <h1 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white">{{ 'dashboard.heading' | translate }}</h1>
+
+  <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+
+    <!-- Mini Calendar Section -->
+    <section aria-labelledby="dashboard-calendar-heading" class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+      <div class="mb-3 flex items-center justify-between">
+        <h2 id="dashboard-calendar-heading" class="text-base font-semibold text-gray-900 dark:text-white">
+          {{ 'dashboard.calendarSectionHeading' | translate }}
+        </h2>
+        <a
+          routerLink="/calendar"
+          class="rounded-lg px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-blue-400 dark:hover:bg-gray-700"
+        >
+          {{ 'planningDashboard.viewFullCalendar' | translate }}
+        </a>
+      </div>
+
+      <!-- 2-week compact calendar grid -->
+      <app-calendar-grid
+        [weeks]="miniCalendarWeeks()"
+        [trips]="allTrips()"
+        [dayNames]="dayOfWeekNames()"
+        [compact]="true"
+      />
+    </section>
+
+    <!-- Planning Dashboard Section -->
+    <section aria-labelledby="dashboard-planning-heading" class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+      <div class="mb-3 flex items-center justify-between">
+        <h2 id="dashboard-planning-heading" class="text-base font-semibold text-gray-900 dark:text-white">
+          {{ 'dashboard.planningSectionHeading' | translate }}
+        </h2>
+        <a
+          routerLink="/planning-dashboard"
+          class="rounded-lg px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-blue-400 dark:hover:bg-gray-700"
+        >
+          {{ 'planningDashboard.viewAllButton' | translate }}
+        </a>
+      </div>
+
+      <!-- Simplified planning dashboard (max 3 items, no heading) -->
+      <app-planning-dashboard [maxItems]="3" [showHeading]="false" />
+    </section>
+
+  </div>
+</div>

@@ -93,6 +93,25 @@
     "metroBus": "Metro / Bus",
     "other": "Other"
   },
+  "planningDashboardNavItem": "Planning",
+  "dashboardNavItem": "Dashboard",
+  "planningDashboard": {
+    "heading": "Trips to plan",
+    "loading": "Loading…",
+    "loadError": "Failed to load data. Please try again.",
+    "retry": "Retry",
+    "noItems": "No trips to plan in the coming period.",
+    "plannedTripLabel": "Planned trip",
+    "availableMonthLabel": "Month to fill",
+    "tripDaysUsed": "{{used}} / {{max}} days used",
+    "viewAllButton": "View all planning",
+    "viewFullCalendar": "View full calendar"
+  },
+  "dashboard": {
+    "heading": "Dashboard",
+    "calendarSectionHeading": "Upcoming trips",
+    "planningSectionHeading": "Trips to plan"
+  },
   "constraints": {
     "heading": "Travel constraints",
     "allowedDaysLabel": "Allowed days of the week",
