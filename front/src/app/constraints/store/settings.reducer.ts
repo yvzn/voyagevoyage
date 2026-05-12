@@ -8,6 +8,7 @@ export interface SettingsState {
   constraints: TravelConstraints | null;
   loadStatus: ApiStatus;
   updateStatus: ApiStatus;
+  importIcsStatus: ApiStatus;
   error: string | null;
 }
 
@@ -15,6 +16,7 @@ const initialState: SettingsState = {
   constraints: null,
   loadStatus: 'idle',
   updateStatus: 'idle',
+  importIcsStatus: 'idle',
   error: null,
 };
 
@@ -59,6 +61,22 @@ export const settingsFeature = createFeature({
     on(SettingsActions.updateSettingsFailure, (state, { error }) => ({
       ...state,
       updateStatus: 'failure' as ApiStatus,
+      error,
+    })),
+
+    // ICS import
+    on(SettingsActions.importIcs, (state) => ({
+      ...state,
+      importIcsStatus: 'loading' as ApiStatus,
+      error: null,
+    })),
+    on(SettingsActions.importIcsSuccess, (state) => ({
+      ...state,
+      importIcsStatus: 'success' as ApiStatus,
+    })),
+    on(SettingsActions.importIcsFailure, (state, { error }) => ({
+      ...state,
+      importIcsStatus: 'failure' as ApiStatus,
       error,
     })),
   ),

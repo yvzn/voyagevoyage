@@ -133,6 +133,19 @@
     "considerPublicHolidaysHint": "Public holidays will not count as allowed travel days.",
     "considerVacationDays": "Exclude vacation days",
     "considerVacationDaysHint": "Personal leave days will not count as allowed travel days.",
+    "publicHolidayRegionsLabel": "Public holiday regions",
+    "publicHolidayRegionsHint": "Select the regions whose public holidays should be displayed in your calendar.",
+    "region": {
+      "france": {
+        "metropole": "France — Métropole"
+      }
+    },
+    "icsImportLabel": "Import from ICS file",
+    "icsImportHint": "Import public holidays from a local ICS calendar file. This replaces any previously imported holidays.",
+    "icsImportButton": "Choose ICS file…",
+    "icsImporting": "Importing…",
+    "icsImportSuccess": "Public holidays imported successfully.",
+    "icsImportError": "An error occurred while importing the ICS file. Please try again.",
     "constraintModeLabel": "Constraint mode",
     "flexible": "Flexible",
     "flexibleHint": "Constraints are guidelines; derogations are allowed.",

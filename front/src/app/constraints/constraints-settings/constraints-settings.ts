@@ -3,9 +3,14 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
-import { DayOfWeek, TravelConstraints } from '../constraints.model';
+import { DayOfWeek, PUBLIC_HOLIDAY_REGIONS, TravelConstraints } from '../constraints.model';
 import { SettingsActions } from '../store/settings.actions';
-import { selectConstraints, selectSettingsLoadStatus, selectSettingsUpdateStatus } from '../store/settings.selectors';
+import {
+  selectConstraints,
+  selectSettingsImportIcsStatus,
+  selectSettingsLoadStatus,
+  selectSettingsUpdateStatus,
+} from '../store/settings.selectors';
 
 @Component({
   selector: 'app-constraints-settings',
@@ -20,6 +25,7 @@ export class ConstraintsSettingsComponent implements OnInit {
   private readonly storeConstraints = this.store.selectSignal(selectConstraints);
   private readonly loadStatus = this.store.selectSignal(selectSettingsLoadStatus);
   private readonly updateStatus = this.store.selectSignal(selectSettingsUpdateStatus);
+  private readonly importIcsStatus = this.store.selectSignal(selectSettingsImportIcsStatus);
 
   protected readonly DayOfWeek = DayOfWeek;
   protected readonly allDays: DayOfWeek[] = [
@@ -32,6 +38,8 @@ export class ConstraintsSettingsComponent implements OnInit {
     DayOfWeek.Sunday,
   ];
 
+  protected readonly allRegions = PUBLIC_HOLIDAY_REGIONS;
+
   protected readonly isDataLoading = computed(() => this.loadStatus() === 'loading');
   protected readonly isLoading = computed(() => this.updateStatus() === 'loading');
   protected readonly isSaved = computed(() => this.updateStatus() === 'success');
@@ -40,6 +48,11 @@ export class ConstraintsSettingsComponent implements OnInit {
   );
   protected readonly errorKey = computed<string | null>(() =>
     this.updateStatus() === 'failure' ? 'constraints.saveError' : null,
+  );
+  protected readonly isImportingIcs = computed(() => this.importIcsStatus() === 'loading');
+  protected readonly isIcsImported = computed(() => this.importIcsStatus() === 'success');
+  protected readonly icsImportErrorKey = computed<string | null>(() =>
+    this.importIcsStatus() === 'failure' ? 'constraints.icsImportError' : null,
   );
 
   protected readonly form = this.fb.group({
@@ -55,6 +68,8 @@ export class ConstraintsSettingsComponent implements OnInit {
     considerPublicHolidays: [false],
     considerVacationDays: [false],
     isStrict: [false],
+    // One boolean control per region
+    'region-france-metropole': [false],
   });
 
   constructor() {
@@ -95,6 +110,7 @@ export class ConstraintsSettingsComponent implements OnInit {
       considerPublicHolidays: constraints.considerPublicHolidays,
       considerVacationDays: constraints.considerVacationDays,
       isStrict: constraints.isStrict,
+      'region-france-metropole': constraints.publicHolidayRegions?.includes('france-metropole') ?? false,
     });
   }
 
@@ -122,6 +138,14 @@ export class ConstraintsSettingsComponent implements OnInit {
     }
   }
 
+  protected getRegionControlName(region: string): string {
+    return `region-${region}`;
+  }
+
+  protected getRegionTranslationKey(region: string): string {
+    return `constraints.region.${region.replace('-', '.')}`;
+  }
+
   private buildAllowedDays(): DayOfWeek[] {
     const v = this.form.getRawValue();
     const days: DayOfWeek[] = [];
@@ -135,6 +159,13 @@ export class ConstraintsSettingsComponent implements OnInit {
     return days;
   }
 
+  private buildPublicHolidayRegions(): string[] {
+    const v = this.form.getRawValue();
+    const regions: string[] = [];
+    if (v['region-france-metropole']) regions.push('france-metropole');
+    return regions;
+  }
+
   protected onSubmit(): void {
     if (this.form.invalid || this.isLoading()) return;
 
@@ -146,8 +177,20 @@ export class ConstraintsSettingsComponent implements OnInit {
       considerPublicHolidays: v.considerPublicHolidays ?? false,
       considerVacationDays: v.considerVacationDays ?? false,
       isStrict: v.isStrict ?? false,
+      publicHolidayRegions: this.buildPublicHolidayRegions(),
     };
 
     this.store.dispatch(SettingsActions.updateSettings({ request }));
+  }
+
+  protected onIcsFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.store.dispatch(SettingsActions.importIcs({ file }));
+
+    // Reset the file input so the same file can be re-selected if needed
+    input.value = '';
   }
 }

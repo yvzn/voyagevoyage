@@ -10,6 +10,7 @@ function makeConstraints(overrides: Partial<TravelConstraints> = {}): TravelCons
     considerVacationDays: false,
     isStrict: false,
     planningHorizonDays: 365,
+    publicHolidayRegions: [],
     ...overrides,
   };
 }
