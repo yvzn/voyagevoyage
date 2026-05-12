@@ -39,7 +39,7 @@
                 @for (trip of getTripsForDay(day); track trip.id) {
                   <a
                     [routerLink]="['/trip', trip.id]"
-                    class="mb-0.5 block cursor-pointer truncate rounded px-1 py-0.5 text-left text-xs leading-tight hover:opacity-80 focus:outline-none focus:ring-1 focus:ring-blue-300"
+                    class="mb-0.5 block truncate rounded px-1 py-0.5 text-left text-xs leading-tight hover:opacity-80 focus:outline-none focus:ring-1 focus:ring-blue-300"
                     [ngClass]="getTripStatusClass(trip.status)"
                     [title]="trip.destination"
                     [attr.aria-label]="trip.destination"
