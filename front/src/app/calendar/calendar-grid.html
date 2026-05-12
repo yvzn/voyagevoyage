@@ -29,27 +29,21 @@
         <tr>
           @for (day of week.days; track trackByDay($index, day)) {
             <td class="p-0.5">
-              <div
-                class="relative mx-auto flex min-h-[3rem] w-full flex-col rounded-lg px-0.5 pt-1 text-xs"
-                [ngClass]="{
-                  'bg-blue-600 text-white font-semibold': day.isToday,
-                  'text-gray-900 dark:text-white': !day.isToday
-                }"
-              >
-                <span class="mb-0.5 block text-center font-medium">{{ day.date }}</span>
+              <div class="relative mx-auto flex min-h-[3rem] w-full flex-col px-0.5 pt-1 text-xs text-gray-900 dark:text-white">
+                <span
+                  class="mb-0.5 inline-flex h-7 w-7 items-center justify-center self-center rounded-full text-sm font-medium"
+                  [class.bg-blue-600]="day.isToday"
+                  [class.text-white]="day.isToday"
+                  [class.font-semibold]="day.isToday"
+                >{{ day.date }}</span>
                 @for (trip of getTripsForDay(day); track trip.id) {
                   <a
                     [routerLink]="['/trip', trip.id]"
-                    class="mb-0.5 flex items-center gap-0.5 overflow-hidden rounded px-0.5 py-px hover:opacity-80 focus:outline-none focus:ring-1 focus:ring-blue-300"
+                    class="mb-0.5 block cursor-pointer truncate rounded px-1 py-0.5 text-left text-xs leading-tight hover:opacity-80 focus:outline-none focus:ring-1 focus:ring-blue-300"
+                    [ngClass]="getTripStatusClass(trip.status)"
+                    [title]="trip.destination"
                     [attr.aria-label]="trip.destination"
-                  >
-                    <span
-                      class="inline-block h-1.5 w-1.5 flex-shrink-0 rounded-full"
-                      [ngClass]="getTripStatusDotClass(trip.status)"
-                      aria-hidden="true"
-                    ></span>
-                    <span class="truncate text-[10px]">{{ trip.destination }}</span>
-                  </a>
+                  >{{ trip.destination }}</a>
                 }
               </div>
             </td>
@@ -81,7 +75,7 @@
                     <button
                       type="button"
                       (click)="addTripClicked.emit(day)"
-                      class="flex h-6 w-6 items-center justify-center rounded text-gray-400 opacity-0 hover:bg-gray-100 hover:text-gray-600 focus:opacity-100 focus:outline-none focus:ring-1 focus:ring-blue-300 group-hover:opacity-100 dark:hover:bg-gray-700 dark:hover:text-gray-300 [td:hover_&]:opacity-100"
+                      class="flex h-6 w-6 cursor-pointer items-center justify-center rounded text-gray-400 opacity-0 hover:bg-gray-100 hover:text-gray-600 focus:opacity-100 focus:outline-none focus:ring-1 focus:ring-blue-300 group-hover:opacity-100 dark:hover:bg-gray-700 dark:hover:text-gray-300 [td:hover_&]:opacity-100"
                       [attr.aria-label]="'addTripForDay' | translate : { date: day.date, month: displayMonth(), year: displayYear() }"
                     >
                       <svg class="h-4 w-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -107,7 +101,7 @@
                     <li>
                       <button
                         type="button"
-                        class="w-full truncate rounded px-1 py-0.5 text-left text-xs leading-tight focus:outline-none focus:ring-1 focus:ring-blue-400"
+                        class="w-full cursor-pointer truncate rounded px-1 py-0.5 text-left text-xs leading-tight focus:outline-none focus:ring-1 focus:ring-blue-400"
                         [ngClass]="getTripStatusClass(trip.status)"
                         [title]="trip.destination"
                         [attr.aria-label]="getTripAriaLabel(trip)"
