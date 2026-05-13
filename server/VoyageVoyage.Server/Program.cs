@@ -40,7 +40,8 @@ builder.Services.AddSpaStaticFiles(options =>
 builder.Services.AddHttpContextAccessor();
 
 // Cosmos DB via EF Core
-var cosmosConnectionString = builder.Configuration.GetConnectionString("CosmosDb");
+var cosmosConnectionString = Environment.GetEnvironmentVariable("COSMOSDB_CONNECTIONSTRING")
+    ?? builder.Configuration.GetConnectionString("CosmosDb");
 if (string.IsNullOrEmpty(cosmosConnectionString))
     throw new InvalidOperationException("Cosmos DB connection string 'CosmosDb' is not configured.");
 
@@ -125,4 +126,4 @@ app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api"), spaApp 
     });
 });
 
-app.Run();
+await app.RunAsync();
