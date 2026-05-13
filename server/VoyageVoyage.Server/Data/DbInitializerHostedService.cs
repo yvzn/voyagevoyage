@@ -21,6 +21,10 @@ public class DbInitializerHostedService(
     /// </summary>
     private const string DevUserId = "dev-user-id";
 
+    // Readiness probe settings.
+    private static readonly TimeSpan ReadinessRetryDelay = TimeSpan.FromSeconds(3);
+    private const int ReadinessMaxAttempts = 30;
+
     // Day offsets from today used to spread seed trips across the calendar.
     private const int PastConfirmedStartOffset   = -24;
     private const int PastConfirmedEndOffset     = -22;
@@ -37,6 +41,8 @@ public class DbInitializerHostedService(
     {
         try
         {
+            await Task.Yield(); // Ensure this runs asynchronously after the host has started.
+            
             await InitAsync(stoppingToken);
         }
         catch (Exception ex)
@@ -47,11 +53,41 @@ public class DbInitializerHostedService(
         }
     }
 
+    private async Task WaitForDatabaseAsync(ApplicationDbContext db, CancellationToken cancellationToken)
+    {
+        var cosmosClient = db.Database.GetCosmosClient();
+        for (var attempt = 1; attempt <= ReadinessMaxAttempts; attempt++)
+        {
+            try
+            {
+                await cosmosClient.ReadAccountAsync();
+                return;
+            }
+            catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+            {
+                logger.LogDebug(ex,
+                    "Cosmos DB not reachable yet (attempt {Attempt}/{Max}).",
+                    attempt, ReadinessMaxAttempts);
+            }
+
+            logger.LogInformation(
+                "Database not reachable yet (attempt {Attempt}/{Max}). Retrying in {Delay}s...",
+                attempt, ReadinessMaxAttempts, ReadinessRetryDelay.TotalSeconds);
+
+            await Task.Delay(ReadinessRetryDelay, cancellationToken);
+        }
+
+        logger.LogWarning(
+            "Database did not become reachable after {ReadinessMaxAttempts} attempts.", ReadinessMaxAttempts);
+    }
+
     private async Task InitAsync(CancellationToken cancellationToken)
     {
         await using var scope = scopeFactory.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        
+
+        await WaitForDatabaseAsync(db, cancellationToken);
+
         logger.LogInformation("Ensuring database and containers exist...");
         await db.Database.EnsureCreatedAsync(cancellationToken);
 

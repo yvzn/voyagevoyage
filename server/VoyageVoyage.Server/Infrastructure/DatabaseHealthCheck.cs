@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using VoyageVoyage.Server.Data;
 
@@ -16,10 +17,9 @@ public class DatabaseHealthCheck(IServiceScopeFactory scopeFactory) : IHealthChe
         {
             using var scope = scopeFactory.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var canConnect = await db.Database.CanConnectAsync(cancellationToken);
-            return canConnect
-                ? HealthCheckResult.Healthy()
-                : HealthCheckResult.Unhealthy("Cannot connect to Cosmos DB.");
+            var cosmosClient = db.Database.GetCosmosClient();
+            await cosmosClient.ReadAccountAsync();
+            return HealthCheckResult.Healthy();
         }
         catch (Exception ex)
         {
