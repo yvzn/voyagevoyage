@@ -133,6 +133,19 @@
     "considerPublicHolidaysHint": "Les jours fériés ne seront pas comptabilisés comme jours de déplacement autorisés.",
     "considerVacationDays": "Exclure les jours de congé",
     "considerVacationDaysHint": "Les jours de congé personnels ne seront pas comptabilisés comme jours de déplacement autorisés.",
+    "publicHolidayRegionsLabel": "Régions de jours fériés",
+    "publicHolidayRegionsHint": "Sélectionnez les régions dont les jours fériés doivent être affichés dans votre calendrier.",
+    "region": {
+      "france": {
+        "metropole": "France — Métropole"
+      }
+    },
+    "icsImportLabel": "Importer depuis un fichier ICS",
+    "icsImportHint": "Importez des jours fériés depuis un fichier calendrier ICS local. Cela remplace les jours fériés précédemment importés.",
+    "icsImportButton": "Choisir un fichier ICS…",
+    "icsImporting": "Importation…",
+    "icsImportSuccess": "Les jours fériés ont été importés avec succès.",
+    "icsImportError": "Une erreur est survenue lors de l'importation du fichier ICS. Veuillez réessayer.",
     "constraintModeLabel": "Mode de contrainte",
     "flexible": "Flexible",
     "flexibleHint": "Les contraintes sont indicatives ; des dérogations sont autorisées.",

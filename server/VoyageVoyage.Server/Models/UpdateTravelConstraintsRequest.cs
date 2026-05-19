@@ -13,5 +13,6 @@ public record UpdateTravelConstraintsRequest(
     bool ConsiderPublicHolidays,
     bool ConsiderVacationDays,
     bool IsStrict,
-    int PlanningHorizonDays
+    int PlanningHorizonDays,
+    List<string> PublicHolidayRegions
 );

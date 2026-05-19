@@ -8,6 +8,9 @@ export enum DayOfWeek {
   Saturday = 6,
 }
 
+export const PUBLIC_HOLIDAY_REGIONS = ['france-metropole'] as const;
+export type PublicHolidayRegion = (typeof PUBLIC_HOLIDAY_REGIONS)[number];
+
 export interface TravelConstraints {
   allowedDaysOfWeek: DayOfWeek[];
   maxDaysPerMonth: number | null;
@@ -15,6 +18,7 @@ export interface TravelConstraints {
   considerVacationDays: boolean;
   isStrict: boolean;
   planningHorizonDays: number;
+  publicHolidayRegions: string[];
 }
 
 export interface UpdateTravelConstraintsRequest {
@@ -24,4 +28,12 @@ export interface UpdateTravelConstraintsRequest {
   considerVacationDays: boolean;
   isStrict: boolean;
   planningHorizonDays: number;
+  publicHolidayRegions: string[];
+}
+
+export interface PublicHoliday {
+  id: string;
+  date: string;
+  name: string;
+  region: string;
 }

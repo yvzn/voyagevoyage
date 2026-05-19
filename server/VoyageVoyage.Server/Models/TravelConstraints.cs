@@ -59,4 +59,10 @@ public class TravelConstraints
     /// Number of days ahead for which planning suggestions should be generated.
     /// </summary>
     public int PlanningHorizonDays { get; set; } = 90;
+
+    /// <summary>
+    /// Public holiday region identifiers selected by the user (e.g. "france-metropole").
+    /// Holidays for these regions will be fetched and displayed in the user's calendar.
+    /// </summary>
+    public List<string> PublicHolidayRegions { get; set; } = [];
 }

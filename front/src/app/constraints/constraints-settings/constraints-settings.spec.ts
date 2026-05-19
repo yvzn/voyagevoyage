@@ -4,7 +4,12 @@ import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { vi } from 'vitest';
 import { ConstraintsSettingsComponent } from './constraints-settings';
 import { TravelConstraints } from '../constraints.model';
-import { selectConstraints, selectSettingsLoadStatus, selectSettingsUpdateStatus } from '../store/settings.selectors';
+import {
+  selectConstraints,
+  selectSettingsImportIcsStatus,
+  selectSettingsLoadStatus,
+  selectSettingsUpdateStatus,
+} from '../store/settings.selectors';
 import { ApiStatus } from '../store/settings.reducer';
 import { SettingsActions } from '../store/settings.actions';
 
@@ -57,6 +62,7 @@ async function setupModule(
           { selector: selectConstraints, value: constraints },
           { selector: selectSettingsLoadStatus, value: loadStatus },
           { selector: selectSettingsUpdateStatus, value: 'idle' as ApiStatus },
+          { selector: selectSettingsImportIcsStatus, value: 'idle' as ApiStatus },
         ],
       }),
     ],
@@ -120,6 +126,7 @@ describe('ConstraintsSettingsComponent — pre-fill', () => {
     considerVacationDays: false,
     isStrict: true,
     planningHorizonDays: 60,
+    publicHolidayRegions: [],
   };
   beforeEach(async () => {
     // loadStatus 'success' matches the real state when constraints are already in the store

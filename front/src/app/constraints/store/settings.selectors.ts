@@ -13,4 +13,8 @@ export const selectSettingsUpdateStatus = createSelector(
   selectSettingsState,
   (state) => state.updateStatus,
 );
+export const selectSettingsImportIcsStatus = createSelector(
+  selectSettingsState,
+  (state) => state.importIcsStatus,
+);
 export const selectSettingsError = createSelector(selectSettingsState, (state) => state.error);

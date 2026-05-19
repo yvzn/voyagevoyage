@@ -3,6 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, mergeMap, of } from 'rxjs';
 import { SettingsActions } from './settings.actions';
 import { ConstraintsService } from '../constraints.service';
+import { PublicHolidayService } from '../public-holiday.service';
 
 export const loadSettingsEffect = createEffect(
   (actions$ = inject(Actions), constraintsService = inject(ConstraintsService)) =>
@@ -33,6 +34,22 @@ export const updateSettingsEffect = createEffect(
           map((constraints) => SettingsActions.updateSettingsSuccess({ constraints })),
           catchError((error: unknown) =>
             of(SettingsActions.updateSettingsFailure({ error: String(error) })),
+          ),
+        ),
+      ),
+    ),
+  { functional: true },
+);
+
+export const importIcsEffect = createEffect(
+  (actions$ = inject(Actions), publicHolidayService = inject(PublicHolidayService)) =>
+    actions$.pipe(
+      ofType(SettingsActions.importIcs),
+      mergeMap(({ file }) =>
+        publicHolidayService.importIcs(file).pipe(
+          map(() => SettingsActions.importIcsSuccess()),
+          catchError((error: unknown) =>
+            of(SettingsActions.importIcsFailure({ error: String(error) })),
           ),
         ),
       ),

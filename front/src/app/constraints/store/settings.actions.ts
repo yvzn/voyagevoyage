@@ -14,5 +14,10 @@ export const SettingsActions = createActionGroup({
     'Update Settings': props<{ request: UpdateTravelConstraintsRequest }>(),
     'Update Settings Success': props<{ constraints: TravelConstraints }>(),
     'Update Settings Failure': props<{ error: string }>(),
+
+    // ICS import
+    'Import Ics': props<{ file: File }>(),
+    'Import Ics Success': emptyProps(),
+    'Import Ics Failure': props<{ error: string }>(),
   },
 });
