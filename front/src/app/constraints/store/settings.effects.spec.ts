@@ -16,6 +16,7 @@ const MOCK_CONSTRAINTS: TravelConstraints = {
   isStrict: false,
   planningHorizonDays: 90,
   publicHolidayRegions: [],
+      schoolHolidayZones: [],
 };
 
 function makeMockConstraintsService() {
@@ -100,6 +101,7 @@ describe('Settings Effects', () => {
         isStrict: true,
         planningHorizonDays: 60,
         publicHolidayRegions: [],
+      schoolHolidayZones: [],
       };
       const updated: TravelConstraints = { ...request };
       mockConstraintsService.update.mockReturnValue(of(updated));
@@ -125,6 +127,7 @@ describe('Settings Effects', () => {
         isStrict: true,
         planningHorizonDays: 60,
         publicHolidayRegions: [],
+      schoolHolidayZones: [],
       };
       mockConstraintsService.update.mockReturnValue(throwError(() => new Error('Server error')));
 

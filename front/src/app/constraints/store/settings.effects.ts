@@ -4,6 +4,7 @@ import { catchError, map, mergeMap, of } from 'rxjs';
 import { SettingsActions } from './settings.actions';
 import { ConstraintsService } from '../constraints.service';
 import { PublicHolidayService } from '../public-holiday.service';
+import { SchoolHolidayService } from '../school-holiday.service';
 
 export const loadSettingsEffect = createEffect(
   (actions$ = inject(Actions), constraintsService = inject(ConstraintsService)) =>
@@ -50,6 +51,22 @@ export const importIcsEffect = createEffect(
           map(() => SettingsActions.importIcsSuccess()),
           catchError((error: unknown) =>
             of(SettingsActions.importIcsFailure({ error: String(error) })),
+          ),
+        ),
+      ),
+    ),
+  { functional: true },
+);
+
+export const importSchoolIcsEffect = createEffect(
+  (actions$ = inject(Actions), schoolHolidayService = inject(SchoolHolidayService)) =>
+    actions$.pipe(
+      ofType(SettingsActions.importSchoolIcs),
+      mergeMap(({ file }) =>
+        schoolHolidayService.importIcs(file).pipe(
+          map(() => SettingsActions.importSchoolIcsSuccess()),
+          catchError((error: unknown) =>
+            of(SettingsActions.importSchoolIcsFailure({ error: String(error) })),
           ),
         ),
       ),

@@ -13,6 +13,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public const string TravelConstraintsContainerName = "travel-constraints";
     public const string ExpensesContainerName = "expenses";
     public const string PublicHolidaysContainerName = "public-holidays";
+    public const string SchoolHolidaysContainerName = "school-holidays";
 
     public DbSet<Trip> Trips { get; set; }
 
@@ -21,6 +22,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Expense> Expenses { get; set; }
 
     public DbSet<PublicHoliday> PublicHolidays { get; set; }
+
+    public DbSet<SchoolHoliday> SchoolHolidays { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -48,6 +51,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<PublicHoliday>(entity =>
         {
             entity.ToContainer(PublicHolidaysContainerName);
+            entity.HasPartitionKey(h => h.UserId);
+            entity.HasKey(h => h.Id);
+        });
+
+        modelBuilder.Entity<SchoolHoliday>(entity =>
+        {
+            entity.ToContainer(SchoolHolidaysContainerName);
             entity.HasPartitionKey(h => h.UserId);
             entity.HasKey(h => h.Id);
         });

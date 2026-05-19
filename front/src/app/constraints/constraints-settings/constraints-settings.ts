@@ -3,11 +3,12 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
-import { DayOfWeek, PUBLIC_HOLIDAY_REGIONS, TravelConstraints } from '../constraints.model';
+import { DayOfWeek, PUBLIC_HOLIDAY_REGIONS, SCHOOL_HOLIDAY_ZONES, TravelConstraints } from '../constraints.model';
 import { SettingsActions } from '../store/settings.actions';
 import {
   selectConstraints,
   selectSettingsImportIcsStatus,
+  selectSettingsImportSchoolIcsStatus,
   selectSettingsLoadStatus,
   selectSettingsUpdateStatus,
 } from '../store/settings.selectors';
@@ -26,6 +27,7 @@ export class ConstraintsSettingsComponent implements OnInit {
   private readonly loadStatus = this.store.selectSignal(selectSettingsLoadStatus);
   private readonly updateStatus = this.store.selectSignal(selectSettingsUpdateStatus);
   private readonly importIcsStatus = this.store.selectSignal(selectSettingsImportIcsStatus);
+  private readonly importSchoolIcsStatus = this.store.selectSignal(selectSettingsImportSchoolIcsStatus);
 
   protected readonly DayOfWeek = DayOfWeek;
   protected readonly allDays: DayOfWeek[] = [
@@ -39,6 +41,7 @@ export class ConstraintsSettingsComponent implements OnInit {
   ];
 
   protected readonly allRegions = PUBLIC_HOLIDAY_REGIONS;
+  protected readonly allZones = SCHOOL_HOLIDAY_ZONES;
 
   protected readonly isDataLoading = computed(() => this.loadStatus() === 'loading');
   protected readonly isLoading = computed(() => this.updateStatus() === 'loading');
@@ -54,6 +57,11 @@ export class ConstraintsSettingsComponent implements OnInit {
   protected readonly icsImportErrorKey = computed<string | null>(() =>
     this.importIcsStatus() === 'failure' ? 'constraints.icsImportError' : null,
   );
+  protected readonly isImportingSchoolIcs = computed(() => this.importSchoolIcsStatus() === 'loading');
+  protected readonly isSchoolIcsImported = computed(() => this.importSchoolIcsStatus() === 'success');
+  protected readonly schoolIcsImportErrorKey = computed<string | null>(() =>
+    this.importSchoolIcsStatus() === 'failure' ? 'constraints.schoolIcsImportError' : null,
+  );
 
   protected readonly form = this.fb.group({
     monday: [false],
@@ -68,16 +76,16 @@ export class ConstraintsSettingsComponent implements OnInit {
     considerPublicHolidays: [false],
     considerVacationDays: [false],
     isStrict: [false],
-    // One boolean control per region
+    // One boolean control per public holiday region
     'region-france-metropole': [false],
+    // One boolean control per school holiday zone
+    'zone-Zone A': [false],
+    'zone-Zone B': [false],
+    'zone-Zone C': [false],
   });
 
   constructor() {
     // Populate the form whenever constraints arrive from a successful load.
-    // Gated on loadStatus === 'success' so user edits are not disrupted while
-    // an update (save) is in flight — loadStatus stays 'success' during saves,
-    // but storeConstraints only changes on load or save completion, so the
-    // re-apply after save is intentional (reflects what was just persisted).
     effect(() => {
       if (this.loadStatus() === 'success') {
         const c = this.storeConstraints();
@@ -111,6 +119,9 @@ export class ConstraintsSettingsComponent implements OnInit {
       considerVacationDays: constraints.considerVacationDays,
       isStrict: constraints.isStrict,
       'region-france-metropole': constraints.publicHolidayRegions?.includes('france-metropole') ?? false,
+      'zone-Zone A': constraints.schoolHolidayZones?.includes('Zone A') ?? false,
+      'zone-Zone B': constraints.schoolHolidayZones?.includes('Zone B') ?? false,
+      'zone-Zone C': constraints.schoolHolidayZones?.includes('Zone C') ?? false,
     });
   }
 
@@ -146,6 +157,14 @@ export class ConstraintsSettingsComponent implements OnInit {
     return `constraints.region.${region.replaceAll('-', '.')}`;
   }
 
+  protected getZoneControlName(zone: string): string {
+    return `zone-${zone}`;
+  }
+
+  protected getZoneTranslationKey(zone: string): string {
+    return `constraints.schoolZone.${zone.replace(' ', '').toLowerCase()}`;
+  }
+
   private buildAllowedDays(): DayOfWeek[] {
     const v = this.form.getRawValue();
     const days: DayOfWeek[] = [];
@@ -166,6 +185,15 @@ export class ConstraintsSettingsComponent implements OnInit {
     return regions;
   }
 
+  private buildSchoolHolidayZones(): string[] {
+    const v = this.form.getRawValue();
+    const zones: string[] = [];
+    if (v['zone-Zone A']) zones.push('Zone A');
+    if (v['zone-Zone B']) zones.push('Zone B');
+    if (v['zone-Zone C']) zones.push('Zone C');
+    return zones;
+  }
+
   protected onSubmit(): void {
     if (this.form.invalid || this.isLoading()) return;
 
@@ -178,6 +206,7 @@ export class ConstraintsSettingsComponent implements OnInit {
       considerVacationDays: v.considerVacationDays ?? false,
       isStrict: v.isStrict ?? false,
       publicHolidayRegions: this.buildPublicHolidayRegions(),
+      schoolHolidayZones: this.buildSchoolHolidayZones(),
     };
 
     this.store.dispatch(SettingsActions.updateSettings({ request }));
@@ -189,6 +218,17 @@ export class ConstraintsSettingsComponent implements OnInit {
     if (!file) return;
 
     this.store.dispatch(SettingsActions.importIcs({ file }));
+
+    // Reset the file input so the same file can be re-selected if needed
+    input.value = '';
+  }
+
+  protected onSchoolIcsFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.store.dispatch(SettingsActions.importSchoolIcs({ file }));
 
     // Reset the file input so the same file can be re-selected if needed
     input.value = '';

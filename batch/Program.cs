@@ -27,4 +27,7 @@ if (!string.IsNullOrEmpty(cosmosConnectionString))
 // HTTP client for France public holiday API
 builder.Services.AddHttpClient<FrancePublicHolidayApiService>();
 
+// HTTP client for France school holiday API
+builder.Services.AddHttpClient<FranceSchoolHolidayApiService>();
+
 builder.Build().Run();
