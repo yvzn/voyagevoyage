@@ -5,19 +5,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace batch;
 
-public class Health
+public class Health(ILogger<Health> logger)
 {
-    private readonly ILogger<Health> _logger;
-
-    public Health(ILogger<Health> logger)
-    {
-        _logger = logger;
-    }
-
     [Function("Health")]
-    public IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequest req)
+    public IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequest _)
     {
-        _logger.LogInformation("C# HTTP trigger function processed a request.");
+        logger.LogInformation("C# HTTP trigger function processed a request.");
         return new OkObjectResult("Healthy!");
     }
 }

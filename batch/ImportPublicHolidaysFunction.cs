@@ -22,9 +22,18 @@ public class ImportPublicHolidaysFunction(
 
     [Function("ImportPublicHolidays")]
     public async Task Run(
-        [TimerTrigger(CronSchedule)] TimerInfo timer,
+#if DEBUG
+        [TimerTrigger(CronSchedule, RunOnStartup = true)]
+#else
+        [TimerTrigger(CronSchedule)]
+#endif
+        TimerInfo timer,
         CancellationToken cancellationToken)
     {
+#if DEBUG
+        await Task.Delay(10_000, cancellationToken); // Simulate some startup delay in debug mode.
+#endif
+
         logger.LogInformation(
             "ImportPublicHolidays triggered. IsPastDue: {IsPastDue}",
             timer.IsPastDue);
