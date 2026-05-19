@@ -10,7 +10,6 @@ A travel and expense management assistant for recurring professional trips. It s
 | Backend | ASP.NET Core Web API (.NET 10) |
 | Background jobs | Azure Functions isolated worker (.NET 10, Functions v4) |
 | Storage | Azure Cosmos DB (metadata) + Azure Storage (files/receipts) |
-| Orchestration | .NET Aspire (TypeScript AppHost) |
 
 ## Project structure
 
@@ -18,32 +17,19 @@ A travel and expense management assistant for recurring professional trips. It s
 front/      Angular application
 server/     ASP.NET Core Web API
 batch/      Azure Functions
-apphost/    Aspire orchestration entry point
 docs/       Functional and technical documentation
+db/         Scripts and data for local database emulator / storage emulator
 ```
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) 20.19 / 22.13 or later
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- [Aspire CLI](https://aspire.dev) (`aspire` command available on PATH)
+- [Node.js](https://nodejs.org/) 24 or later
+- [.NET SDK](https://dotnet.microsoft.com/download) 10 or later
 - Azure Functions Core Tools (for running `batch/` locally)
-- Azure Storage emulator (e.g. Azurite) configured with `UseDevelopmentStorage=true`
+- Azure Storage emulator running locally (e.g. Azurite) configured with `UseDevelopmentStorage=true`
 - Azure Cosmos DB emulator running locally (default endpoint: `https://localhost:8081/` with master key)
-- Optional: Docker or Rancher Desktop (for running both Cosmos DB and Storage emulators)
 
 ## Build & run
-
-### Aspire orchestration (recommended — requires Docker/Rancher for emulators)
-
-```bash
-cd apphost
-aspire run
-```
-
-The front end is served at `http://localhost:4200` and the API at the port configured by Aspire.
-
-### Individual subprojects
 
 **Frontend**
 

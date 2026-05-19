@@ -1,0 +1,14 @@
+{
+  "name": "voyagevoyage-storage",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "npm run dev",
+    "dev": "azurite --location ./data --debug ./debug.log"
+  },
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "azurite": "^3.35.0"
+  }
+}
