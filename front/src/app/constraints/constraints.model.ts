@@ -50,3 +50,10 @@ export interface SchoolHoliday {
   name: string;
   zone: string;
 }
+
+export interface PersonalLeave {
+  id: string;
+  startDate: string;
+  endDate: string;
+  name: string;
+}

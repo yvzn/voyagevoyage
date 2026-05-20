@@ -294,6 +294,59 @@
       </div>
     </div>
 
+    <!-- Personal leave ICS import -->
+    <fieldset class="mb-6 rounded-lg border border-gray-200 p-4 dark:border-gray-600">
+      <legend class="px-2 text-sm font-semibold text-gray-900 dark:text-white">
+        {{ 'constraints.personalLeaveLabel' | translate }}
+      </legend>
+      <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+        {{ 'constraints.personalLeaveHint' | translate }}
+      </p>
+      <div class="mt-4 border-t border-gray-200 pt-4 dark:border-gray-600">
+        <p class="mb-2 text-sm font-medium text-gray-900 dark:text-white">
+          {{ 'constraints.personalLeaveIcsImportLabel' | translate }}
+        </p>
+        <p class="mb-3 text-xs text-gray-500 dark:text-gray-400">
+          {{ 'constraints.personalLeaveIcsImportHint' | translate }}
+        </p>
+        <label
+          for="personal-leave-ics-file-input"
+          class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+          [class.opacity-50]="isImportingPersonalLeaveIcs()"
+        >
+          @if (isImportingPersonalLeaveIcs()) {
+            <svg class="h-4 w-4 animate-spin" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.036l3-2.745z"/>
+            </svg>
+          } @else {
+            <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+            </svg>
+          }
+          {{ (isImportingPersonalLeaveIcs() ? 'constraints.personalLeaveIcsImporting' : 'constraints.personalLeaveIcsImportButton') | translate }}
+          <input
+            id="personal-leave-ics-file-input"
+            type="file"
+            accept=".ics"
+            class="sr-only"
+            [disabled]="isImportingPersonalLeaveIcs()"
+            (change)="onPersonalLeaveIcsFileSelected($event)"
+          />
+        </label>
+        @if (isPersonalLeaveIcsImported()) {
+          <p role="status" class="mt-2 text-xs text-green-600 dark:text-green-400">
+            {{ 'constraints.personalLeaveIcsImportSuccess' | translate }}
+          </p>
+        }
+        @if (personalLeaveIcsImportErrorKey()) {
+          <p role="alert" class="mt-2 text-xs text-red-600 dark:text-red-400">
+            {{ personalLeaveIcsImportErrorKey()! | translate }}
+          </p>
+        }
+      </div>
+    </fieldset>
+
     <!-- Strict vs Flexible -->
     <fieldset class="mb-6 rounded-lg border border-gray-200 p-4 dark:border-gray-600">
       <legend class="px-2 text-sm font-semibold text-gray-900 dark:text-white">

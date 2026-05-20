@@ -52,6 +52,7 @@ builder.Services.AddScoped<ITravelConstraintsService, CosmosDbTravelConstraintsS
 builder.Services.AddScoped<IExpenseService, CosmosDbExpenseService>();
 builder.Services.AddScoped<IPublicHolidayService, CosmosDbPublicHolidayService>();
 builder.Services.AddScoped<ISchoolHolidayService, CosmosDbSchoolHolidayService>();
+builder.Services.AddScoped<IPersonalLeaveService, CosmosDbPersonalLeaveService>();
 builder.Services.AddHostedService<DbInitializerHostedService>();
 
 builder.Services.AddHealthChecks()

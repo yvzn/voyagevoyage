@@ -24,5 +24,10 @@ export const SettingsActions = createActionGroup({
     'Import School Ics': props<{ file: File }>(),
     'Import School Ics Success': emptyProps(),
     'Import School Ics Failure': props<{ error: string }>(),
+
+    // Personal leave ICS import
+    'Import Personal Leave Ics': props<{ file: File }>(),
+    'Import Personal Leave Ics Success': emptyProps(),
+    'Import Personal Leave Ics Failure': props<{ error: string }>(),
   },
 });

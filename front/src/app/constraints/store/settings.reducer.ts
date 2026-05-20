@@ -10,6 +10,7 @@ export interface SettingsState {
   updateStatus: ApiStatus;
   importIcsStatus: ApiStatus;
   importSchoolIcsStatus: ApiStatus;
+  importPersonalLeaveIcsStatus: ApiStatus;
   error: string | null;
 }
 
@@ -19,6 +20,7 @@ const initialState: SettingsState = {
   updateStatus: 'idle',
   importIcsStatus: 'idle',
   importSchoolIcsStatus: 'idle',
+  importPersonalLeaveIcsStatus: 'idle',
   error: null,
 };
 
@@ -95,6 +97,22 @@ export const settingsFeature = createFeature({
     on(SettingsActions.importSchoolIcsFailure, (state, { error }) => ({
       ...state,
       importSchoolIcsStatus: 'failure' as ApiStatus,
+      error,
+    })),
+
+    // Personal leave ICS import
+    on(SettingsActions.importPersonalLeaveIcs, (state) => ({
+      ...state,
+      importPersonalLeaveIcsStatus: 'loading' as ApiStatus,
+      error: null,
+    })),
+    on(SettingsActions.importPersonalLeaveIcsSuccess, (state) => ({
+      ...state,
+      importPersonalLeaveIcsStatus: 'success' as ApiStatus,
+    })),
+    on(SettingsActions.importPersonalLeaveIcsFailure, (state, { error }) => ({
+      ...state,
+      importPersonalLeaveIcsStatus: 'failure' as ApiStatus,
       error,
     })),
   ),

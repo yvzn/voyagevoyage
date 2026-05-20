@@ -7,6 +7,7 @@ import { TravelConstraints } from '../constraints.model';
 import {
   selectConstraints,
   selectSettingsImportIcsStatus,
+  selectSettingsImportPersonalLeaveIcsStatus,
   selectSettingsImportSchoolIcsStatus,
   selectSettingsLoadStatus,
   selectSettingsUpdateStatus,
@@ -65,6 +66,7 @@ async function setupModule(
           { selector: selectSettingsUpdateStatus, value: 'idle' as ApiStatus },
           { selector: selectSettingsImportIcsStatus, value: 'idle' as ApiStatus },
           { selector: selectSettingsImportSchoolIcsStatus, value: 'idle' as ApiStatus },
+          { selector: selectSettingsImportPersonalLeaveIcsStatus, value: 'idle' as ApiStatus },
         ],
       }),
     ],

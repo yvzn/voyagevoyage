@@ -8,6 +8,7 @@ import { SettingsActions } from '../store/settings.actions';
 import {
   selectConstraints,
   selectSettingsImportIcsStatus,
+  selectSettingsImportPersonalLeaveIcsStatus,
   selectSettingsImportSchoolIcsStatus,
   selectSettingsLoadStatus,
   selectSettingsUpdateStatus,
@@ -28,6 +29,7 @@ export class ConstraintsSettingsComponent implements OnInit {
   private readonly updateStatus = this.store.selectSignal(selectSettingsUpdateStatus);
   private readonly importIcsStatus = this.store.selectSignal(selectSettingsImportIcsStatus);
   private readonly importSchoolIcsStatus = this.store.selectSignal(selectSettingsImportSchoolIcsStatus);
+  private readonly importPersonalLeaveIcsStatus = this.store.selectSignal(selectSettingsImportPersonalLeaveIcsStatus);
 
   protected readonly DayOfWeek = DayOfWeek;
   protected readonly allDays: DayOfWeek[] = [
@@ -61,6 +63,11 @@ export class ConstraintsSettingsComponent implements OnInit {
   protected readonly isSchoolIcsImported = computed(() => this.importSchoolIcsStatus() === 'success');
   protected readonly schoolIcsImportErrorKey = computed<string | null>(() =>
     this.importSchoolIcsStatus() === 'failure' ? 'constraints.schoolIcsImportError' : null,
+  );
+  protected readonly isImportingPersonalLeaveIcs = computed(() => this.importPersonalLeaveIcsStatus() === 'loading');
+  protected readonly isPersonalLeaveIcsImported = computed(() => this.importPersonalLeaveIcsStatus() === 'success');
+  protected readonly personalLeaveIcsImportErrorKey = computed<string | null>(() =>
+    this.importPersonalLeaveIcsStatus() === 'failure' ? 'constraints.personalLeaveIcsImportError' : null,
   );
 
   protected readonly form = this.fb.group({
@@ -229,6 +236,17 @@ export class ConstraintsSettingsComponent implements OnInit {
     if (!file) return;
 
     this.store.dispatch(SettingsActions.importSchoolIcs({ file }));
+
+    // Reset the file input so the same file can be re-selected if needed
+    input.value = '';
+  }
+
+  protected onPersonalLeaveIcsFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.store.dispatch(SettingsActions.importPersonalLeaveIcs({ file }));
 
     // Reset the file input so the same file can be re-selected if needed
     input.value = '';

@@ -5,6 +5,7 @@ import { SettingsActions } from './settings.actions';
 import { ConstraintsService } from '../constraints.service';
 import { PublicHolidayService } from '../public-holiday.service';
 import { SchoolHolidayService } from '../school-holiday.service';
+import { PersonalLeaveService } from '../personal-leave.service';
 
 export const loadSettingsEffect = createEffect(
   (actions$ = inject(Actions), constraintsService = inject(ConstraintsService)) =>
@@ -67,6 +68,22 @@ export const importSchoolIcsEffect = createEffect(
           map(() => SettingsActions.importSchoolIcsSuccess()),
           catchError((error: unknown) =>
             of(SettingsActions.importSchoolIcsFailure({ error: String(error) })),
+          ),
+        ),
+      ),
+    ),
+  { functional: true },
+);
+
+export const importPersonalLeaveIcsEffect = createEffect(
+  (actions$ = inject(Actions), personalLeaveService = inject(PersonalLeaveService)) =>
+    actions$.pipe(
+      ofType(SettingsActions.importPersonalLeaveIcs),
+      mergeMap(({ file }) =>
+        personalLeaveService.importIcs(file).pipe(
+          map(() => SettingsActions.importPersonalLeaveIcsSuccess()),
+          catchError((error: unknown) =>
+            of(SettingsActions.importPersonalLeaveIcsFailure({ error: String(error) })),
           ),
         ),
       ),

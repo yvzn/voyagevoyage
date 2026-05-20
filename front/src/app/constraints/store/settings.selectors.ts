@@ -21,4 +21,8 @@ export const selectSettingsImportSchoolIcsStatus = createSelector(
   selectSettingsState,
   (state) => state.importSchoolIcsStatus,
 );
+export const selectSettingsImportPersonalLeaveIcsStatus = createSelector(
+  selectSettingsState,
+  (state) => state.importPersonalLeaveIcsStatus,
+);
 export const selectSettingsError = createSelector(selectSettingsState, (state) => state.error);
