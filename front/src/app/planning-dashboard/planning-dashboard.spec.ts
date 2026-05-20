@@ -38,6 +38,7 @@ const DEFAULT_CONSTRAINTS: TravelConstraints = {
   isStrict: false,
   planningHorizonDays: 90,
   publicHolidayRegions: [],
+      schoolHolidayZones: [],
 };
 
 async function setupWithMockStore(

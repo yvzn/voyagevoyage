@@ -65,4 +65,10 @@ public class TravelConstraints
     /// Holidays for these regions will be fetched and displayed in the user's calendar.
     /// </summary>
     public List<string> PublicHolidayRegions { get; set; } = [];
+
+    /// <summary>
+    /// School holiday zone identifiers selected by the user (e.g. "Zone A", "Zone B", "Zone C").
+    /// School holiday periods for these zones will be fetched and displayed in the user's calendar.
+    /// </summary>
+    public List<string> SchoolHolidayZones { get; set; } = [];
 }

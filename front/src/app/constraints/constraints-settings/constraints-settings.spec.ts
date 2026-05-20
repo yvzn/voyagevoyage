@@ -7,6 +7,7 @@ import { TravelConstraints } from '../constraints.model';
 import {
   selectConstraints,
   selectSettingsImportIcsStatus,
+  selectSettingsImportSchoolIcsStatus,
   selectSettingsLoadStatus,
   selectSettingsUpdateStatus,
 } from '../store/settings.selectors';
@@ -63,6 +64,7 @@ async function setupModule(
           { selector: selectSettingsLoadStatus, value: loadStatus },
           { selector: selectSettingsUpdateStatus, value: 'idle' as ApiStatus },
           { selector: selectSettingsImportIcsStatus, value: 'idle' as ApiStatus },
+          { selector: selectSettingsImportSchoolIcsStatus, value: 'idle' as ApiStatus },
         ],
       }),
     ],
@@ -127,6 +129,7 @@ describe('ConstraintsSettingsComponent — pre-fill', () => {
     isStrict: true,
     planningHorizonDays: 60,
     publicHolidayRegions: [],
+      schoolHolidayZones: [],
   };
   beforeEach(async () => {
     // loadStatus 'success' matches the real state when constraints are already in the store

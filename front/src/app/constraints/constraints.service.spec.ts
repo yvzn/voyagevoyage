@@ -12,6 +12,7 @@ const MOCK_CONSTRAINTS: TravelConstraints = {
   isStrict: false,
   planningHorizonDays: 90,
   publicHolidayRegions: [],
+      schoolHolidayZones: [],
 };
 
 describe('ConstraintsService', () => {
@@ -75,6 +76,7 @@ describe('ConstraintsService', () => {
         isStrict: true,
         planningHorizonDays: 60,
         publicHolidayRegions: [],
+      schoolHolidayZones: [],
       };
       const updated: TravelConstraints = { ...request };
 

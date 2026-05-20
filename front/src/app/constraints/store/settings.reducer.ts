@@ -9,6 +9,7 @@ export interface SettingsState {
   loadStatus: ApiStatus;
   updateStatus: ApiStatus;
   importIcsStatus: ApiStatus;
+  importSchoolIcsStatus: ApiStatus;
   error: string | null;
 }
 
@@ -17,6 +18,7 @@ const initialState: SettingsState = {
   loadStatus: 'idle',
   updateStatus: 'idle',
   importIcsStatus: 'idle',
+  importSchoolIcsStatus: 'idle',
   error: null,
 };
 
@@ -64,7 +66,7 @@ export const settingsFeature = createFeature({
       error,
     })),
 
-    // ICS import
+    // Public holiday ICS import
     on(SettingsActions.importIcs, (state) => ({
       ...state,
       importIcsStatus: 'loading' as ApiStatus,
@@ -77,6 +79,22 @@ export const settingsFeature = createFeature({
     on(SettingsActions.importIcsFailure, (state, { error }) => ({
       ...state,
       importIcsStatus: 'failure' as ApiStatus,
+      error,
+    })),
+
+    // School holiday ICS import
+    on(SettingsActions.importSchoolIcs, (state) => ({
+      ...state,
+      importSchoolIcsStatus: 'loading' as ApiStatus,
+      error: null,
+    })),
+    on(SettingsActions.importSchoolIcsSuccess, (state) => ({
+      ...state,
+      importSchoolIcsStatus: 'success' as ApiStatus,
+    })),
+    on(SettingsActions.importSchoolIcsFailure, (state, { error }) => ({
+      ...state,
+      importSchoolIcsStatus: 'failure' as ApiStatus,
       error,
     })),
   ),

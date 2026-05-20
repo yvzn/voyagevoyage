@@ -11,6 +11,9 @@ export enum DayOfWeek {
 export const PUBLIC_HOLIDAY_REGIONS = ['france-metropole'] as const;
 export type PublicHolidayRegion = (typeof PUBLIC_HOLIDAY_REGIONS)[number];
 
+export const SCHOOL_HOLIDAY_ZONES = ['Zone A', 'Zone B', 'Zone C'] as const;
+export type SchoolHolidayZone = (typeof SCHOOL_HOLIDAY_ZONES)[number];
+
 export interface TravelConstraints {
   allowedDaysOfWeek: DayOfWeek[];
   maxDaysPerMonth: number | null;
@@ -19,6 +22,7 @@ export interface TravelConstraints {
   isStrict: boolean;
   planningHorizonDays: number;
   publicHolidayRegions: string[];
+  schoolHolidayZones: string[];
 }
 
 export interface UpdateTravelConstraintsRequest {
@@ -29,6 +33,7 @@ export interface UpdateTravelConstraintsRequest {
   isStrict: boolean;
   planningHorizonDays: number;
   publicHolidayRegions: string[];
+  schoolHolidayZones: string[];
 }
 
 export interface PublicHoliday {
@@ -36,4 +41,12 @@ export interface PublicHoliday {
   date: string;
   name: string;
   region: string;
+}
+
+export interface SchoolHoliday {
+  id: string;
+  startDate: string;
+  endDate: string;
+  name: string;
+  zone: string;
 }
