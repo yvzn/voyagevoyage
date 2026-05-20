@@ -41,15 +41,17 @@ public class FranceSchoolHolidayApiService(HttpClient httpClient, ILogger<France
     public async Task<List<SchoolHoliday>> FetchZoneAsync(string zone, CancellationToken cancellationToken = default)
     {
         var currentYear = DateTime.UtcNow.Year;
-        var zoneEncoded = Uri.EscapeDataString($"\"{zone}\"");
-        var dateFilter = Uri.EscapeDataString($"date'{currentYear}'");
-        var where = Uri.EscapeDataString($"zones={zoneEncoded} AND start_date > date'{currentYear}'");
 
-        var url = $"{BaseUrl}?where={where}&limit={PageSize}&offset=0";
+        var url = new UriBuilder(BaseUrl);
+        var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+        queryString["where"] = $"zones='{zone}' AND start_date>=date'{currentYear}'";
+        queryString["limit"] = PageSize.ToString();
+        queryString["offset"] = "0";
+        url.Query = queryString.ToString();
 
         logger.LogInformation("Fetching school holidays for {Zone} from {Url}", zone, url);
 
-        var response = await httpClient.GetAsync(url, cancellationToken);
+        var response = await httpClient.GetAsync(url.ToString(), cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var data = await response.Content.ReadFromJsonAsync<ApiResponse>(
@@ -57,7 +59,7 @@ public class FranceSchoolHolidayApiService(HttpClient httpClient, ILogger<France
             cancellationToken: cancellationToken)
             ?? throw new InvalidOperationException("Empty response from school holiday API.");
 
-        var holidays = new List<SchoolHoliday>(data.Results?.Count ?? 0);
+        var holidays = new Dictionary<string, SchoolHoliday>(data.Results?.Count ?? 0);
         foreach (var record in data.Results ?? [])
         {
             if (string.IsNullOrWhiteSpace(record.Description)
@@ -83,7 +85,7 @@ public class FranceSchoolHolidayApiService(HttpClient httpClient, ILogger<France
             var zoneSlug = zone.Replace(" ", "-").ToLowerInvariant();
             var id = $"school-{zoneSlug}-{record.StartDate[..10]}";
 
-            holidays.Add(new SchoolHoliday
+            holidays[id] = new SchoolHoliday
             {
                 Id = id,
                 UserId = SchoolHoliday.SystemUserId,
@@ -91,11 +93,11 @@ public class FranceSchoolHolidayApiService(HttpClient httpClient, ILogger<France
                 EndDate = endDate,
                 Name = record.Description,
                 Zone = zone,
-            });
+            };
         }
 
         logger.LogInformation("Fetched {Count} school holidays for zone '{Zone}'.", holidays.Count, zone);
-        return holidays;
+        return holidays.Values.ToList();
     }
 
     /// <summary>

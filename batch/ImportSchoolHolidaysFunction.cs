@@ -25,13 +25,13 @@ public class ImportSchoolHolidaysFunction(
 #if DEBUG
         [TimerTrigger(CronSchedule, RunOnStartup = true)]
 #else
-        [TimerTrigger(CronSchedule)]
+        [TimerTrigger(CronSchedule, RunOnStartup = false)]
 #endif
         TimerInfo timer,
         CancellationToken cancellationToken)
     {
 #if DEBUG
-        await Task.Delay(20_000, cancellationToken); // Simulate some startup delay in debug mode.
+        await Task.Delay(15_000, cancellationToken); // Simulate some startup delay in debug mode.
 #endif
 
         logger.LogInformation(

@@ -25,7 +25,7 @@ public class ImportPublicHolidaysFunction(
 #if DEBUG
         [TimerTrigger(CronSchedule, RunOnStartup = true)]
 #else
-        [TimerTrigger(CronSchedule)]
+        [TimerTrigger(CronSchedule, RunOnStartup = false)]
 #endif
         TimerInfo timer,
         CancellationToken cancellationToken)
