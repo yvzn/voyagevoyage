@@ -1,0 +1,53 @@
+variables:
+  - group: 'voyagevoyage-deployment'
+  - name: functionAppType
+    value: 'functionAppLinux'
+  - name: buildPlatform
+    value: 'linux-x64'
+
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - batch
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+- job: CI
+  steps:
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'build'
+      projects: 'batch/*.csproj'
+      arguments: '--configuration Release -r $(buildPlatform) --no-self-contained'
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'publish'
+      publishWebProjects: false
+      projects: 'batch/*.csproj'
+      nobuild: true
+      arguments: '--configuration Release -r $(buildPlatform) --no-self-contained --no-build'
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: 'batch/bin/Release/net10.0/$(buildPlatform)/publish.zip'
+      publishLocation: 'pipeline'
+      artifact: 'batch'
+
+- deployment: CD
+  dependsOn: CI
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  environment: 'Azure'
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: AzureFunctionApp@1
+          inputs:
+            azureSubscription: '$(azureServiceConnection)'
+            appType: '$(functionAppType)'
+            appName: '$(functionAppName)'
+            package: '$(Pipeline.Workspace)/batch/*.zip'
