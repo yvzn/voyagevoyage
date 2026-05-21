@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { vi } from 'vitest';
@@ -58,6 +59,7 @@ async function setupModule(
   await TestBed.configureTestingModule({
     imports: [ConstraintsSettingsComponent, TranslateModule.forRoot()],
     providers: [
+      provideRouter([]),
       provideMockStore({
         selectors: [
           { selector: selectConstraints, value: constraints },

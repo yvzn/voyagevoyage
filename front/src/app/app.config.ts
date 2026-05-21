@@ -10,9 +10,11 @@ import { routes } from './app.routes';
 import { tripsFeature } from './trip/store/trip.reducer';
 import { settingsFeature } from './constraints/store/settings.reducer';
 import { expensesFeature } from './expense/store/expense.reducer';
+import { personalLeaveFeature } from './personal-leave/store/personal-leave.reducer';
 import * as tripEffects from './trip/store/trip.effects';
 import * as settingsEffects from './constraints/store/settings.effects';
 import * as expenseEffects from './expense/store/expense.effects';
+import * as personalLeaveEffects from './personal-leave/store/personal-leave.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -31,7 +33,8 @@ export const appConfig: ApplicationConfig = {
       [tripsFeature.name]: tripsFeature.reducer,
       [settingsFeature.name]: settingsFeature.reducer,
       [expensesFeature.name]: expensesFeature.reducer,
+      [personalLeaveFeature.name]: personalLeaveFeature.reducer,
     }),
-    provideEffects(tripEffects, settingsEffects, expenseEffects),
+    provideEffects(tripEffects, settingsEffects, expenseEffects, personalLeaveEffects),
   ],
 };

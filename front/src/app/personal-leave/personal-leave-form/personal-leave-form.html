@@ -1,0 +1,142 @@
+<dialog
+  #dialogEl
+  (cancel)="onDialogCancel($event)"
+  (click)="onBackdropClick($event)"
+  aria-labelledby="personal-leave-form-title"
+  class="m-auto w-full max-w-md rounded-xl border-0 bg-white p-0 shadow-xl backdrop:bg-black/50 dark:bg-gray-800"
+>
+  <!-- Inner wrapper stops backdrop-click propagation -->
+  <div class="p-6" (click)="$event.stopPropagation()">
+    <h3
+      id="personal-leave-form-title"
+      class="mb-6 text-lg font-semibold text-gray-900 dark:text-white"
+    >
+      {{ (isEditMode ? 'personalLeaveForm.editTitle' : 'personalLeaveForm.createTitle') | translate }}
+    </h3>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate [attr.aria-busy]="isLoading() ? 'true' : null">
+      <fieldset [disabled]="isLoading()">
+        <legend class="sr-only">{{ (isEditMode ? 'personalLeaveForm.editTitle' : 'personalLeaveForm.createTitle') | translate }}</legend>
+
+        <!-- Start date -->
+        <div class="mb-4">
+          <label
+            for="leave-start-date"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'personalLeaveForm.startDate' | translate }}
+          </label>
+          <input
+            id="leave-start-date"
+            type="date"
+            formControlName="startDate"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('startDate')?.invalid && form.get('startDate')?.touched }"
+          />
+          @if (form.get('startDate')?.invalid && form.get('startDate')?.touched) {
+            <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+              {{ 'personalLeaveForm.startDateRequired' | translate }}
+            </p>
+          }
+        </div>
+
+        <!-- End date -->
+        <div class="mb-4">
+          <label
+            for="leave-end-date"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'personalLeaveForm.endDate' | translate }}
+          </label>
+          <input
+            id="leave-end-date"
+            type="date"
+            formControlName="endDate"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            [ngClass]="{ 'border-red-500 dark:border-red-500': (form.get('endDate')?.invalid && form.get('endDate')?.touched) || (form.errors?.['endBeforeStart'] && form.get('endDate')?.touched) }"
+          />
+          @if (form.get('endDate')?.invalid && form.get('endDate')?.touched) {
+            <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+              {{ 'personalLeaveForm.endDateRequired' | translate }}
+            </p>
+          }
+          @if (form.errors?.['endBeforeStart'] && form.get('endDate')?.touched) {
+            <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+              {{ 'personalLeaveForm.endBeforeStart' | translate }}
+            </p>
+          }
+        </div>
+
+        <!-- Type -->
+        <div class="mb-4">
+          <label
+            for="leave-type"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'personalLeaveForm.type' | translate }}
+          </label>
+          <select
+            id="leave-type"
+            formControlName="type"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          >
+            @for (leaveType of leaveTypes; track leaveType) {
+              <option [value]="leaveType">{{ 'leaveType.' + leaveType | translate }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Label -->
+        <div class="mb-6">
+          <label
+            for="leave-label"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'personalLeaveForm.label' | translate }}
+          </label>
+          <input
+            id="leave-label"
+            type="text"
+            formControlName="label"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          />
+        </div>
+
+      </fieldset>
+
+      <!-- Error message -->
+      @if (errorKey()) {
+        <div
+          role="alert"
+          class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-400"
+        >
+          {{ errorKey()! | translate }}
+        </div>
+      }
+
+      <!-- Actions -->
+      <div class="flex items-center justify-end gap-2">
+        <button
+          type="button"
+          (click)="onCancel()"
+          class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+        >
+          {{ 'personalLeaveForm.cancel' | translate }}
+        </button>
+        <button
+          type="submit"
+          [attr.aria-busy]="isSaving() ? 'true' : null"
+          class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
+        >
+          @if (isSaving()) {
+            <svg class="inline h-4 w-4 animate-spin" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.036l3-2.745z"/>
+            </svg>
+          }
+          {{ (isSaving() ? 'personalLeaveForm.saving' : 'personalLeaveForm.save') | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</dialog>

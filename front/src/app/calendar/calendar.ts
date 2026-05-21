@@ -21,11 +21,12 @@ import { ExpenseFormComponent } from '../expense/expense-form/expense-form';
 import { ExpenseActions } from '../expense/store/expense.actions';
 import { selectExpensesCreateStatus, selectExpensesLastCreatedTripId } from '../expense/store/expense.selectors';
 import { CalendarGridComponent } from './calendar-grid';
+import { PersonalLeaveFormComponent } from '../personal-leave/personal-leave-form/personal-leave-form';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [NgClass, TranslatePipe, TripFormComponent, ExpenseFormComponent, CalendarGridComponent],
+  imports: [NgClass, TranslatePipe, TripFormComponent, ExpenseFormComponent, CalendarGridComponent, PersonalLeaveFormComponent],
   templateUrl: './calendar.html',
 })
 export class CalendarComponent {
@@ -95,6 +96,9 @@ export class CalendarComponent {
   /** Pre-filled date for expense creation (YYYY-MM-DD) */
   protected readonly expenseFormDate = signal<string | null>(null);
 
+  /** Whether the personal leave form modal is open */
+  protected readonly isLeaveFormOpen = signal(false);
+
   private readonly expenseCreateStatus = this.store.selectSignal(selectExpensesCreateStatus);
   private readonly expenseLastCreatedTripId = this.store.selectSignal(selectExpensesLastCreatedTripId);
 
@@ -119,6 +123,10 @@ export class CalendarComponent {
     this.isExpenseFormOpen.set(true);
   }
 
+  openCreateLeaveForm(): void {
+    this.isLeaveFormOpen.set(true);
+  }
+
   navigateToTrip(trip: Trip): void {
     this.router.navigate(['/trip', trip.id]);
   }
@@ -130,6 +138,10 @@ export class CalendarComponent {
   closeExpenseForm(): void {
     this.expenseFormPending = false;
     this.isExpenseFormOpen.set(false);
+  }
+
+  closeLeaveForm(): void {
+    this.isLeaveFormOpen.set(false);
   }
 
   retryLoadTrips(): void {

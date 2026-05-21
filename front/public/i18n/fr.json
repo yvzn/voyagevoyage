@@ -13,6 +13,7 @@
   "yearInputLabel": "Année",
   "todayButton": "Aujourd'hui",
   "newTripButton": "Nouveau déplacement",
+  "newLeaveButton": "Nouveau congé",
   "calendarLoading": "Chargement des déplacements…",
   "calendarLoadError": "Impossible de charger les déplacements. Veuillez réessayer.",
   "calendarRetryButton": "Réessayer",
@@ -95,6 +96,7 @@
   },
   "planningDashboardNavItem": "Planification",
   "dashboardNavItem": "Tableau de bord",
+  "personalLeaveNavItem": "Congés personnels",
   "planningDashboard": {
     "heading": "Déplacements à planifier",
     "loading": "Chargement…",
@@ -133,6 +135,7 @@
     "considerPublicHolidaysHint": "Les jours fériés ne seront pas comptabilisés comme jours de déplacement autorisés.",
     "considerVacationDays": "Exclure les jours de congé",
     "considerVacationDaysHint": "Les jours de congé personnels ne seront pas comptabilisés comme jours de déplacement autorisés.",
+    "managePersonalLeaves": "Gérer les congés personnels",
     "publicHolidayRegionsLabel": "Régions de jours fériés",
     "publicHolidayRegionsHint": "Sélectionnez les régions dont les jours fériés doivent être affichés dans votre calendrier.",
     "region": {
@@ -171,5 +174,45 @@
     "loadError": "Impossible de charger les contraintes de déplacement. Veuillez réessayer.",
     "loading": "Chargement…",
     "retry": "Réessayer"
+  },
+  "leaveType": {
+    "annual": "Congés annuels",
+    "sick": "Arrêt maladie",
+    "other": "Autre"
+  },
+  "personalLeave": {
+    "heading": "Congés personnels",
+    "loading": "Chargement…",
+    "loadError": "Impossible de charger les congés personnels. Veuillez réessayer.",
+    "retry": "Réessayer",
+    "empty": "Aucune période de congé enregistrée.",
+    "addButton": "Ajouter une période de congé",
+    "editButton": "Modifier",
+    "deleteButton": "Supprimer",
+    "deleteConfirmMessage": "Supprimer cette période de congé ?",
+    "deleteConfirmButton": "Confirmer",
+    "deleteCancelButton": "Annuler",
+    "icsImportLabel": "Importer depuis un fichier ICS",
+    "icsImportHint": "Importez des congés depuis un fichier calendrier ICS local. Cela remplace toutes les périodes de congé existantes.",
+    "icsImportButton": "Choisir un fichier ICS…",
+    "icsImporting": "Importation…",
+    "icsImportSuccess": "Les congés personnels ont été importés avec succès.",
+    "icsImportError": "Une erreur est survenue lors de l'importation du fichier ICS. Veuillez réessayer.",
+    "backToConstraints": "Retour aux contraintes de déplacement"
+  },
+  "personalLeaveForm": {
+    "createTitle": "Nouvelle période de congé",
+    "editTitle": "Modifier la période de congé",
+    "startDate": "Date de début",
+    "startDateRequired": "La date de début est obligatoire.",
+    "endDate": "Date de fin",
+    "endDateRequired": "La date de fin est obligatoire.",
+    "endBeforeStart": "La date de fin doit être égale ou postérieure à la date de début.",
+    "type": "Type",
+    "label": "Libellé (facultatif)",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "cancel": "Annuler",
+    "saveError": "Une erreur est survenue lors de l'enregistrement de la période de congé. Veuillez réessayer."
   }
 }
