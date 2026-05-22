@@ -53,9 +53,6 @@ export class CalendarGridComponent {
   /** Emitted when the user clicks the add-trip button for a day (non-compact mode). */
   readonly addTripClicked = output<CalendarDay>();
 
-  /** Emitted when the user clicks the add-expense button for a day (non-compact mode). */
-  readonly addExpenseClicked = output<CalendarDay>();
-
   protected readonly getTripStatusClass = getTripStatusClass;
   protected readonly getTripStatusDotClass = getTripStatusDotClass;
   protected readonly getTripStatusTranslationKey = getTripStatusTranslationKey;

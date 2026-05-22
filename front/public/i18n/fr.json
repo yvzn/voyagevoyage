@@ -176,7 +176,7 @@
     "retry": "Réessayer"
   },
   "leaveType": {
-    "annual": "Congés annuels",
+    "annual": "Congés payés",
     "sick": "Arrêt maladie",
     "other": "Autre"
   },
@@ -199,6 +199,21 @@
     "icsImportSuccess": "Les congés personnels ont été importés avec succès.",
     "icsImportError": "Une erreur est survenue lors de l'importation du fichier ICS. Veuillez réessayer.",
     "backToConstraints": "Retour aux contraintes de déplacement"
+  },
+  "personalLeaveDetail": {
+    "backToList": "Retour aux congés personnels",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "type": "Type",
+    "label": "Libellé",
+    "editButton": "Modifier",
+    "deleteButton": "Supprimer",
+    "deleting": "Suppression…",
+    "deleteConfirmMessage": "Êtes-vous sûr de vouloir supprimer cette période de congé ? Cette action est irréversible.",
+    "deleteConfirmButton": "Confirmer la suppression",
+    "deleteCancelButton": "Annuler",
+    "deleteError": "Une erreur est survenue lors de la suppression de la période de congé. Veuillez réessayer.",
+    "notFound": "Période de congé introuvable."
   },
   "personalLeaveForm": {
     "createTitle": "Nouvelle période de congé",

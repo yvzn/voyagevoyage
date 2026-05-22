@@ -200,6 +200,21 @@
     "icsImportError": "An error occurred while importing the ICS file. Please try again.",
     "backToConstraints": "Back to travel constraints"
   },
+  "personalLeaveDetail": {
+    "backToList": "Back to personal leave",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "type": "Type",
+    "label": "Label",
+    "editButton": "Edit",
+    "deleteButton": "Delete",
+    "deleting": "Deleting…",
+    "deleteConfirmMessage": "Are you sure you want to delete this leave period? This action cannot be undone.",
+    "deleteConfirmButton": "Confirm deletion",
+    "deleteCancelButton": "Cancel",
+    "deleteError": "An error occurred while deleting the leave period. Please try again.",
+    "notFound": "Leave period not found."
+  },
   "personalLeaveForm": {
     "createTitle": "New leave period",
     "editTitle": "Edit leave period",
