@@ -10,7 +10,6 @@ import { selectAllTrips, selectTripsCreateStatus, selectTripsDeleteStatus, selec
 import { selectTripsError } from '../trip/store/trip.selectors';
 import { selectConstraints } from '../constraints/store/settings.selectors';
 import { ApiStatus } from '../trip/store/trip.reducer';
-import { selectExpensesCreateStatus, selectExpensesLastCreatedTripId, selectExpensesUpdateStatus } from '../expense/store/expense.selectors';
 
 const EN_TRANSLATIONS = {
   calendarHeading: 'Trip calendar',
@@ -84,9 +83,6 @@ async function setupWithMockStore(trips: Trip[] = []): Promise<void> {
           { selector: selectTripsCreateStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsUpdateStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsDeleteStatus, value: 'idle' as ApiStatus },
-          { selector: selectExpensesCreateStatus, value: 'idle' as ApiStatus },
-          { selector: selectExpensesUpdateStatus, value: 'idle' as ApiStatus },
-          { selector: selectExpensesLastCreatedTripId, value: null },
         ],
       }),
     ],

@@ -13,6 +13,7 @@
   "yearInputLabel": "Year",
   "todayButton": "Today",
   "newTripButton": "New trip",
+  "newLeaveButton": "New leave",
   "calendarLoading": "Loading trips…",
   "calendarLoadError": "Failed to load trips. Please try again.",
   "calendarRetryButton": "Retry",
@@ -95,6 +96,7 @@
   },
   "planningDashboardNavItem": "Planning",
   "dashboardNavItem": "Dashboard",
+  "personalLeaveNavItem": "Personal leave",
   "planningDashboard": {
     "heading": "Trips to plan",
     "loading": "Loading…",
@@ -133,6 +135,7 @@
     "considerPublicHolidaysHint": "Public holidays will not count as allowed travel days.",
     "considerVacationDays": "Exclude vacation days",
     "considerVacationDaysHint": "Personal leave days will not count as allowed travel days.",
+    "managePersonalLeaves": "Manage personal leave periods",
     "publicHolidayRegionsLabel": "Public holiday regions",
     "publicHolidayRegionsHint": "Select the regions whose public holidays should be displayed in your calendar.",
     "region": {
@@ -171,5 +174,60 @@
     "loadError": "Failed to load travel constraints. Please try again.",
     "loading": "Loading…",
     "retry": "Retry"
+  },
+  "leaveType": {
+    "annual": "Annual leave",
+    "sick": "Sick leave",
+    "other": "Other"
+  },
+  "personalLeave": {
+    "heading": "Personal leave",
+    "loading": "Loading…",
+    "loadError": "Failed to load personal leave periods. Please try again.",
+    "retry": "Retry",
+    "empty": "No personal leave periods recorded.",
+    "addButton": "Add leave period",
+    "editButton": "Edit",
+    "deleteButton": "Delete",
+    "deleteConfirmMessage": "Delete this leave period?",
+    "deleteConfirmButton": "Confirm",
+    "deleteCancelButton": "Cancel",
+    "icsImportLabel": "Import from ICS file",
+    "icsImportHint": "Import leave periods from a local ICS calendar file. This replaces all existing personal leave periods.",
+    "icsImportButton": "Choose ICS file…",
+    "icsImporting": "Importing…",
+    "icsImportSuccess": "Personal leave periods imported successfully.",
+    "icsImportError": "An error occurred while importing the ICS file. Please try again.",
+    "backToConstraints": "Back to travel constraints"
+  },
+  "personalLeaveDetail": {
+    "backToList": "Back to personal leave",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "type": "Type",
+    "label": "Label",
+    "editButton": "Edit",
+    "deleteButton": "Delete",
+    "deleting": "Deleting…",
+    "deleteConfirmMessage": "Are you sure you want to delete this leave period? This action cannot be undone.",
+    "deleteConfirmButton": "Confirm deletion",
+    "deleteCancelButton": "Cancel",
+    "deleteError": "An error occurred while deleting the leave period. Please try again.",
+    "notFound": "Leave period not found."
+  },
+  "personalLeaveForm": {
+    "createTitle": "New leave period",
+    "editTitle": "Edit leave period",
+    "startDate": "Start date",
+    "startDateRequired": "Start date is required.",
+    "endDate": "End date",
+    "endDateRequired": "End date is required.",
+    "endBeforeStart": "End date must be on or after the start date.",
+    "type": "Type",
+    "label": "Label (optional)",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "saveError": "An error occurred while saving the leave period. Please try again."
   }
 }

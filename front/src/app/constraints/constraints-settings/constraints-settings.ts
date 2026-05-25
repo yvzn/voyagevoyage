@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, effect, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { NgClass } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { DayOfWeek, PUBLIC_HOLIDAY_REGIONS, SCHOOL_HOLIDAY_ZONES, TravelConstraints } from '../constraints.model';
@@ -16,7 +17,7 @@ import {
 @Component({
   selector: 'app-constraints-settings',
   standalone: true,
-  imports: [ReactiveFormsModule, NgClass, TranslatePipe],
+  imports: [ReactiveFormsModule, NgClass, RouterLink, TranslatePipe],
   templateUrl: './constraints-settings.html',
 })
 export class ConstraintsSettingsComponent implements OnInit {

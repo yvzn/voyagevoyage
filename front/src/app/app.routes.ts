@@ -5,6 +5,8 @@ import { TripDetailComponent } from './trip/trip-detail/trip-detail';
 import { ExpenseDetailComponent } from './expense/expense-detail/expense-detail';
 import { PlanningDashboardComponent } from './planning-dashboard/planning-dashboard';
 import { DashboardComponent } from './dashboard/dashboard';
+import { PersonalLeavePageComponent } from './personal-leave/personal-leave-page/personal-leave-page';
+import { PersonalLeaveDetailComponent } from './personal-leave/personal-leave-detail/personal-leave-detail';
 
 export const routes: Routes = [
   {
@@ -31,5 +33,13 @@ export const routes: Routes = [
   {
     path: 'constraints',
     component: ConstraintsSettingsComponent,
+  },
+  {
+    path: 'personal-leaves',
+    component: PersonalLeavePageComponent,
+  },
+  {
+    path: 'personal-leaves/:id',
+    component: PersonalLeaveDetailComponent,
   },
 ];

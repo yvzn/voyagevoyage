@@ -119,7 +119,6 @@
       [displayYear]="displayYear()"
       (tripClicked)="navigateToTrip($event)"
       (addTripClicked)="openCreateForm($event)"
-      (addExpenseClicked)="openCreateExpenseForm($event)"
     />
   </div>
 
@@ -145,15 +144,6 @@
     [defaultDate]="formDefaultDate()"
     (saved)="closeForm()"
     (cancelled)="closeForm()"
-  />
-}
-
-<!-- Expense form modal -->
-@if (isExpenseFormOpen()) {
-  <app-expense-form
-    [defaultDate]="expenseFormDate()"
-    (saved)="closeExpenseForm()"
-    (cancelled)="closeExpenseForm()"
   />
 }
 
