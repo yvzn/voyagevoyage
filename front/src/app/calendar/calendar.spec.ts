@@ -1,15 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { provideMockStore } from '@ngrx/store/testing';
+import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { provideRouter } from '@angular/router';
 import { Router } from '@angular/router';
 import { vi } from 'vitest';
 import { CalendarComponent } from './calendar';
 import { Trip, TripStatus } from '../trip/trip.model';
 import { selectAllTrips, selectTripsCreateStatus, selectTripsDeleteStatus, selectTripsLoadStatus, selectTripsUpdateStatus } from '../trip/store/trip.selectors';
-import { selectTripsError } from '../trip/store/trip.selectors';
+import { selectTripsError, selectCalendarMonth, selectCalendarYear } from '../trip/store/trip.selectors';
 import { selectConstraints } from '../constraints/store/settings.selectors';
 import { ApiStatus } from '../trip/store/trip.reducer';
+import { TripActions } from '../trip/store/trip.actions';
 
 const EN_TRANSLATIONS = {
   calendarHeading: 'Trip calendar',
@@ -69,7 +70,8 @@ const EN_TRANSLATIONS = {
   },
 };
 
-async function setupWithMockStore(trips: Trip[] = []): Promise<void> {
+async function setupWithMockStore(trips: Trip[] = []): Promise<MockStore> {
+  let store: MockStore;
   await TestBed.configureTestingModule({
     imports: [CalendarComponent, TranslateModule.forRoot()],
     providers: [
@@ -83,19 +85,27 @@ async function setupWithMockStore(trips: Trip[] = []): Promise<void> {
           { selector: selectTripsCreateStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsUpdateStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsDeleteStatus, value: 'idle' as ApiStatus },
+          { selector: selectCalendarMonth, value: new Date().getMonth() },
+          { selector: selectCalendarYear, value: new Date().getFullYear() },
         ],
       }),
     ],
   }).compileComponents();
 
+  store = TestBed.inject(MockStore);
   const translate = TestBed.inject(TranslateService);
   translate.setTranslation('en', EN_TRANSLATIONS);
   translate.use('en');
+  
+  return store;
 }
 
 describe('CalendarComponent', () => {
+  let store: MockStore;
+  
   beforeEach(async () => {
-    await setupWithMockStore();
+    store = await setupWithMockStore();
+    vi.spyOn(store, 'dispatch');
   });
 
   it('should create', () => {
@@ -201,11 +211,13 @@ describe('CalendarComponent', () => {
     fixture.detectChanges();
 
     if (initialMonth === 0) {
-      expect(component['currentMonth']()).toBe(11);
-      expect(component['currentYear']()).toBe(initialYear - 1);
+      expect(store.dispatch).toHaveBeenCalledWith(
+        TripActions.setCalendarMonth({ month: 11, year: initialYear - 1 })
+      );
     } else {
-      expect(component['currentMonth']()).toBe(initialMonth - 1);
-      expect(component['currentYear']()).toBe(initialYear);
+      expect(store.dispatch).toHaveBeenCalledWith(
+        TripActions.setCalendarMonth({ month: initialMonth - 1, year: initialYear })
+      );
     }
   });
 
@@ -222,11 +234,13 @@ describe('CalendarComponent', () => {
     fixture.detectChanges();
 
     if (initialMonth === 11) {
-      expect(component['currentMonth']()).toBe(0);
-      expect(component['currentYear']()).toBe(initialYear + 1);
+      expect(store.dispatch).toHaveBeenCalledWith(
+        TripActions.setCalendarMonth({ month: 0, year: initialYear + 1 })
+      );
     } else {
-      expect(component['currentMonth']()).toBe(initialMonth + 1);
-      expect(component['currentYear']()).toBe(initialYear);
+      expect(store.dispatch).toHaveBeenCalledWith(
+        TripActions.setCalendarMonth({ month: initialMonth + 1, year: initialYear })
+      );
     }
   });
 
@@ -243,40 +257,43 @@ describe('CalendarComponent', () => {
     fixture.detectChanges();
 
     const today = new Date();
-    expect(component['currentMonth']()).toBe(today.getMonth());
-    expect(component['currentYear']()).toBe(today.getFullYear());
+    expect(store.dispatch).toHaveBeenCalledWith(
+      TripActions.setCalendarMonth({ month: today.getMonth(), year: today.getFullYear() })
+    );
   });
 
   it('should handle December to January transition correctly', () => {
     const fixture = TestBed.createComponent(CalendarComponent);
     const component = fixture.componentInstance;
-    fixture.detectChanges();
-
-    component['currentMonth'].set(11);
-    component['currentYear'].set(2025);
+    
+    // Override the selectors to set month/year to December 2025
+    store.overrideSelector(selectCalendarMonth, 11);
+    store.overrideSelector(selectCalendarYear, 2025);
     fixture.detectChanges();
 
     component.goToNextMonth();
     fixture.detectChanges();
 
-    expect(component['currentMonth']()).toBe(0);
-    expect(component['currentYear']()).toBe(2026);
+    expect(store.dispatch).toHaveBeenCalledWith(
+      TripActions.setCalendarMonth({ month: 0, year: 2026 })
+    );
   });
 
   it('should handle January to December transition correctly', () => {
     const fixture = TestBed.createComponent(CalendarComponent);
     const component = fixture.componentInstance;
-    fixture.detectChanges();
-
-    component['currentMonth'].set(0);
-    component['currentYear'].set(2026);
+    
+    // Override the selectors to set month/year to January 2026
+    store.overrideSelector(selectCalendarMonth, 0);
+    store.overrideSelector(selectCalendarYear, 2026);
     fixture.detectChanges();
 
     component.goToPreviousMonth();
     fixture.detectChanges();
 
-    expect(component['currentMonth']()).toBe(11);
-    expect(component['currentYear']()).toBe(2025);
+    expect(store.dispatch).toHaveBeenCalledWith(
+      TripActions.setCalendarMonth({ month: 11, year: 2025 })
+    );
   });
 
   it('should have accessible section with heading', async () => {
@@ -342,15 +359,17 @@ describe('CalendarComponent — trip events', () => {
     },
   ];
 
+  let store: MockStore;
+
   beforeEach(async () => {
-    await setupWithMockStore(MOCK_TRIPS);
+    store = await setupWithMockStore(MOCK_TRIPS);
+    vi.spyOn(store, 'dispatch');
   });
 
   function createFixtureForApril2026() {
     const fixture = TestBed.createComponent(CalendarComponent);
-    const component = fixture.componentInstance;
-    component['currentMonth'].set(3); // April (0-indexed)
-    component['currentYear'].set(2026);
+    store.overrideSelector(selectCalendarMonth, 3); // April (0-indexed)
+    store.overrideSelector(selectCalendarYear, 2026);
     fixture.detectChanges();
     return fixture;
   }
