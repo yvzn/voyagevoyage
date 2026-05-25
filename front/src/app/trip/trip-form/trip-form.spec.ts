@@ -221,6 +221,144 @@ describe('TripFormComponent — validation', () => {
 
     expect(component['form'].hasError('endBeforeStart')).toBe(true);
   });
+
+  it('should sync end date to start date when end date is empty', async () => {
+    const fixture = TestBed.createComponent(TripFormComponent);
+    fixture.componentRef.setInput('trip', null);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component['form'].setValue({
+      destination: 'Paris',
+      startDate: '2026-08-01',
+      endDate: '',
+      status: TripStatus.Planned,
+    });
+
+    // Change start date
+    component['form'].get('startDate')?.setValue('2026-08-05');
+    await fixture.whenStable();
+
+    // End date should sync to the new start date
+    expect(component['form'].get('endDate')?.value).toBe('2026-08-05');
+  });
+
+  it('should sync end date to start date when end date is before start date', async () => {
+    const fixture = TestBed.createComponent(TripFormComponent);
+    fixture.componentRef.setInput('trip', null);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component['form'].setValue({
+      destination: 'Paris',
+      startDate: '2026-08-01',
+      endDate: '2026-08-03',
+      status: TripStatus.Planned,
+    });
+
+    // Change start date to after end date
+    component['form'].get('startDate')?.setValue('2026-08-10');
+    await fixture.whenStable();
+
+    // End date should sync to the new start date
+    expect(component['form'].get('endDate')?.value).toBe('2026-08-10');
+  });
+
+  it('should not sync end date when end date is after start date', async () => {
+    const fixture = TestBed.createComponent(TripFormComponent);
+    fixture.componentRef.setInput('trip', null);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component['form'].setValue({
+      destination: 'Paris',
+      startDate: '2026-08-01',
+      endDate: '2026-08-05',
+      status: TripStatus.Planned,
+    });
+
+    // Change start date to before end date
+    component['form'].get('startDate')?.setValue('2026-07-30');
+    await fixture.whenStable();
+
+    // End date should remain unchanged
+    expect(component['form'].get('endDate')?.value).toBe('2026-08-05');
+  });
+});
+
+describe('TripFormComponent — date synchronization', () => {
+  beforeEach(async () => {
+    await setupModule();
+  });
+
+  it('should sync end date to start date when end date is empty', async () => {
+    const fixture = TestBed.createComponent(TripFormComponent);
+    fixture.componentRef.setInput('trip', null);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component['form'].setValue({
+      destination: 'Paris',
+      startDate: '2026-08-01',
+      endDate: '',
+      status: TripStatus.Planned,
+    });
+
+    // Change start date
+    component['form'].get('startDate')?.setValue('2026-08-05');
+    await fixture.whenStable();
+
+    // End date should sync to the new start date
+    expect(component['form'].get('endDate')?.value).toBe('2026-08-05');
+  });
+
+  it('should sync end date to start date when end date is before start date', async () => {
+    const fixture = TestBed.createComponent(TripFormComponent);
+    fixture.componentRef.setInput('trip', null);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component['form'].setValue({
+      destination: 'Paris',
+      startDate: '2026-08-01',
+      endDate: '2026-08-03',
+      status: TripStatus.Planned,
+    });
+
+    // Change start date to after end date
+    component['form'].get('startDate')?.setValue('2026-08-10');
+    await fixture.whenStable();
+
+    // End date should sync to the new start date
+    expect(component['form'].get('endDate')?.value).toBe('2026-08-10');
+  });
+
+  it('should not sync end date when end date is after start date', async () => {
+    const fixture = TestBed.createComponent(TripFormComponent);
+    fixture.componentRef.setInput('trip', null);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component['form'].setValue({
+      destination: 'Paris',
+      startDate: '2026-08-01',
+      endDate: '2026-08-05',
+      status: TripStatus.Planned,
+    });
+
+    // Change start date to before end date
+    component['form'].get('startDate')?.setValue('2026-07-30');
+    await fixture.whenStable();
+
+    // End date should remain unchanged
+    expect(component['form'].get('endDate')?.value).toBe('2026-08-05');
+  });
 });
 
 describe('TripFormComponent — create operation', () => {

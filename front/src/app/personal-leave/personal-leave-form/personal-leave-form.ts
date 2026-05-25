@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   Component,
+  DestroyRef,
   ElementRef,
   computed,
   effect,
@@ -13,6 +14,7 @@ import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, Validati
 import { NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   PersonalLeave,
   LeaveType,
@@ -54,6 +56,7 @@ export class PersonalLeaveFormComponent implements AfterViewInit {
   private readonly dialogEl = viewChild.required<ElementRef<HTMLDialogElement>>('dialogEl');
   private readonly store = inject(Store);
   private readonly fb = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly createStatus = this.store.selectSignal(selectPersonalLeavesCreateStatus);
   private readonly updateStatus = this.store.selectSignal(selectPersonalLeavesUpdateStatus);
@@ -108,6 +111,25 @@ export class PersonalLeaveFormComponent implements AfterViewInit {
           type: LeaveType.Annual,
           label: '',
         });
+      }
+    });
+
+    // Sync end date when start date changes
+    effect(() => {
+      const startDateControl = this.form.get('startDate');
+      const endDateControl = this.form.get('endDate');
+      if (startDateControl && endDateControl) {
+        startDateControl.valueChanges
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe((newStartDate: string | null) => {
+            if (newStartDate) {
+              const currentEndDate = endDateControl.value as string;
+              // Sync end date if it's empty or before the new start date
+              if (!currentEndDate || currentEndDate < newStartDate) {
+                endDateControl.setValue(newStartDate, { emitEvent: false });
+              }
+            }
+          });
       }
     });
 
