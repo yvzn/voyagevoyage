@@ -5,6 +5,10 @@ export const selectConstraints = createSelector(
   selectSettingsState,
   (state) => state.constraints,
 );
+export const selectPublicHolidays = createSelector(
+  selectSettingsState,
+  (state) => state.publicHolidays,
+);
 export const selectSettingsLoadStatus = createSelector(
   selectSettingsState,
   (state) => state.loadStatus,

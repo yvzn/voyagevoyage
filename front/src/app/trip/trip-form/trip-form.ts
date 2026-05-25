@@ -15,11 +15,14 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { Trip, TripStatus } from '../trip.model';
 import { TripActions } from '../store/trip.actions';
-import { selectTripsCreateStatus, selectTripsUpdateStatus } from '../store/trip.selectors';
+import { selectTripsCreateStatus, selectTripsUpdateStatus, selectAllTrips } from '../store/trip.selectors';
 import { LocaleService } from '../../locale.service';
-import { selectConstraints } from '../../constraints/store/settings.selectors';
-import { constraintViolationValidator } from './constraint-violation.validator';
+import { selectConstraints, selectPublicHolidays } from '../../constraints/store/settings.selectors';
+import { SettingsActions } from '../../constraints/store/settings.actions';
+import { constraintViolationValidator, ConstraintViolationReason } from './constraint-violation.validator';
 import { getTripStatusTranslationKey } from '../trip-status.utils';
+import { PersonalLeaveActions } from '../../personal-leave/store/personal-leave.actions';
+import { selectAllPersonalLeaves } from '../../personal-leave/store/personal-leave.selectors';
 
 function endDateAfterStartDate(group: AbstractControl): ValidationErrors | null {
   const start = group.get('startDate')?.value as string;
@@ -51,6 +54,9 @@ export class TripFormComponent implements AfterViewInit {
   protected readonly localeService = inject(LocaleService);
 
   private readonly constraints = this.store.selectSignal(selectConstraints);
+  private readonly publicHolidays = this.store.selectSignal(selectPublicHolidays);
+  private readonly personalLeaves = this.store.selectSignal(selectAllPersonalLeaves);
+  private readonly allTrips = this.store.selectSignal(selectAllTrips);
   private readonly createStatus = this.store.selectSignal(selectTripsCreateStatus);
   private readonly updateStatus = this.store.selectSignal(selectTripsUpdateStatus);
 
@@ -70,6 +76,13 @@ export class TripFormComponent implements AfterViewInit {
     return null;
   });
 
+  /** Violation reasons from the form's constraintWarning or constraintError. */
+  protected readonly violationReasons = computed<ConstraintViolationReason[]>(() => {
+    const detail =
+      this.form.getError('constraintWarning') ?? this.form.getError('constraintError');
+    return detail?.reasons ?? [];
+  });
+
   /** Tracks which save operation (create/update) was last dispatched by this instance. */
   private saveOp: 'create' | 'update' | null = null;
 
@@ -80,10 +93,25 @@ export class TripFormComponent implements AfterViewInit {
       endDate: ['', Validators.required],
       status: [TripStatus.Planned as TripStatus, Validators.required],
     },
-    { validators: [endDateAfterStartDate, constraintViolationValidator(() => this.constraints())] },
+    {
+      validators: [
+        endDateAfterStartDate,
+        constraintViolationValidator(
+          () => this.constraints(),
+          () => this.publicHolidays(),
+          () => this.personalLeaves(),
+          () => this.allTrips(),
+          () => this.trip()?.id ?? null,
+        ),
+      ],
+    },
   );
 
   constructor() {
+    // Ensure public holidays and personal leaves are available for constraint checking
+    this.store.dispatch(SettingsActions.loadPublicHolidays());
+    this.store.dispatch(PersonalLeaveActions.loadPersonalLeaves());
+
     effect(() => {
       const t = this.trip();
       const d = this.defaultDate();

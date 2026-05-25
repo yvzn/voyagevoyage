@@ -40,7 +40,15 @@
     "cancel": "Annuler",
     "saveError": "Une erreur est survenue lors de l'enregistrement du déplacement. Veuillez réessayer.",
     "constraintWarning": "Les dates sélectionnées ne respectent pas vos contraintes de déplacement.",
-    "constraintError": "Les dates sélectionnées violent vos contraintes de déplacement obligatoires."
+    "constraintError": "Les dates sélectionnées violent vos contraintes de déplacement obligatoires.",
+    "constraintAllowedDaysWarning": "Un ou plusieurs jours sélectionnés ne font pas partie de vos jours de déplacement autorisés.",
+    "constraintAllowedDaysError": "Un ou plusieurs jours sélectionnés ne font pas partie de vos jours de déplacement autorisés. Veuillez ajuster vos dates.",
+    "constraintPublicHolidayWarning": "La période sélectionnée comprend un jour férié.",
+    "constraintPublicHolidayError": "La période sélectionnée comprend un jour férié. Veuillez ajuster vos dates.",
+    "constraintPersonalLeaveWarning": "La période sélectionnée chevauche une période de congé personnel.",
+    "constraintPersonalLeaveError": "La période sélectionnée chevauche une période de congé personnel. Veuillez ajuster vos dates.",
+    "constraintMaxDaysWarning": "La période sélectionnée dépasserait votre nombre maximum de jours de déplacement par mois.",
+    "constraintMaxDaysError": "La période sélectionnée dépasserait votre nombre maximum de jours de déplacement par mois. Veuillez ajuster vos dates."
   },
   "tripDetail": {
     "backToCalendar": "Retour au calendrier",

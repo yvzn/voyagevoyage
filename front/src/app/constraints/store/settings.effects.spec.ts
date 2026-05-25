@@ -3,9 +3,10 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { Observable, Subject, of, throwError } from 'rxjs';
 import { Action } from '@ngrx/store';
 import { vi } from 'vitest';
-import { TravelConstraints, UpdateTravelConstraintsRequest } from '../constraints.model';
+import { TravelConstraints, UpdateTravelConstraintsRequest, PublicHoliday } from '../constraints.model';
 import { SettingsActions } from './settings.actions';
 import { ConstraintsService } from '../constraints.service';
+import { PublicHolidayService } from '../public-holiday.service';
 import * as SettingsEffects from './settings.effects';
 
 const MOCK_CONSTRAINTS: TravelConstraints = {
@@ -19,6 +20,10 @@ const MOCK_CONSTRAINTS: TravelConstraints = {
       schoolHolidayZones: [],
 };
 
+const MOCK_HOLIDAYS: PublicHoliday[] = [
+  { id: 'h1', date: '2026-01-01', name: "New Year's Day", region: 'france-metropole' },
+];
+
 function makeMockConstraintsService() {
   return {
     get: vi.fn().mockReturnValue(of(null)),
@@ -26,16 +31,26 @@ function makeMockConstraintsService() {
   };
 }
 
+function makeMockPublicHolidayService() {
+  return {
+    getForCurrentUser: vi.fn().mockReturnValue(of([])),
+    importIcs: vi.fn().mockReturnValue(of(undefined)),
+  };
+}
+
 describe('Settings Effects', () => {
   let actions$: Subject<Action>;
   let mockConstraintsService: ReturnType<typeof makeMockConstraintsService>;
+  let mockPublicHolidayService: ReturnType<typeof makeMockPublicHolidayService>;
 
   beforeEach(() => {
     actions$ = new Subject<Action>();
     mockConstraintsService = makeMockConstraintsService();
+    mockPublicHolidayService = makeMockPublicHolidayService();
     TestBed.configureTestingModule({
       providers: [
         { provide: ConstraintsService, useValue: mockConstraintsService },
+        { provide: PublicHolidayService, useValue: mockPublicHolidayService },
         provideMockActions(() => actions$),
       ],
     });
@@ -88,6 +103,43 @@ describe('Settings Effects', () => {
       expect((result as ReturnType<typeof SettingsActions.loadSettingsFailure>).type).toBe(
         SettingsActions.loadSettingsFailure.type,
       );
+    });
+  });
+
+  describe('loadPublicHolidaysEffect', () => {
+    it('should dispatch loadPublicHolidaysSuccess when service returns holidays', () => {
+      mockPublicHolidayService.getForCurrentUser.mockReturnValue(of(MOCK_HOLIDAYS));
+
+      const effect$: Observable<Action> = TestBed.runInInjectionContext(() =>
+        SettingsEffects.loadPublicHolidaysEffect(),
+      );
+
+      let result: Action | undefined;
+      effect$.subscribe((action) => (result = action));
+
+      actions$.next(SettingsActions.loadPublicHolidays());
+
+      expect(result).toEqual(SettingsActions.loadPublicHolidaysSuccess({ holidays: MOCK_HOLIDAYS }));
+    });
+
+    it('should dispatch loadPublicHolidaysFailure when service throws', () => {
+      mockPublicHolidayService.getForCurrentUser.mockReturnValue(
+        throwError(() => new Error('Network error')),
+      );
+
+      const effect$: Observable<Action> = TestBed.runInInjectionContext(() =>
+        SettingsEffects.loadPublicHolidaysEffect(),
+      );
+
+      let result: Action | undefined;
+      effect$.subscribe((action) => (result = action));
+
+      actions$.next(SettingsActions.loadPublicHolidays());
+
+      expect(result).toBeDefined();
+      expect(
+        (result as ReturnType<typeof SettingsActions.loadPublicHolidaysFailure>).type,
+      ).toBe(SettingsActions.loadPublicHolidaysFailure.type);
     });
   });
 

@@ -1,5 +1,5 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
-import { TravelConstraints, UpdateTravelConstraintsRequest } from '../constraints.model';
+import { TravelConstraints, UpdateTravelConstraintsRequest, PublicHoliday } from '../constraints.model';
 
 export const SettingsActions = createActionGroup({
   source: 'Settings',
@@ -14,6 +14,11 @@ export const SettingsActions = createActionGroup({
     'Update Settings': props<{ request: UpdateTravelConstraintsRequest }>(),
     'Update Settings Success': props<{ constraints: TravelConstraints }>(),
     'Update Settings Failure': props<{ error: string }>(),
+
+    // Public holiday list load
+    'Load Public Holidays': emptyProps(),
+    'Load Public Holidays Success': props<{ holidays: PublicHoliday[] }>(),
+    'Load Public Holidays Failure': props<{ error: string }>(),
 
     // Public holiday ICS import
     'Import Ics': props<{ file: File }>(),
