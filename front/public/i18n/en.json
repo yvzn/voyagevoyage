@@ -40,7 +40,15 @@
     "cancel": "Cancel",
     "saveError": "An error occurred while saving the trip. Please try again.",
     "constraintWarning": "The selected dates do not comply with your travel constraints.",
-    "constraintError": "The selected dates violate your mandatory travel constraints."
+    "constraintError": "The selected dates violate your mandatory travel constraints.",
+    "constraintAllowedDaysWarning": "One or more selected days are outside your allowed travel days.",
+    "constraintAllowedDaysError": "One or more selected days are outside your allowed travel days. Please adjust your dates.",
+    "constraintPublicHolidayWarning": "The selected period includes a public holiday.",
+    "constraintPublicHolidayError": "The selected period includes a public holiday. Please adjust your dates.",
+    "constraintPersonalLeaveWarning": "The selected period overlaps with a personal leave period.",
+    "constraintPersonalLeaveError": "The selected period overlaps with a personal leave period. Please adjust your dates.",
+    "constraintMaxDaysWarning": "The selected period would exceed your maximum travel days per month.",
+    "constraintMaxDaysError": "The selected period would exceed your maximum travel days per month. Please adjust your dates."
   },
   "tripDetail": {
     "backToCalendar": "Back to calendar",

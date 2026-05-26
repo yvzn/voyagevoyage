@@ -4,8 +4,9 @@ import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { TripFormComponent } from './trip-form';
 import { Trip, TripStatus } from '../trip.model';
 import { ApiStatus } from '../store/trip.reducer';
-import { selectTripsCreateStatus, selectTripsUpdateStatus } from '../store/trip.selectors';
-import { selectConstraints } from '../../constraints/store/settings.selectors';
+import { selectTripsCreateStatus, selectTripsUpdateStatus, selectAllTrips } from '../store/trip.selectors';
+import { selectConstraints, selectPublicHolidays } from '../../constraints/store/settings.selectors';
+import { selectAllPersonalLeaves } from '../../personal-leave/store/personal-leave.selectors';
 import { TravelConstraints, DayOfWeek } from '../../constraints/constraints.model';
 
 const EN_TRANSLATIONS = {
@@ -22,8 +23,14 @@ const EN_TRANSLATIONS = {
     saving: 'Saving…',
     cancel: 'Cancel',
     saveError: 'An error occurred while saving the trip. Please try again.',
-    constraintWarning: 'One or more selected days are outside your allowed travel days (flexible mode).',
-    constraintError: 'One or more selected days are outside your allowed travel days (strict mode). Please adjust your dates.',
+    constraintAllowedDaysWarning: 'One or more selected days are outside your allowed travel days.',
+    constraintAllowedDaysError: 'One or more selected days are outside your allowed travel days. Please adjust your dates.',
+    constraintPublicHolidayWarning: 'The selected period includes a public holiday.',
+    constraintPublicHolidayError: 'The selected period includes a public holiday. Please adjust your dates.',
+    constraintPersonalLeaveWarning: 'The selected period overlaps with a personal leave period.',
+    constraintPersonalLeaveError: 'The selected period overlaps with a personal leave period. Please adjust your dates.',
+    constraintMaxDaysWarning: 'The selected period would exceed your maximum travel days per month.',
+    constraintMaxDaysError: 'The selected period would exceed your maximum travel days per month. Please adjust your dates.',
   },
   tripStatus: {
     planned: 'Planned',
@@ -46,6 +53,9 @@ async function setupModule(
       provideMockStore({
         selectors: [
           { selector: selectConstraints, value: constraints },
+          { selector: selectPublicHolidays, value: [] },
+          { selector: selectAllPersonalLeaves, value: [] },
+          { selector: selectAllTrips, value: [] },
           { selector: selectTripsCreateStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsUpdateStatus, value: 'idle' as ApiStatus },
         ],
