@@ -23,5 +23,8 @@ export const TripActions = createActionGroup({
     'Delete Trip': props<{ id: string }>(),
     'Delete Trip Success': props<{ id: string }>(),
     'Delete Trip Failure': props<{ error: string }>(),
+
+    // Calendar navigation
+    'Set Calendar Month': props<{ month: number; year: number }>(),
   },
 });

@@ -16,3 +16,5 @@ export const selectTripsDeleteStatus = createSelector(
   (state) => state.deleteStatus,
 );
 export const selectTripsError = createSelector(selectTripsState, (state) => state.error);
+export const selectCalendarMonth = createSelector(selectTripsState, (state) => state.selectedMonth);
+export const selectCalendarYear = createSelector(selectTripsState, (state) => state.selectedYear);

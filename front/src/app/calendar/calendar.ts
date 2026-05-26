@@ -15,7 +15,7 @@ import { Trip, TripStatus } from '../trip/trip.model';
 import { TripFormComponent } from '../trip/trip-form/trip-form';
 import { TripActions } from '../trip/store/trip.actions';
 import { SettingsActions } from '../constraints/store/settings.actions';
-import { selectAllTrips, selectTripsLoadStatus, selectTripsError } from '../trip/store/trip.selectors';
+import { selectAllTrips, selectTripsLoadStatus, selectTripsError, selectCalendarMonth, selectCalendarYear } from '../trip/store/trip.selectors';
 import { getTripStatusDotClass, getTripStatusTranslationKey } from '../trip/trip-status.utils';
 import { CalendarGridComponent } from './calendar-grid';
 
@@ -39,8 +39,8 @@ export class CalendarComponent {
   protected readonly tripsLoadStatus = this.store.selectSignal(selectTripsLoadStatus);
   protected readonly tripsError = this.store.selectSignal(selectTripsError);
 
-  protected readonly currentYear = signal(new Date().getFullYear());
-  protected readonly currentMonth = signal(new Date().getMonth());
+  protected readonly currentYear = this.store.selectSignal(selectCalendarYear);
+  protected readonly currentMonth = this.store.selectSignal(selectCalendarMonth);
 
   protected readonly monthNames = computed(() => getMonthNames(this.localeService.currentLocale()));
   protected readonly dayOfWeekNames = computed(() => getDayOfWeekNames(this.localeService.currentLocale()));
@@ -96,10 +96,9 @@ export class CalendarComponent {
     const month = this.currentMonth();
     const year = this.currentYear();
     if (month === 0) {
-      this.currentMonth.set(11);
-      this.currentYear.set(year - 1);
+      this.store.dispatch(TripActions.setCalendarMonth({ month: 11, year: year - 1 }));
     } else {
-      this.currentMonth.set(month - 1);
+      this.store.dispatch(TripActions.setCalendarMonth({ month: month - 1, year }));
     }
   }
 
@@ -107,29 +106,28 @@ export class CalendarComponent {
     const month = this.currentMonth();
     const year = this.currentYear();
     if (month === 11) {
-      this.currentMonth.set(0);
-      this.currentYear.set(year + 1);
+      this.store.dispatch(TripActions.setCalendarMonth({ month: 0, year: year + 1 }));
     } else {
-      this.currentMonth.set(month + 1);
+      this.store.dispatch(TripActions.setCalendarMonth({ month: month + 1, year }));
     }
   }
 
   goToToday(): void {
     const today = new Date();
-    this.currentMonth.set(today.getMonth());
-    this.currentYear.set(today.getFullYear());
+    this.store.dispatch(TripActions.setCalendarMonth({ month: today.getMonth(), year: today.getFullYear() }));
   }
 
   onMonthChange(event: Event): void {
     const select = event.target as HTMLSelectElement;
-    this.currentMonth.set(Number(select.value));
+    const month = Number(select.value);
+    this.store.dispatch(TripActions.setCalendarMonth({ month, year: this.currentYear() }));
   }
 
   onYearChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const value = Number(input.value);
     if (!isNaN(value) && value >= this.minYear && value <= this.maxYear) {
-      this.currentYear.set(value);
+      this.store.dispatch(TripActions.setCalendarMonth({ month: this.currentMonth(), year: value }));
     }
   }
 }

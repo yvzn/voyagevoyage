@@ -11,6 +11,8 @@ export interface TripsState {
   updateStatus: ApiStatus;
   deleteStatus: ApiStatus;
   error: string | null;
+  selectedMonth: number;
+  selectedYear: number;
 }
 
 const initialState: TripsState = {
@@ -20,6 +22,8 @@ const initialState: TripsState = {
   updateStatus: 'idle',
   deleteStatus: 'idle',
   error: null,
+  selectedMonth: new Date().getMonth(),
+  selectedYear: new Date().getFullYear(),
 };
 
 export const tripsFeature = createFeature({
@@ -94,6 +98,13 @@ export const tripsFeature = createFeature({
       deleteStatus: 'failure' as ApiStatus,
       error,
     })),
+
+    // Calendar navigation
+    on(TripActions.setCalendarMonth, (state, { month, year }) => ({
+      ...state,
+      selectedMonth: month,
+      selectedYear: year,
+    })),
   ),
 });
 
@@ -107,4 +118,6 @@ export const {
   selectUpdateStatus,
   selectDeleteStatus,
   selectError,
+  selectSelectedMonth,
+  selectSelectedYear,
 } = tripsFeature;
