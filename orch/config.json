@@ -1,0 +1,30 @@
+{
+    "front": {
+        "path": "../front",
+        "run": "npm start",
+        "url": "http://localhost:4200",
+        "health": "http://localhost:4200"
+    },
+    "server": {
+        "path": "../server/VoyageVoyage.Server",
+        "build": "dotnet build",
+        "run": "dotnet run",
+        "url": "http://localhost:5066/",
+        "health": "http://localhost:5066/api/health"
+    },
+    "batch": {
+        "path": "../batch",
+        "build": "dotnet build",
+        "run": "func host start",
+        "url": "http://localhost:7137/",
+        "health": "http://localhost:7137/api/health"
+    },
+    "storage": {
+        "path": "../db/storage",
+        "run": "npm start"
+    },
+    "cosmos": {
+        "url": "https://localhost:8081/",
+        "health": "https://localhost:8081/_explorer/emulator.html"
+    }
+}
