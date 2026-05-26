@@ -55,11 +55,12 @@
           @for (day of week.days; track trackByDay($index, day)) {
             <td
               role="gridcell"
-              class="group h-16 px-2 py-1 align-top md:h-28 md:px-3 md:py-2"
+              class="group h-16 px-2 py-1 align-top transition-colors md:h-28 md:px-3 md:py-2"
               [class.text-gray-400]="!day.isCurrentMonth"
               [class.dark:text-gray-500]="!day.isCurrentMonth"
               [class.text-gray-900]="day.isCurrentMonth && !day.isToday"
               [class.dark:text-white]="day.isCurrentMonth && !day.isToday"
+              [ngClass]="getDayCellClass(day)"
             >
               <div class="flex items-start justify-between">
                 <span
@@ -83,6 +84,52 @@
                   </button>
                 }
               </div>
+              @if (day.isCurrentMonth) {
+                @let constraints = getConstraintsForDay(day);
+                @if (constraints.publicHolidays.length > 0 || constraints.schoolHolidays.length > 0 || constraints.personalLeaves.length > 0) {
+                  <div class="mt-0.5 flex flex-wrap gap-0.5" [attr.aria-label]="'calendar.constraintsLabel' | translate">
+                    @if (constraints.publicHolidays.length > 0) {
+                      <a
+                        routerLink="/constraints"
+                        class="inline-flex items-center rounded p-0.5 text-amber-700 hover:bg-amber-200 focus:outline-none focus:ring-1 focus:ring-amber-400 dark:text-amber-400 dark:hover:bg-amber-900/40"
+                        [title]="constraints.publicHolidays[0].name"
+                        [attr.aria-label]="'calendar.constraintPublicHolidayAriaLabel' | translate : { name: constraints.publicHolidays[0].name }"
+                      >
+                        <!-- Flag icon (same as in trip form constraint warnings) -->
+                        <svg class="h-3.5 w-3.5 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5v16M5 5h14l-3 5 3 5H5"/>
+                        </svg>
+                      </a>
+                    }
+                    @if (constraints.schoolHolidays.length > 0) {
+                      <a
+                        routerLink="/constraints"
+                        class="inline-flex items-center rounded p-0.5 text-amber-700 hover:bg-amber-200 focus:outline-none focus:ring-1 focus:ring-amber-400 dark:text-amber-400 dark:hover:bg-amber-900/40"
+                        [title]="constraints.schoolHolidays[0].name"
+                        [attr.aria-label]="'calendar.constraintSchoolHolidayAriaLabel' | translate : { name: constraints.schoolHolidays[0].name }"
+                      >
+                        <!-- Graduation cap icon -->
+                        <svg class="h-3.5 w-3.5 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.25 2 10.75l10 4.5 10-4.5-10-4.5ZM7 13v4l5 2.25L17 17v-4"/>
+                        </svg>
+                      </a>
+                    }
+                    @for (leave of constraints.personalLeaves; track leave.id) {
+                      <a
+                        [routerLink]="['/personal-leaves', leave.id]"
+                        class="inline-flex items-center rounded p-0.5 text-amber-700 hover:bg-amber-200 focus:outline-none focus:ring-1 focus:ring-amber-400 dark:text-amber-400 dark:hover:bg-amber-900/40"
+                        [title]="leave.label || ('leaveType.' + leave.type | translate)"
+                        [attr.aria-label]="'calendar.constraintPersonalLeaveAriaLabel' | translate : { label: leave.label || ('leaveType.' + leave.type | translate) }"
+                      >
+                        <!-- Person icon (same as in trip form constraint warnings) -->
+                        <svg class="h-3.5 w-3.5 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4Z"/>
+                        </svg>
+                      </a>
+                    }
+                  </div>
+                }
+              }
               @if (getTripsForDay(day).length > 0) {
                 <ul class="mt-0.5 space-y-0.5 text-left" [attr.aria-label]="'tripEventsForDay' | translate : { date: day.date, month: displayMonth(), year: displayYear() }">
                   @for (trip of getTripsForDay(day); track trip.id) {

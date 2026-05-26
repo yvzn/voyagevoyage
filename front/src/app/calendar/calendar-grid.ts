@@ -6,6 +6,15 @@ import { Trip } from '../trip/trip.model';
 import { CalendarDay, CalendarWeek } from './calendar.utils';
 import { getTripStatusClass, getTripStatusDotClass, getTripStatusTranslationKey } from '../trip/trip-status.utils';
 import { MILLISECONDS_PER_DAY, parseISODateUTC } from '../planning-dashboard/planning-dashboard.utils';
+import { PublicHoliday, SchoolHoliday } from '../constraints/constraints.model';
+import { PersonalLeave } from '../personal-leave/personal-leave.model';
+
+/** Constraints resolved for a single calendar day. */
+export interface DayConstraints {
+  publicHolidays: PublicHoliday[];
+  schoolHolidays: SchoolHoliday[];
+  personalLeaves: PersonalLeave[];
+}
 
 /**
  * Shared calendar grid component used by both CalendarComponent (full monthly view)
@@ -34,6 +43,15 @@ export class CalendarGridComponent {
 
   /** All trips to display across the grid (used to compute per-day mapping). */
   readonly trips = input<Trip[]>([]);
+
+  /** Public holidays to display as constraint markers. */
+  readonly publicHolidays = input<PublicHoliday[]>([]);
+
+  /** School holidays to display as constraint markers. */
+  readonly schoolHolidays = input<SchoolHoliday[]>([]);
+
+  /** Personal leaves to display as constraint markers. */
+  readonly personalLeaves = input<PersonalLeave[]>([]);
 
   /** Localized short names for days of the week, starting from Monday. */
   readonly dayNames = input<string[]>([]);
@@ -77,8 +95,88 @@ export class CalendarGridComponent {
     return map;
   });
 
+  /** Map from day key (YYYY-MM-DD) to public holidays on that day. */
+  private readonly publicHolidaysPerDay = computed(() => {
+    const map = new Map<string, PublicHoliday[]>();
+    for (const holiday of this.publicHolidays()) {
+      const key = holiday.date;
+      const existing = map.get(key);
+      if (existing) {
+        existing.push(holiday);
+      } else {
+        map.set(key, [holiday]);
+      }
+    }
+    return map;
+  });
+
+  /** Map from day key (YYYY-MM-DD) to school holiday periods covering that day. */
+  private readonly schoolHolidaysPerDay = computed(() => {
+    const map = new Map<string, SchoolHoliday[]>();
+    for (const holiday of this.schoolHolidays()) {
+      const startTs = parseISODateUTC(holiday.startDate);
+      const endTs = parseISODateUTC(holiday.endDate);
+      for (let ts = startTs; ts <= endTs; ts += MILLISECONDS_PER_DAY) {
+        const d = new Date(ts);
+        const key = this.dayKey(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+        const existing = map.get(key);
+        if (existing) {
+          existing.push(holiday);
+        } else {
+          map.set(key, [holiday]);
+        }
+      }
+    }
+    return map;
+  });
+
+  /** Map from day key (YYYY-MM-DD) to personal leave periods covering that day. */
+  private readonly personalLeavesPerDay = computed(() => {
+    const map = new Map<string, PersonalLeave[]>();
+    for (const leave of this.personalLeaves()) {
+      const startTs = parseISODateUTC(leave.startDate);
+      const endTs = parseISODateUTC(leave.endDate);
+      for (let ts = startTs; ts <= endTs; ts += MILLISECONDS_PER_DAY) {
+        const d = new Date(ts);
+        const key = this.dayKey(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+        const existing = map.get(key);
+        if (existing) {
+          existing.push(leave);
+        } else {
+          map.set(key, [leave]);
+        }
+      }
+    }
+    return map;
+  });
+
   protected getTripsForDay(day: CalendarDay): Trip[] {
     return this.tripsPerDay().get(this.dayKey(day.year, day.month, day.date)) ?? [];
+  }
+
+  protected getConstraintsForDay(day: CalendarDay): DayConstraints {
+    const key = this.dayKey(day.year, day.month, day.date);
+    return {
+      publicHolidays: this.publicHolidaysPerDay().get(key) ?? [],
+      schoolHolidays: this.schoolHolidaysPerDay().get(key) ?? [],
+      personalLeaves: this.personalLeavesPerDay().get(key) ?? [],
+    };
+  }
+
+  protected hasConstraints(day: CalendarDay): boolean {
+    const key = this.dayKey(day.year, day.month, day.date);
+    return (
+      (this.publicHolidaysPerDay().get(key)?.length ?? 0) > 0 ||
+      (this.schoolHolidaysPerDay().get(key)?.length ?? 0) > 0 ||
+      (this.personalLeavesPerDay().get(key)?.length ?? 0) > 0
+    );
+  }
+
+  protected getDayCellClass(day: CalendarDay): string {
+    if (this.hasConstraints(day)) {
+      return 'bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 dark:hover:bg-amber-900/30';
+    }
+    return 'hover:bg-gray-50 dark:hover:bg-gray-700/30';
   }
 
   protected getTripAriaLabel(trip: Trip): string {

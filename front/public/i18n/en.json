@@ -21,6 +21,12 @@
   "addExpenseForDay": "Add an expense on {{month}} {{date}}, {{year}}",
   "tripEventsForDay": "Trip events for {{month}} {{date}}, {{year}}",
   "tripStatusLegendLabel": "Trip status legend",
+  "calendar": {
+    "constraintsLabel": "Constraints",
+    "constraintPublicHolidayAriaLabel": "Public holiday: {{name}} — go to constraints settings",
+    "constraintSchoolHolidayAriaLabel": "School holiday: {{name}} — go to constraints settings",
+    "constraintPersonalLeaveAriaLabel": "Personal leave: {{label}} — go to leave management"
+  },
   "tripStatus": {
     "planned": "Planned",
     "confirmed": "Confirmed",

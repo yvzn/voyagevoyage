@@ -8,7 +8,8 @@ import { CalendarComponent } from './calendar';
 import { Trip, TripStatus } from '../trip/trip.model';
 import { selectAllTrips, selectTripsCreateStatus, selectTripsDeleteStatus, selectTripsLoadStatus, selectTripsUpdateStatus } from '../trip/store/trip.selectors';
 import { selectTripsError, selectCalendarMonth, selectCalendarYear } from '../trip/store/trip.selectors';
-import { selectConstraints } from '../constraints/store/settings.selectors';
+import { selectConstraints, selectPublicHolidays, selectSchoolHolidays } from '../constraints/store/settings.selectors';
+import { selectAllPersonalLeaves } from '../personal-leave/store/personal-leave.selectors';
 import { ApiStatus } from '../trip/store/trip.reducer';
 import { TripActions } from '../trip/store/trip.actions';
 
@@ -82,6 +83,9 @@ async function setupWithMockStore(trips: Trip[] = []): Promise<MockStore> {
           { selector: selectTripsLoadStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsError, value: null },
           { selector: selectConstraints, value: null },
+          { selector: selectPublicHolidays, value: [] },
+          { selector: selectSchoolHolidays, value: [] },
+          { selector: selectAllPersonalLeaves, value: [] },
           { selector: selectTripsCreateStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsUpdateStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsDeleteStatus, value: 'idle' as ApiStatus },
@@ -96,13 +100,13 @@ async function setupWithMockStore(trips: Trip[] = []): Promise<MockStore> {
   const translate = TestBed.inject(TranslateService);
   translate.setTranslation('en', EN_TRANSLATIONS);
   translate.use('en');
-  
+
   return store;
 }
 
 describe('CalendarComponent', () => {
   let store: MockStore;
-  
+
   beforeEach(async () => {
     store = await setupWithMockStore();
     vi.spyOn(store, 'dispatch');
@@ -265,7 +269,7 @@ describe('CalendarComponent', () => {
   it('should handle December to January transition correctly', () => {
     const fixture = TestBed.createComponent(CalendarComponent);
     const component = fixture.componentInstance;
-    
+
     // Override the selectors to set month/year to December 2025
     store.overrideSelector(selectCalendarMonth, 11);
     store.overrideSelector(selectCalendarYear, 2025);
@@ -282,7 +286,7 @@ describe('CalendarComponent', () => {
   it('should handle January to December transition correctly', () => {
     const fixture = TestBed.createComponent(CalendarComponent);
     const component = fixture.componentInstance;
-    
+
     // Override the selectors to set month/year to January 2026
     store.overrideSelector(selectCalendarMonth, 0);
     store.overrideSelector(selectCalendarYear, 2026);
