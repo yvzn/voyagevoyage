@@ -9,6 +9,10 @@ export const selectPublicHolidays = createSelector(
   selectSettingsState,
   (state) => state.publicHolidays,
 );
+export const selectSchoolHolidays = createSelector(
+  selectSettingsState,
+  (state) => state.schoolHolidays,
+);
 export const selectSettingsLoadStatus = createSelector(
   selectSettingsState,
   (state) => state.loadStatus,

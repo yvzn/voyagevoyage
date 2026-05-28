@@ -16,8 +16,11 @@ import { TripFormComponent } from '../trip/trip-form/trip-form';
 import { TripActions } from '../trip/store/trip.actions';
 import { SettingsActions } from '../constraints/store/settings.actions';
 import { selectAllTrips, selectTripsLoadStatus, selectTripsError, selectCalendarMonth, selectCalendarYear } from '../trip/store/trip.selectors';
+import { selectConstraints } from '../constraints/store/settings.selectors';
 import { getTripStatusDotClass, getTripStatusTranslationKey } from '../trip/trip-status.utils';
 import { CalendarGridComponent } from './calendar-grid';
+import { PersonalLeaveActions } from '../personal-leave/store/personal-leave.actions';
+import { selectConstraintsPerDay } from './calendar.selectors';
 
 @Component({
   selector: 'app-calendar',
@@ -33,11 +36,19 @@ export class CalendarComponent {
   constructor() {
     this.store.dispatch(TripActions.loadTrips());
     this.store.dispatch(SettingsActions.loadSettings());
+    this.store.dispatch(SettingsActions.loadPublicHolidays());
+    this.store.dispatch(SettingsActions.loadSchoolHolidays());
+    this.store.dispatch(PersonalLeaveActions.loadPersonalLeaves());
   }
 
   protected readonly trips = this.store.selectSignal(selectAllTrips);
   protected readonly tripsLoadStatus = this.store.selectSignal(selectTripsLoadStatus);
   protected readonly tripsError = this.store.selectSignal(selectTripsError);
+
+  protected readonly constraintsPerDay = this.store.selectSignal(selectConstraintsPerDay);
+  protected readonly allowedDaysOfWeek = this.store.selectSignal(
+    (state) => selectConstraints(state)?.allowedDaysOfWeek ?? [],
+  );
 
   protected readonly currentYear = this.store.selectSignal(selectCalendarYear);
   protected readonly currentMonth = this.store.selectSignal(selectCalendarMonth);

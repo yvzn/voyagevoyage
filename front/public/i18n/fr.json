@@ -21,6 +21,13 @@
   "addExpenseForDay": "Ajouter une dépense le {{date}} {{month}} {{year}}",
   "tripEventsForDay": "Déplacements du {{date}} {{month}} {{year}}",
   "tripStatusLegendLabel": "Légende des statuts de déplacement",
+  "calendar": {
+    "constraintsLabel": "Contraintes",
+    "constraintPublicHolidayAriaLabel": "Jour férié : {{name}} — aller aux paramètres de contraintes",
+    "constraintSchoolHolidayAriaLabel": "Vacances scolaires : {{name}} — aller aux paramètres de contraintes",
+    "constraintPersonalLeaveAriaLabel": "Congé personnel : {{label}} — aller à la gestion des congés",
+    "constraintAllowedDaysAriaLabel": "Jour non autorisé — aller aux paramètres de contraintes"
+  },
   "tripStatus": {
     "planned": "Planifié",
     "confirmed": "Confirmé",

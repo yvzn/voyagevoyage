@@ -1,5 +1,5 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
-import { TravelConstraints, PublicHoliday } from '../constraints.model';
+import { TravelConstraints, PublicHoliday, SchoolHoliday } from '../constraints.model';
 import { SettingsActions } from './settings.actions';
 
 export type ApiStatus = 'idle' | 'loading' | 'success' | 'failure';
@@ -7,8 +7,10 @@ export type ApiStatus = 'idle' | 'loading' | 'success' | 'failure';
 export interface SettingsState {
   constraints: TravelConstraints | null;
   publicHolidays: PublicHoliday[];
+  schoolHolidays: SchoolHoliday[];
   loadStatus: ApiStatus;
   loadPublicHolidaysStatus: ApiStatus;
+  loadSchoolHolidaysStatus: ApiStatus;
   updateStatus: ApiStatus;
   importIcsStatus: ApiStatus;
   importSchoolIcsStatus: ApiStatus;
@@ -18,8 +20,10 @@ export interface SettingsState {
 const initialState: SettingsState = {
   constraints: null,
   publicHolidays: [],
+  schoolHolidays: [],
   loadStatus: 'idle',
   loadPublicHolidaysStatus: 'idle',
+  loadSchoolHolidaysStatus: 'idle',
   updateStatus: 'idle',
   importIcsStatus: 'idle',
   importSchoolIcsStatus: 'idle',
@@ -116,6 +120,23 @@ export const settingsFeature = createFeature({
     on(SettingsActions.importSchoolIcsFailure, (state, { error }) => ({
       ...state,
       importSchoolIcsStatus: 'failure' as ApiStatus,
+      error,
+    })),
+
+    // School holiday list load
+    on(SettingsActions.loadSchoolHolidays, (state) => ({
+      ...state,
+      loadSchoolHolidaysStatus: 'loading' as ApiStatus,
+      error: null,
+    })),
+    on(SettingsActions.loadSchoolHolidaysSuccess, (state, { holidays }) => ({
+      ...state,
+      schoolHolidays: holidays,
+      loadSchoolHolidaysStatus: 'success' as ApiStatus,
+    })),
+    on(SettingsActions.loadSchoolHolidaysFailure, (state, { error }) => ({
+      ...state,
+      loadSchoolHolidaysStatus: 'failure' as ApiStatus,
       error,
     })),
   ),

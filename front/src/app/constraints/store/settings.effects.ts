@@ -58,6 +58,22 @@ export const loadPublicHolidaysEffect = createEffect(
   { functional: true },
 );
 
+export const loadSchoolHolidaysEffect = createEffect(
+  (actions$ = inject(Actions), schoolHolidayService = inject(SchoolHolidayService)) =>
+    actions$.pipe(
+      ofType(SettingsActions.loadSchoolHolidays),
+      mergeMap(() =>
+        schoolHolidayService.getForCurrentUser().pipe(
+          map((holidays) => SettingsActions.loadSchoolHolidaysSuccess({ holidays })),
+          catchError((error: unknown) =>
+            of(SettingsActions.loadSchoolHolidaysFailure({ error: String(error) })),
+          ),
+        ),
+      ),
+    ),
+  { functional: true },
+);
+
 export const importIcsEffect = createEffect(
   (actions$ = inject(Actions), publicHolidayService = inject(PublicHolidayService)) =>
     actions$.pipe(

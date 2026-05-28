@@ -6,6 +6,7 @@ import { Trip } from '../trip/trip.model';
 import { CalendarDay, CalendarWeek } from './calendar.utils';
 import { getTripStatusClass, getTripStatusDotClass, getTripStatusTranslationKey } from '../trip/trip-status.utils';
 import { MILLISECONDS_PER_DAY, parseISODateUTC } from '../planning-dashboard/planning-dashboard.utils';
+import { DayConstraints } from './calendar-constraints.utils';
 
 /**
  * Shared calendar grid component used by both CalendarComponent (full monthly view)
@@ -19,7 +20,7 @@ import { MILLISECONDS_PER_DAY, parseISODateUTC } from '../planning-dashboard/pla
   selector: 'app-calendar-grid',
   standalone: true,
   imports: [NgClass, RouterLink, TranslatePipe],
-  templateUrl: './calendar-grid.html',
+  templateUrl: './calendar-grid.html'
 })
 export class CalendarGridComponent {
   /**
@@ -34,6 +35,19 @@ export class CalendarGridComponent {
 
   /** All trips to display across the grid (used to compute per-day mapping). */
   readonly trips = input<Trip[]>([]);
+
+  /**
+   * Pre-built map from ISO date string (YYYY-MM-DD) to the constraints applying on that day.
+   * Built by the `selectConstraintsPerDay` selector in the parent component.
+   */
+  readonly constraintsPerDay = input<Map<string, DayConstraints>>(new Map());
+
+  /**
+   * Weekday numbers (0=Sun … 6=Sat) that are allowed for travel.
+   * Days falling outside this list are highlighted as a restricted-weekday constraint.
+   * An empty array means no weekday restriction.
+   */
+  readonly allowedDaysOfWeek = input<number[]>([]);
 
   /** Localized short names for days of the week, starting from Monday. */
   readonly dayNames = input<string[]>([]);
@@ -79,6 +93,37 @@ export class CalendarGridComponent {
 
   protected getTripsForDay(day: CalendarDay): Trip[] {
     return this.tripsPerDay().get(this.dayKey(day.year, day.month, day.date)) ?? [];
+  }
+
+  protected getConstraintsForDay(day: CalendarDay): DayConstraints {
+    const key = this.dayKey(day.year, day.month, day.date);
+    return this.constraintsPerDay().get(key) ?? { publicHolidays: [], schoolHolidays: [], personalLeaves: [] };
+  }
+
+  /** Returns true when the day falls outside the allowed weekdays (if any restriction is configured). */
+  protected isRestrictedWeekday(day: CalendarDay): boolean {
+    const allowed = this.allowedDaysOfWeek();
+    if (allowed.length === 0) return false;
+    const d = new Date(day.year, day.month, day.date);
+    return !allowed.includes(d.getDay());
+  }
+
+  /**
+   * Returns the CSS classes for a calendar day cell.
+   * Blocking constraints (public holidays, personal leaves, restricted weekday) get a gray background.
+   * School holidays alone (non-blocking) show only an icon with no background change.
+   */
+  protected getDayCellClass(day: CalendarDay): string {
+    const key = this.dayKey(day.year, day.month, day.date);
+    const constraints = this.constraintsPerDay().get(key);
+    const hasBlockingConstraint =
+      this.isRestrictedWeekday(day) ||
+      (constraints?.publicHolidays.length ?? 0) > 0 ||
+      (constraints?.personalLeaves.length ?? 0) > 0;
+    if (hasBlockingConstraint) {
+      return 'hover:bg-gray-50 dark:hover:bg-gray-700/30';
+    }
+    return 'border-l-4 border-blue-200 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:border-blue-700/50';
   }
 
   protected getTripAriaLabel(trip: Trip): string {
