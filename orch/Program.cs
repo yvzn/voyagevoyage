@@ -319,6 +319,7 @@ internal static class Program
         table.AddColumn("Project");
         table.AddColumn("Status");
         table.AddColumn("Health");
+        table.AddColumn("URL");
 
         foreach (var (name, (process, config)) in runningProcesses)
         {
@@ -326,6 +327,7 @@ internal static class Program
                 ? "[cyan]External[/]" 
                 : (process.HasExited ? "[red]Stopped[/]" : "[green]Running[/]");
             var health = "N/A";
+            var url = "N/A";
 
             if (config.Health != null)
             {
@@ -340,7 +342,13 @@ internal static class Program
                 }
             }
 
-            table.AddRow(name, status, health);
+            if (!string.IsNullOrWhiteSpace(config.Url))
+            {
+                var escapedUrlText = Markup.Escape(config.Url);
+                url = $"[link={config.Url}]{escapedUrlText}[/]";
+            }
+
+            table.AddRow(name, status, health, url);
         }
 
         return table;
