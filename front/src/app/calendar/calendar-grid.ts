@@ -20,7 +20,7 @@ import { DayConstraints } from './calendar-constraints.utils';
   selector: 'app-calendar-grid',
   standalone: true,
   imports: [NgClass, RouterLink, TranslatePipe],
-  templateUrl: './calendar-grid.html',
+  templateUrl: './calendar-grid.html'
 })
 export class CalendarGridComponent {
   /**
@@ -121,9 +121,9 @@ export class CalendarGridComponent {
       (constraints?.publicHolidays.length ?? 0) > 0 ||
       (constraints?.personalLeaves.length ?? 0) > 0;
     if (hasBlockingConstraint) {
-      return 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700/50 dark:hover:bg-gray-700';
+      return 'hover:bg-gray-50 dark:hover:bg-gray-700/30';
     }
-    return 'hover:bg-gray-50 dark:hover:bg-gray-700/30';
+    return 'border-l-4 border-blue-200 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:border-blue-700/50';
   }
 
   protected getTripAriaLabel(trip: Trip): string {
