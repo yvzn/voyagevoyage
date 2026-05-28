@@ -6,15 +6,7 @@ import { Trip } from '../trip/trip.model';
 import { CalendarDay, CalendarWeek } from './calendar.utils';
 import { getTripStatusClass, getTripStatusDotClass, getTripStatusTranslationKey } from '../trip/trip-status.utils';
 import { MILLISECONDS_PER_DAY, parseISODateUTC } from '../planning-dashboard/planning-dashboard.utils';
-import { PublicHoliday, SchoolHoliday } from '../constraints/constraints.model';
-import { PersonalLeave } from '../personal-leave/personal-leave.model';
-
-/** Constraints resolved for a single calendar day. */
-export interface DayConstraints {
-  publicHolidays: PublicHoliday[];
-  schoolHolidays: SchoolHoliday[];
-  personalLeaves: PersonalLeave[];
-}
+import { DayConstraints } from './calendar-constraints.utils';
 
 /**
  * Shared calendar grid component used by both CalendarComponent (full monthly view)
@@ -44,14 +36,18 @@ export class CalendarGridComponent {
   /** All trips to display across the grid (used to compute per-day mapping). */
   readonly trips = input<Trip[]>([]);
 
-  /** Public holidays to display as constraint markers. */
-  readonly publicHolidays = input<PublicHoliday[]>([]);
+  /**
+   * Pre-built map from ISO date string (YYYY-MM-DD) to the constraints applying on that day.
+   * Built by the `selectConstraintsPerDay` selector in the parent component.
+   */
+  readonly constraintsPerDay = input<Map<string, DayConstraints>>(new Map());
 
-  /** School holidays to display as constraint markers. */
-  readonly schoolHolidays = input<SchoolHoliday[]>([]);
-
-  /** Personal leaves to display as constraint markers. */
-  readonly personalLeaves = input<PersonalLeave[]>([]);
+  /**
+   * Weekday numbers (0=Sun … 6=Sat) that are allowed for travel.
+   * Days falling outside this list are highlighted as a restricted-weekday constraint.
+   * An empty array means no weekday restriction.
+   */
+  readonly allowedDaysOfWeek = input<number[]>([]);
 
   /** Localized short names for days of the week, starting from Monday. */
   readonly dayNames = input<string[]>([]);
@@ -95,86 +91,37 @@ export class CalendarGridComponent {
     return map;
   });
 
-  /** Map from day key (YYYY-MM-DD) to public holidays on that day. */
-  private readonly publicHolidaysPerDay = computed(() => {
-    const map = new Map<string, PublicHoliday[]>();
-    for (const holiday of this.publicHolidays()) {
-      const key = holiday.date;
-      const existing = map.get(key);
-      if (existing) {
-        existing.push(holiday);
-      } else {
-        map.set(key, [holiday]);
-      }
-    }
-    return map;
-  });
-
-  /** Map from day key (YYYY-MM-DD) to school holiday periods covering that day. */
-  private readonly schoolHolidaysPerDay = computed(() => {
-    const map = new Map<string, SchoolHoliday[]>();
-    for (const holiday of this.schoolHolidays()) {
-      const startTs = parseISODateUTC(holiday.startDate);
-      const endTs = parseISODateUTC(holiday.endDate);
-      for (let ts = startTs; ts <= endTs; ts += MILLISECONDS_PER_DAY) {
-        const d = new Date(ts);
-        const key = this.dayKey(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-        const existing = map.get(key);
-        if (existing) {
-          existing.push(holiday);
-        } else {
-          map.set(key, [holiday]);
-        }
-      }
-    }
-    return map;
-  });
-
-  /** Map from day key (YYYY-MM-DD) to personal leave periods covering that day. */
-  private readonly personalLeavesPerDay = computed(() => {
-    const map = new Map<string, PersonalLeave[]>();
-    for (const leave of this.personalLeaves()) {
-      const startTs = parseISODateUTC(leave.startDate);
-      const endTs = parseISODateUTC(leave.endDate);
-      for (let ts = startTs; ts <= endTs; ts += MILLISECONDS_PER_DAY) {
-        const d = new Date(ts);
-        const key = this.dayKey(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-        const existing = map.get(key);
-        if (existing) {
-          existing.push(leave);
-        } else {
-          map.set(key, [leave]);
-        }
-      }
-    }
-    return map;
-  });
-
   protected getTripsForDay(day: CalendarDay): Trip[] {
     return this.tripsPerDay().get(this.dayKey(day.year, day.month, day.date)) ?? [];
   }
 
   protected getConstraintsForDay(day: CalendarDay): DayConstraints {
     const key = this.dayKey(day.year, day.month, day.date);
-    return {
-      publicHolidays: this.publicHolidaysPerDay().get(key) ?? [],
-      schoolHolidays: this.schoolHolidaysPerDay().get(key) ?? [],
-      personalLeaves: this.personalLeavesPerDay().get(key) ?? [],
-    };
+    return this.constraintsPerDay().get(key) ?? { publicHolidays: [], schoolHolidays: [], personalLeaves: [] };
   }
 
-  protected hasConstraints(day: CalendarDay): boolean {
-    const key = this.dayKey(day.year, day.month, day.date);
-    return (
-      (this.publicHolidaysPerDay().get(key)?.length ?? 0) > 0 ||
-      (this.schoolHolidaysPerDay().get(key)?.length ?? 0) > 0 ||
-      (this.personalLeavesPerDay().get(key)?.length ?? 0) > 0
-    );
+  /** Returns true when the day falls outside the allowed weekdays (if any restriction is configured). */
+  protected isRestrictedWeekday(day: CalendarDay): boolean {
+    const allowed = this.allowedDaysOfWeek();
+    if (allowed.length === 0) return false;
+    const d = new Date(day.year, day.month, day.date);
+    return !allowed.includes(d.getDay());
   }
 
+  /**
+   * Returns the CSS classes for a calendar day cell.
+   * Blocking constraints (public holidays, personal leaves, restricted weekday) get a gray background.
+   * School holidays alone (non-blocking) show only an icon with no background change.
+   */
   protected getDayCellClass(day: CalendarDay): string {
-    if (this.hasConstraints(day)) {
-      return 'bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 dark:hover:bg-amber-900/30';
+    const key = this.dayKey(day.year, day.month, day.date);
+    const constraints = this.constraintsPerDay().get(key);
+    const hasBlockingConstraint =
+      this.isRestrictedWeekday(day) ||
+      (constraints?.publicHolidays.length ?? 0) > 0 ||
+      (constraints?.personalLeaves.length ?? 0) > 0;
+    if (hasBlockingConstraint) {
+      return 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700/50 dark:hover:bg-gray-700';
     }
     return 'hover:bg-gray-50 dark:hover:bg-gray-700/30';
   }

@@ -8,8 +8,8 @@ import { CalendarComponent } from './calendar';
 import { Trip, TripStatus } from '../trip/trip.model';
 import { selectAllTrips, selectTripsCreateStatus, selectTripsDeleteStatus, selectTripsLoadStatus, selectTripsUpdateStatus } from '../trip/store/trip.selectors';
 import { selectTripsError, selectCalendarMonth, selectCalendarYear } from '../trip/store/trip.selectors';
-import { selectConstraints, selectPublicHolidays, selectSchoolHolidays } from '../constraints/store/settings.selectors';
-import { selectAllPersonalLeaves } from '../personal-leave/store/personal-leave.selectors';
+import { selectConstraints } from '../constraints/store/settings.selectors';
+import { selectConstraintsPerDay } from './calendar.selectors';
 import { ApiStatus } from '../trip/store/trip.reducer';
 import { TripActions } from '../trip/store/trip.actions';
 
@@ -83,9 +83,7 @@ async function setupWithMockStore(trips: Trip[] = []): Promise<MockStore> {
           { selector: selectTripsLoadStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsError, value: null },
           { selector: selectConstraints, value: null },
-          { selector: selectPublicHolidays, value: [] },
-          { selector: selectSchoolHolidays, value: [] },
-          { selector: selectAllPersonalLeaves, value: [] },
+          { selector: selectConstraintsPerDay, value: new Map() },
           { selector: selectTripsCreateStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsUpdateStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsDeleteStatus, value: 'idle' as ApiStatus },

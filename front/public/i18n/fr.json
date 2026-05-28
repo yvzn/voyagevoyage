@@ -25,7 +25,8 @@
     "constraintsLabel": "Contraintes",
     "constraintPublicHolidayAriaLabel": "Jour férié : {{name}} — aller aux paramètres de contraintes",
     "constraintSchoolHolidayAriaLabel": "Vacances scolaires : {{name}} — aller aux paramètres de contraintes",
-    "constraintPersonalLeaveAriaLabel": "Congé personnel : {{label}} — aller à la gestion des congés"
+    "constraintPersonalLeaveAriaLabel": "Congé personnel : {{label}} — aller à la gestion des congés",
+    "constraintAllowedDaysAriaLabel": "Jour non autorisé — aller aux paramètres de contraintes"
   },
   "tripStatus": {
     "planned": "Planifié",

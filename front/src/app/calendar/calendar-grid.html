@@ -86,8 +86,20 @@
               </div>
               @if (day.isCurrentMonth) {
                 @let constraints = getConstraintsForDay(day);
-                @if (constraints.publicHolidays.length > 0 || constraints.schoolHolidays.length > 0 || constraints.personalLeaves.length > 0) {
+                @if (constraints.publicHolidays.length > 0 || constraints.schoolHolidays.length > 0 || constraints.personalLeaves.length > 0 || isRestrictedWeekday(day)) {
                   <div class="mt-0.5 flex flex-wrap gap-0.5" [attr.aria-label]="'calendar.constraintsLabel' | translate">
+                    @if (isRestrictedWeekday(day)) {
+                      <a
+                        routerLink="/constraints"
+                        class="inline-flex items-center rounded p-0.5 text-gray-600 hover:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-400 dark:text-gray-400 dark:hover:bg-gray-600/40"
+                        [attr.aria-label]="'calendar.constraintAllowedDaysAriaLabel' | translate"
+                      >
+                        <!-- Calendar / week icon (same as in trip form constraint warnings) -->
+                        <svg class="h-3.5 w-3.5 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01M6 4v2M18 4v2M5 6h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z"/>
+                        </svg>
+                      </a>
+                    }
                     @if (constraints.publicHolidays.length > 0) {
                       <a
                         routerLink="/constraints"

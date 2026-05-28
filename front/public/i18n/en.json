@@ -25,7 +25,8 @@
     "constraintsLabel": "Constraints",
     "constraintPublicHolidayAriaLabel": "Public holiday: {{name}} — go to constraints settings",
     "constraintSchoolHolidayAriaLabel": "School holiday: {{name}} — go to constraints settings",
-    "constraintPersonalLeaveAriaLabel": "Personal leave: {{label}} — go to leave management"
+    "constraintPersonalLeaveAriaLabel": "Personal leave: {{label}} — go to leave management",
+    "constraintAllowedDaysAriaLabel": "Restricted day of week — go to constraints settings"
   },
   "tripStatus": {
     "planned": "Planned",
