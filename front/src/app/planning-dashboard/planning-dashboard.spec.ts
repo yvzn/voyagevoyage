@@ -5,7 +5,8 @@ import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
 import { PlanningDashboardComponent } from './planning-dashboard';
 import { selectAllTrips, selectTripsLoadStatus } from '../trip/store/trip.selectors';
-import { selectConstraints, selectSettingsLoadStatus } from '../constraints/store/settings.selectors';
+import { selectConstraints, selectPublicHolidays, selectSettingsLoadStatus } from '../constraints/store/settings.selectors';
+import { selectAllPersonalLeaves } from '../personal-leave/store/personal-leave.selectors';
 import { ApiStatus } from '../trip/store/trip.reducer';
 import { Trip, TripStatus } from '../trip/trip.model';
 import { TravelConstraints } from '../constraints/constraints.model';
@@ -22,6 +23,12 @@ const EN_TRANSLATIONS = {
     tripDaysUsed: '{{used}} / {{max}} days used',
     viewAllButton: 'View all planning',
     viewFullCalendar: 'View full calendar',
+    suggestSlots: 'Suggest slots',
+    suggestionsHeading: 'Suggestions for {{month}}',
+    noSuggestions: 'No valid slots found for this month.',
+    suggestionLabel: '{{days}} day(s): {{startDate}} – {{endDate}}',
+    acceptSuggestion: 'Accept',
+    dismissSuggestions: 'Close',
   },
   tripStatus: {
     planned: 'Planned',
@@ -55,6 +62,8 @@ async function setupWithMockStore(
           { selector: selectTripsLoadStatus, value: 'idle' as ApiStatus },
           { selector: selectConstraints, value: constraints },
           { selector: selectSettingsLoadStatus, value: 'idle' as ApiStatus },
+          { selector: selectPublicHolidays, value: [] },
+          { selector: selectAllPersonalLeaves, value: [] },
         ],
       }),
     ],
@@ -168,6 +177,8 @@ describe('PlanningDashboardComponent', () => {
             { selector: selectTripsLoadStatus, value: 'failure' as ApiStatus },
             { selector: selectConstraints, value: null },
             { selector: selectSettingsLoadStatus, value: 'idle' as ApiStatus },
+            { selector: selectPublicHolidays, value: [] },
+            { selector: selectAllPersonalLeaves, value: [] },
           ],
         }),
       ],
