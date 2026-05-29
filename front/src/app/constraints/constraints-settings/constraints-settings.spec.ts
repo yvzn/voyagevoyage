@@ -33,6 +33,9 @@ const EN_TRANSLATIONS = {
     planningHorizonDays: 'Planning horizon (days)',
     planningHorizonDaysHint: 'Suggestions are generated only within this horizon (1 to 365 days).',
     planningHorizonDaysError: 'Must be between 1 and 365.',
+    trainBookingThresholdDays: 'Train booking threshold (days)',
+    trainBookingThresholdDaysHint: 'Reminders are shown for trips occurring within this threshold (1 to 365 days).',
+    trainBookingThresholdDaysError: 'Must be between 1 and 365.',
     considerPublicHolidays: 'Exclude public holidays',
     considerPublicHolidaysHint: 'Public holidays will not count as allowed travel days.',
     considerVacationDays: 'Exclude vacation days',
@@ -130,6 +133,7 @@ describe('ConstraintsSettingsComponent — pre-fill', () => {
     considerVacationDays: false,
     isStrict: true,
     planningHorizonDays: 60,
+    trainBookingThresholdDays: 90,
     publicHolidayRegions: [],
       schoolHolidayZones: [],
   };

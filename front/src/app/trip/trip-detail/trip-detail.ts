@@ -7,7 +7,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { TripStatus } from '../trip.model';
 import { TripActions } from '../store/trip.actions';
-import { selectAllTrips, selectTripsDeleteStatus } from '../store/trip.selectors';
+import { selectAllTrips, selectTripsDeleteStatus, selectTripsUpdateStatus } from '../store/trip.selectors';
 import { TripFormComponent } from '../trip-form/trip-form';
 import { getTripStatusClass, getTripStatusTranslationKey } from '../trip-status.utils';
 import { LocaleService } from '../../locale.service';
@@ -15,11 +15,12 @@ import { ExpenseFormComponent } from '../../expense/expense-form/expense-form';
 import { ExpenseActions } from '../../expense/store/expense.actions';
 import { selectAllExpenses, selectExpensesLoadStatus } from '../../expense/store/expense.selectors';
 import { ExpenseCategory } from '../../expense/expense.model';
+import { TrainBookingFormComponent } from '../../train-booking/train-booking-form/train-booking-form';
 
 @Component({
   selector: 'app-trip-detail',
   standalone: true,
-  imports: [NgClass, DecimalPipe, TranslatePipe, TripFormComponent, RouterLink, ExpenseFormComponent],
+  imports: [NgClass, DecimalPipe, TranslatePipe, TripFormComponent, RouterLink, ExpenseFormComponent, TrainBookingFormComponent],
   templateUrl: './trip-detail.html',
 })
 export class TripDetailComponent {
@@ -42,17 +43,30 @@ export class TripDetailComponent {
   /** Whether the edit form modal is open */
   protected readonly isFormOpen = signal(false);
 
+  /** Whether the train booking form modal is open */
+  protected readonly isTrainBookingFormOpen = signal(false);
+
   /** Whether the expense form modal is open */
   protected readonly isExpenseFormOpen = signal(false);
 
   /** Whether the inline delete confirmation prompt is shown */
   protected readonly showDeleteConfirm = signal(false);
 
+  /** Whether the inline clear-booking confirmation prompt is shown */
+  protected readonly showClearBookingConfirm = signal(false);
+
   private readonly deleteStatus = this.store.selectSignal(selectTripsDeleteStatus);
   protected readonly isDeleting = computed(() => this.deleteStatus() === 'loading');
   protected readonly deleteError = computed<string | null>(() =>
     this.deleteStatus() === 'failure' ? 'tripDetail.deleteError' : null
   );
+
+  private readonly updateStatus = this.store.selectSignal(selectTripsUpdateStatus);
+  private readonly clearBookingPending = signal(false);
+  protected readonly isClearingBooking = computed(() =>
+    this.clearBookingPending() && this.updateStatus() === 'loading',
+  );
+  protected readonly clearBookingError = signal<string | null>(null);
 
   protected readonly expenses = this.store.selectSignal(selectAllExpenses);
   protected readonly expensesLoadStatus = this.store.selectSignal(selectExpensesLoadStatus);
@@ -78,6 +92,19 @@ export class TripDetailComponent {
       }
     });
 
+    effect(() => {
+      const us = this.updateStatus();
+      if (this.clearBookingPending()) {
+        if (us === 'success') {
+          this.clearBookingPending.set(false);
+          this.showClearBookingConfirm.set(false);
+        } else if (us === 'failure') {
+          this.clearBookingPending.set(false);
+          this.clearBookingError.set('tripDetail.clearTrainBookingError');
+        }
+      }
+    });
+
     // Load expenses when the trip id is known
     effect(() => {
       const id = this.tripId();
@@ -97,12 +124,30 @@ export class TripDetailComponent {
     }).format(new Date(Date.UTC(year, month - 1, day)));
   }
 
+  protected formatDateTime(dateTimeStr: string): string {
+    return new Intl.DateTimeFormat(this.localeService.currentLocale(), {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date(dateTimeStr));
+  }
+
   protected openEditForm(): void {
     this.isFormOpen.set(true);
   }
 
   protected closeForm(): void {
     this.isFormOpen.set(false);
+  }
+
+  protected openTrainBookingForm(): void {
+    this.isTrainBookingFormOpen.set(true);
+  }
+
+  protected closeTrainBookingForm(): void {
+    this.isTrainBookingFormOpen.set(false);
   }
 
   protected openExpenseForm(): void {
@@ -123,6 +168,34 @@ export class TripDetailComponent {
 
   protected cancelDelete(): void {
     this.showDeleteConfirm.set(false);
+  }
+
+  protected requestClearBooking(): void {
+    this.clearBookingError.set(null);
+    this.showClearBookingConfirm.set(true);
+  }
+
+  protected cancelClearBooking(): void {
+    this.showClearBookingConfirm.set(false);
+    this.clearBookingError.set(null);
+  }
+
+  protected onClearBooking(): void {
+    const trip = this.trip();
+    if (!trip || this.isClearingBooking()) return;
+
+    this.clearBookingError.set(null);
+    this.clearBookingPending.set(true);
+    this.store.dispatch(TripActions.updateTrip({
+      id: trip.id,
+      request: {
+        destination: trip.destination,
+        startDate: trip.startDate,
+        endDate: trip.endDate,
+        status: trip.status,
+        trainBooking: null,
+      },
+    }));
   }
 
   protected onDelete(): void {

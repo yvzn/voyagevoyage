@@ -42,7 +42,16 @@
                     [ngClass]="getTripStatusClass(trip.status)"
                     [title]="trip.destination"
                     [attr.aria-label]="trip.destination"
-                  >{{ trip.destination }}</a>
+                  >
+                    <span class="inline-flex items-center gap-0.5">
+                      @if (trip.trainBooking) {
+                        <svg aria-hidden="true" class="inline-block h-2.5 w-2.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 7.5h12l4.5 4.5-4.5 4.5H4.5A2.25 2.25 0 0 1 2.25 14.25V9.75A2.25 2.25 0 0 1 4.5 7.5ZM9 7.5v9M13.5 7.5v9" />
+                        </svg>
+                      }
+                      <span class="truncate">{{ trip.destination }}</span>
+                    </span>
+                  </a>
                 }
               </div>
             </td>
@@ -155,7 +164,20 @@
                         [attr.aria-label]="getTripAriaLabel(trip)"
                         (click)="tripClicked.emit(trip)"
                       >
-                        {{ trip.destination }}
+                        <span class="inline-flex items-center w-full space-between gap-0.5">
+                          <span class="truncate">{{ trip.destination }}</span>
+                          @if (trip.trainBooking) {
+                          <svg aria-hidden="true" class="inline-block h-2.5 w-2.5 flex-shrink-0" viewBox="0 0 10 10" fill="none"
+                            stroke="currentColor" stroke-width=".5" stroke-linecap="round" stroke-linejoin="round"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <rect x="0.5" y="0.5" width="9" height="6" rx="1" />
+                            <rect x="1.5" y="1.5" width="2.5" height="2" rx="0.5" />
+                            <rect x="6" y="1.5" width="2.5" height="2" rx="0.5" />
+                            <circle cx="2" cy="8" r="1" />
+                            <circle cx="8" cy="8" r="1" />
+                          </svg>
+                          }
+                        </span>
                       </button>
                     </li>
                   }

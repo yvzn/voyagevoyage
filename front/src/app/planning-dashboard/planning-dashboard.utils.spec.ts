@@ -24,6 +24,7 @@ const DEFAULT_CONSTRAINTS: TravelConstraints = {
   considerVacationDays: false,
   isStrict: false,
   planningHorizonDays: 90,
+  trainBookingThresholdDays: 90,
   publicHolidayRegions: [],
       schoolHolidayZones: [],
 };
@@ -129,6 +130,7 @@ const SUGGEST_CONSTRAINTS: TravelConstraints = {
   considerVacationDays: false,
   isStrict: false,
   planningHorizonDays: 90,
+  trainBookingThresholdDays: 90,
   publicHolidayRegions: [],
   schoolHolidayZones: [],
 };

@@ -82,7 +82,7 @@
       </div>
 
       <!-- Status -->
-      <div class="mb-6">
+      <div class="mb-4">
         <label
           for="trip-status"
           class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
@@ -99,8 +99,6 @@
           }
         </select>
       </div>
-
-      </fieldset>
 
       <!-- Constraint violation messages (one alert per violated constraint type) -->
       @if (form.hasError('constraintWarning') || form.hasError('constraintError')) {
@@ -186,6 +184,7 @@
             {{ (isSaving() ? 'tripForm.saving' : 'tripForm.save') | translate }}
           </button>
       </div>
+    </fieldset>
     </form>
   </div>
 </dialog>

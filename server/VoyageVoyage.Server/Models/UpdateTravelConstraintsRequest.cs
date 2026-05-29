@@ -15,5 +15,6 @@ public record UpdateTravelConstraintsRequest(
     bool IsStrict,
     int PlanningHorizonDays,
     List<string> PublicHolidayRegions,
-    List<string> SchoolHolidayZones
+    List<string> SchoolHolidayZones,
+    int TrainBookingThresholdDays = 90
 );

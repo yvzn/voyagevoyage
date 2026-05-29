@@ -478,6 +478,7 @@ describe('TripFormComponent — constraint violation', () => {
     considerVacationDays: false,
     isStrict: false,
     planningHorizonDays: 365,
+    trainBookingThresholdDays: 90,
     publicHolidayRegions: [],
       schoolHolidayZones: [],
   };

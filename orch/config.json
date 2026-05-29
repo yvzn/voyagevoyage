@@ -1,6 +1,7 @@
 {
     "front": {
         "path": "../front",
+	"build": "npm install",
         "run": "npm start",
         "url": "http://localhost:4200",
         "health": "http://localhost:4200"
@@ -22,9 +23,5 @@
     "storage": {
         "path": "../db/storage",
         "run": "npm start"
-    },
-    "cosmos": {
-        "url": "https://localhost:8081/",
-        "health": "https://localhost:8081/_explorer/emulator.html"
     }
 }

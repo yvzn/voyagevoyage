@@ -24,4 +24,10 @@ public class Trip
     public string Destination { get; set; } = string.Empty;
 
     public TripStatus Status { get; set; }
+
+    /// <summary>
+    /// Optional train booking details for this trip.
+    /// Null if no train booking has been recorded yet.
+    /// </summary>
+    public TrainBooking? TrainBooking { get; set; }
 }

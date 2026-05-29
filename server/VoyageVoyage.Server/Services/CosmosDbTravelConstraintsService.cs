@@ -47,6 +47,7 @@ public class CosmosDbTravelConstraintsService(
         existing.ConsiderVacationDays = request.ConsiderVacationDays;
         existing.IsStrict = request.IsStrict;
         existing.PlanningHorizonDays = request.PlanningHorizonDays;
+        existing.TrainBookingThresholdDays = request.TrainBookingThresholdDays;
         existing.PublicHolidayRegions = request.PublicHolidayRegions;
         existing.SchoolHolidayZones = request.SchoolHolidayZones;
 

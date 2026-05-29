@@ -205,11 +205,14 @@ export class TripFormComponent implements AfterViewInit {
     if (fieldInvalid || groupInvalid || this.isLoading()) return;
 
     const { destination, startDate, endDate, status } = this.form.getRawValue();
+
     const request = {
       destination: destination!,
       startDate: startDate!,
       endDate: endDate!,
       status: status!,
+      // Preserve the existing train booking — it is managed via the dedicated train booking form
+      trainBooking: this.trip()?.trainBooking ?? null,
     };
 
     const trip = this.trip();
