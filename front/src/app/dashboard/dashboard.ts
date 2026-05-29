@@ -9,11 +9,12 @@ import { LocaleService } from '../locale.service';
 import { CalendarDay, CalendarWeek, getDayOfWeekNames } from '../calendar/calendar.utils';
 import { PlanningDashboardComponent } from '../planning-dashboard/planning-dashboard';
 import { CalendarGridComponent } from '../calendar/calendar-grid';
+import { TrainBookingDashboardComponent } from '../train-booking/train-booking-dashboard/train-booking-dashboard';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, TranslatePipe, PlanningDashboardComponent, CalendarGridComponent],
+  imports: [RouterLink, TranslatePipe, PlanningDashboardComponent, CalendarGridComponent, TrainBookingDashboardComponent],
   templateUrl: './dashboard.html',
 })
 export class DashboardComponent {

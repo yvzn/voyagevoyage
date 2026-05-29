@@ -26,7 +26,8 @@
     "constraintPublicHolidayAriaLabel": "Public holiday: {{name}} — go to constraints settings",
     "constraintSchoolHolidayAriaLabel": "School holiday: {{name}} — go to constraints settings",
     "constraintPersonalLeaveAriaLabel": "Personal leave: {{label}} — go to leave management",
-    "constraintAllowedDaysAriaLabel": "Restricted day of week — go to constraints settings"
+    "constraintAllowedDaysAriaLabel": "Restricted day of week — go to constraints settings",
+    "trainBookingAriaLabel": "Train booked: {{departure}} → {{arrival}}"
   },
   "tripStatus": {
     "planned": "Planned",
@@ -55,7 +56,12 @@
     "constraintPersonalLeaveWarning": "The selected period overlaps with a personal leave period.",
     "constraintPersonalLeaveError": "The selected period overlaps with a personal leave period. Please adjust your dates.",
     "constraintMaxDaysWarning": "The selected period would exceed your maximum travel days per month.",
-    "constraintMaxDaysError": "The selected period would exceed your maximum travel days per month. Please adjust your dates."
+    "constraintMaxDaysError": "The selected period would exceed your maximum travel days per month. Please adjust your dates.",
+    "trainBookingHeading": "Train booking",
+    "trainBookingHint": "Optional. Fill in when you have booked the train for this trip.",
+    "trainDeparture": "Departure city / station",
+    "trainArrival": "Arrival city / station",
+    "trainDepartureDateTime": "Departure date & time (optional)"
   },
   "tripDetail": {
     "backToCalendar": "Back to calendar",
@@ -71,7 +77,11 @@
     "expensesHeading": "Expenses",
     "addExpenseButton": "Add expense",
     "noExpenses": "No expenses recorded for this trip.",
-    "notFound": "Trip not found."
+    "notFound": "Trip not found.",
+    "trainBookingHeading": "Train booking",
+    "trainDeparture": "Departure",
+    "trainArrival": "Arrival",
+    "trainDepartureDateTime": "Departure date & time"
   },
   "expenseForm": {
     "createTitle": "New expense",
@@ -133,7 +143,8 @@
   "dashboard": {
     "heading": "Dashboard",
     "calendarSectionHeading": "Upcoming trips",
-    "planningSectionHeading": "Trips to plan"
+    "planningSectionHeading": "Trips to plan",
+    "trainBookingSectionHeading": "Train bookings to make"
   },
   "constraints": {
     "heading": "Travel constraints",
@@ -194,7 +205,10 @@
     "saveError": "An error occurred while saving the constraints. Please try again.",
     "loadError": "Failed to load travel constraints. Please try again.",
     "loading": "Loading…",
-    "retry": "Retry"
+    "retry": "Retry",
+    "trainBookingThresholdDays": "Train booking reminder threshold (days)",
+    "trainBookingThresholdDaysHint": "Reminders are shown for confirmed trips starting within this many days (1 to 365). Default is 90 days (SNCF booking window).",
+    "trainBookingThresholdDaysError": "Must be between 1 and 365."
   },
   "leaveType": {
     "annual": "Annual leave",
@@ -250,5 +264,23 @@
     "saving": "Saving…",
     "cancel": "Cancel",
     "saveError": "An error occurred while saving the leave period. Please try again."
+  },
+  "trainBookingNavItem": "Train bookings",
+  "trainBookingDashboard": {
+    "heading": "Train bookings to make",
+    "loading": "Loading…",
+    "loadError": "Failed to load data. Please try again.",
+    "retry": "Retry",
+    "noItems": "No train bookings to make in the coming period.",
+    "viewAllButton": "All train bookings"
+  },
+  "trainBookingList": {
+    "heading": "Train bookings",
+    "description": "Confirmed trips starting within the next {{days}} days without a train booking.",
+    "loading": "Loading…",
+    "loadError": "Failed to load data. Please try again.",
+    "retry": "Retry",
+    "noItems": "No train bookings to make. All confirmed upcoming trips are covered.",
+    "toBook": "To book"
   }
 }

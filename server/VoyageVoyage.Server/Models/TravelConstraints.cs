@@ -61,6 +61,12 @@ public class TravelConstraints
     public int PlanningHorizonDays { get; set; } = 90;
 
     /// <summary>
+    /// Number of days before the trip departure within which the train booking reminder is shown.
+    /// Defaults to 90 days (SNCF booking window).
+    /// </summary>
+    public int TrainBookingThresholdDays { get; set; } = 90;
+
+    /// <summary>
     /// Public holiday region identifiers selected by the user (e.g. "france-metropole").
     /// Holidays for these regions will be fetched and displayed in the user's calendar.
     /// </summary>

@@ -45,6 +45,7 @@ public class CosmosDbTripService(ApplicationDbContext db, ICurrentUserService cu
             EndDate = request.EndDate,
             Destination = request.Destination,
             Status = request.Status,
+            TrainBooking = request.TrainBooking,
         };
         db.Trips.Add(trip);
         await db.SaveChangesAsync();
@@ -65,6 +66,7 @@ public class CosmosDbTripService(ApplicationDbContext db, ICurrentUserService cu
         trip.EndDate = request.EndDate;
         trip.Destination = request.Destination;
         trip.Status = request.Status;
+        trip.TrainBooking = request.TrainBooking;
         await db.SaveChangesAsync();
         return trip;
     }

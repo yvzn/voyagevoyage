@@ -97,6 +97,16 @@ export class TripDetailComponent {
     }).format(new Date(Date.UTC(year, month - 1, day)));
   }
 
+  protected formatDateTime(dateTimeStr: string): string {
+    return new Intl.DateTimeFormat(this.localeService.currentLocale(), {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date(dateTimeStr));
+  }
+
   protected openEditForm(): void {
     this.isFormOpen.set(true);
   }

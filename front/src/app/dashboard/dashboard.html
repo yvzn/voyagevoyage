@@ -44,5 +44,13 @@
       <app-planning-dashboard [maxItems]="3" [showHeading]="false" />
     </section>
 
+    <!-- Train Booking Reminders Section -->
+    <section aria-labelledby="dashboard-train-booking-heading" class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800 xl:col-span-2">
+      <h2 id="dashboard-train-booking-heading" class="sr-only">
+        {{ 'dashboard.trainBookingSectionHeading' | translate }}
+      </h2>
+      <app-train-booking-dashboard [maxItems]="5" [showHeading]="true" />
+    </section>
+
   </div>
 </div>

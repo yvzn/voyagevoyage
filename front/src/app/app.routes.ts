@@ -7,6 +7,7 @@ import { PlanningDashboardComponent } from './planning-dashboard/planning-dashbo
 import { DashboardComponent } from './dashboard/dashboard';
 import { PersonalLeavePageComponent } from './personal-leave/personal-leave-page/personal-leave-page';
 import { PersonalLeaveDetailComponent } from './personal-leave/personal-leave-detail/personal-leave-detail';
+import { TrainBookingListComponent } from './train-booking/train-booking-list/train-booking-list';
 
 export const routes: Routes = [
   {
@@ -21,6 +22,10 @@ export const routes: Routes = [
   {
     path: 'planning-dashboard',
     component: PlanningDashboardComponent,
+  },
+  {
+    path: 'train-bookings',
+    component: TrainBookingListComponent,
   },
   {
     path: 'trip/:id',

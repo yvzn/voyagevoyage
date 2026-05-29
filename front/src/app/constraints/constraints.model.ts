@@ -21,6 +21,7 @@ export interface TravelConstraints {
   considerVacationDays: boolean;
   isStrict: boolean;
   planningHorizonDays: number;
+  trainBookingThresholdDays: number;
   publicHolidayRegions: string[];
   schoolHolidayZones: string[];
 }
@@ -32,6 +33,7 @@ export interface UpdateTravelConstraintsRequest {
   considerVacationDays: boolean;
   isStrict: boolean;
   planningHorizonDays: number;
+  trainBookingThresholdDays: number;
   publicHolidayRegions: string[];
   schoolHolidayZones: string[];
 }

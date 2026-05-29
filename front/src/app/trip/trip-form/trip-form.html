@@ -82,7 +82,7 @@
       </div>
 
       <!-- Status -->
-      <div class="mb-6">
+      <div class="mb-4">
         <label
           for="trip-status"
           class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
@@ -99,6 +99,68 @@
           }
         </select>
       </div>
+
+      <!-- Train booking section -->
+      <fieldset class="mb-4 rounded-lg border border-gray-200 p-4 dark:border-gray-600">
+        <legend class="px-2 text-sm font-semibold text-gray-900 dark:text-white">
+          <span class="inline-flex items-center gap-1.5">
+            <!-- Train icon -->
+            <svg class="h-4 w-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 7h14M5 7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2M5 7V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2M9 14a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm6 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM9 18.5 8 20m8-1.5 1 1.5"/>
+            </svg>
+            {{ 'tripForm.trainBookingHeading' | translate }}
+          </span>
+        </legend>
+        <p class="mt-1 mb-3 text-xs text-gray-500 dark:text-gray-400">
+          {{ 'tripForm.trainBookingHint' | translate }}
+        </p>
+        <!-- Train departure -->
+        <div class="mb-3">
+          <label
+            for="train-departure"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'tripForm.trainDeparture' | translate }}
+          </label>
+          <input
+            id="train-departure"
+            type="text"
+            formControlName="trainDeparture"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          />
+        </div>
+        <!-- Train arrival -->
+        <div class="mb-3">
+          <label
+            for="train-arrival"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'tripForm.trainArrival' | translate }}
+          </label>
+          <input
+            id="train-arrival"
+            type="text"
+            formControlName="trainArrival"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          />
+        </div>
+        <!-- Train departure date/time -->
+        <div>
+          <label
+            for="train-departure-datetime"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'tripForm.trainDepartureDateTime' | translate }}
+          </label>
+          <input
+            id="train-departure-datetime"
+            type="datetime-local"
+            formControlName="trainDepartureDateTime"
+            [lang]="localeService.currentLocale()"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          />
+        </div>
+      </fieldset>
 
       </fieldset>
 

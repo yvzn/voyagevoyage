@@ -1,0 +1,75 @@
+@if (showHeading()) {
+  <div class="mb-3 flex items-center justify-between">
+    <h2 class="flex items-center gap-1.5 text-base font-semibold text-gray-900 dark:text-white">
+      <!-- Train icon -->
+      <svg class="h-5 w-5 text-blue-600 dark:text-blue-400" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 7h14M5 7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2M5 7V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2M9 14a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm6 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM9 18.5 8 20m8-1.5 1 1.5"/>
+      </svg>
+      {{ 'trainBookingDashboard.heading' | translate }}
+    </h2>
+    <a
+      routerLink="/train-bookings"
+      class="rounded-lg px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-blue-400 dark:hover:bg-gray-700"
+    >
+      {{ 'trainBookingDashboard.viewAllButton' | translate }}
+    </a>
+  </div>
+}
+
+@if (isLoading()) {
+  <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400" role="status" aria-live="polite">
+    <svg class="h-4 w-4 animate-spin flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.036l3-2.745z"/>
+    </svg>
+    <span>{{ 'trainBookingDashboard.loading' | translate }}</span>
+  </div>
+} @else if (hasError()) {
+  <div
+    role="alert"
+    class="flex flex-wrap items-center gap-3 rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-400"
+  >
+    <span>{{ 'trainBookingDashboard.loadError' | translate }}</span>
+    <button
+      type="button"
+      (click)="retryLoad()"
+      class="rounded-lg border border-red-300 px-3 py-1 text-xs font-medium hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-300 dark:border-red-600 dark:hover:bg-red-900/40"
+    >
+      {{ 'trainBookingDashboard.retry' | translate }}
+    </button>
+  </div>
+} @else if (pendingTrips().length === 0) {
+  <p class="text-sm text-gray-500 dark:text-gray-400">
+    {{ 'trainBookingDashboard.noItems' | translate }}
+  </p>
+} @else {
+  @if (!showHeading()) {
+    <div class="mb-2 flex justify-end">
+      <a
+        routerLink="/train-bookings"
+        class="rounded-lg px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-blue-400 dark:hover:bg-gray-700"
+      >
+        {{ 'trainBookingDashboard.viewAllButton' | translate }}
+      </a>
+    </div>
+  }
+  <ul class="divide-y divide-gray-100 dark:divide-gray-700">
+    @for (trip of pendingTrips(); track trip.id) {
+      <li>
+        <a
+          [routerLink]="['/trip', trip.id]"
+          class="flex items-center justify-between py-3 text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-300 dark:hover:bg-gray-750"
+        >
+          <span class="flex flex-col">
+            <span class="font-medium text-gray-900 dark:text-white">{{ trip.destination }}</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(trip.startDate) }}</span>
+          </span>
+          <!-- Train not-booked indicator -->
+          <svg class="h-4 w-4 shrink-0 text-amber-500" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 7h14M5 7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2M5 7V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2M9 14a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm6 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM9 18.5 8 20m8-1.5 1 1.5"/>
+          </svg>
+        </a>
+      </li>
+    }
+  </ul>
+}

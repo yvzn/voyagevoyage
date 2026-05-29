@@ -26,7 +26,8 @@
     "constraintPublicHolidayAriaLabel": "Jour férié : {{name}} — aller aux paramètres de contraintes",
     "constraintSchoolHolidayAriaLabel": "Vacances scolaires : {{name}} — aller aux paramètres de contraintes",
     "constraintPersonalLeaveAriaLabel": "Congé personnel : {{label}} — aller à la gestion des congés",
-    "constraintAllowedDaysAriaLabel": "Jour non autorisé — aller aux paramètres de contraintes"
+    "constraintAllowedDaysAriaLabel": "Jour non autorisé — aller aux paramètres de contraintes",
+    "trainBookingAriaLabel": "Train réservé : {{departure}} → {{arrival}}"
   },
   "tripStatus": {
     "planned": "Planifié",
@@ -55,7 +56,12 @@
     "constraintPersonalLeaveWarning": "La période sélectionnée chevauche une période de congé personnel.",
     "constraintPersonalLeaveError": "La période sélectionnée chevauche une période de congé personnel. Veuillez ajuster vos dates.",
     "constraintMaxDaysWarning": "La période sélectionnée dépasserait votre nombre maximum de jours de déplacement par mois.",
-    "constraintMaxDaysError": "La période sélectionnée dépasserait votre nombre maximum de jours de déplacement par mois. Veuillez ajuster vos dates."
+    "constraintMaxDaysError": "La période sélectionnée dépasserait votre nombre maximum de jours de déplacement par mois. Veuillez ajuster vos dates.",
+    "trainBookingHeading": "Réservation de train",
+    "trainBookingHint": "Facultatif. À renseigner une fois que vous avez réservé le train pour ce déplacement.",
+    "trainDeparture": "Ville / gare de départ",
+    "trainArrival": "Ville / gare d'arrivée",
+    "trainDepartureDateTime": "Date et heure de départ (facultatif)"
   },
   "tripDetail": {
     "backToCalendar": "Retour au calendrier",
@@ -71,7 +77,11 @@
     "expensesHeading": "Dépenses",
     "addExpenseButton": "Ajouter une dépense",
     "noExpenses": "Aucune dépense enregistrée pour ce déplacement.",
-    "notFound": "Déplacement introuvable."
+    "notFound": "Déplacement introuvable.",
+    "trainBookingHeading": "Réservation de train",
+    "trainDeparture": "Départ",
+    "trainArrival": "Arrivée",
+    "trainDepartureDateTime": "Date et heure de départ"
   },
   "expenseForm": {
     "createTitle": "Nouvelle dépense",
@@ -133,7 +143,8 @@
   "dashboard": {
     "heading": "Tableau de bord",
     "calendarSectionHeading": "Prochains déplacements",
-    "planningSectionHeading": "Déplacements à planifier"
+    "planningSectionHeading": "Déplacements à planifier",
+    "trainBookingSectionHeading": "Réservations de train à effectuer"
   },
   "constraints": {
     "heading": "Contraintes de déplacement",
@@ -194,7 +205,10 @@
     "saveError": "Une erreur est survenue lors de l'enregistrement des contraintes. Veuillez réessayer.",
     "loadError": "Impossible de charger les contraintes de déplacement. Veuillez réessayer.",
     "loading": "Chargement…",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "trainBookingThresholdDays": "Seuil de rappel de réservation de train (jours)",
+    "trainBookingThresholdDaysHint": "Les rappels s'affichent pour les voyages confirmés dont le départ a lieu dans ce nombre de jours (1 à 365). Par défaut, 90 jours (ouverture des réservations SNCF).",
+    "trainBookingThresholdDaysError": "Doit être compris entre 1 et 365."
   },
   "leaveType": {
     "annual": "Congés payés",
@@ -250,5 +264,23 @@
     "saving": "Enregistrement…",
     "cancel": "Annuler",
     "saveError": "Une erreur est survenue lors de l'enregistrement de la période de congé. Veuillez réessayer."
+  },
+  "trainBookingNavItem": "Réservations de train",
+  "trainBookingDashboard": {
+    "heading": "Réservations de train à effectuer",
+    "loading": "Chargement…",
+    "loadError": "Impossible de charger les données. Veuillez réessayer.",
+    "retry": "Réessayer",
+    "noItems": "Aucune réservation de train à effectuer pour la période à venir.",
+    "viewAllButton": "Toutes les réservations"
+  },
+  "trainBookingList": {
+    "heading": "Réservations de train",
+    "description": "Voyages confirmés dont le départ a lieu dans les {{days}} prochains jours, sans réservation de train.",
+    "loading": "Chargement…",
+    "loadError": "Impossible de charger les données. Veuillez réessayer.",
+    "retry": "Réessayer",
+    "noItems": "Aucune réservation de train à effectuer. Tous les voyages confirmés à venir sont couverts.",
+    "toBook": "À réserver"
   }
 }

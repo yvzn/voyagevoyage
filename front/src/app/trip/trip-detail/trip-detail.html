@@ -45,6 +45,41 @@
           </div>
         </dl>
 
+        <!-- Train booking section -->
+        @if (currentTrip.trainBooking) {
+          <div class="mt-4 rounded-lg border border-blue-100 bg-blue-50 p-4 dark:border-blue-700/50 dark:bg-blue-900/20">
+            <h2 class="mb-2 flex items-center gap-1.5 text-sm font-semibold text-blue-900 dark:text-blue-200">
+              <!-- Train icon -->
+              <svg class="h-4 w-4 shrink-0" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 7h14M5 7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2M5 7V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2M9 14a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm6 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM9 18.5 8 20m8-1.5 1 1.5"/>
+              </svg>
+              {{ 'tripDetail.trainBookingHeading' | translate }}
+            </h2>
+            <dl class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div>
+                <dt class="text-xs font-medium uppercase tracking-wide text-blue-700 dark:text-blue-400">
+                  {{ 'tripDetail.trainDeparture' | translate }}
+                </dt>
+                <dd class="mt-0.5 text-sm text-blue-900 dark:text-blue-100">{{ currentTrip.trainBooking.departure }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs font-medium uppercase tracking-wide text-blue-700 dark:text-blue-400">
+                  {{ 'tripDetail.trainArrival' | translate }}
+                </dt>
+                <dd class="mt-0.5 text-sm text-blue-900 dark:text-blue-100">{{ currentTrip.trainBooking.arrival }}</dd>
+              </div>
+              @if (currentTrip.trainBooking.departureDateTime) {
+                <div class="sm:col-span-2">
+                  <dt class="text-xs font-medium uppercase tracking-wide text-blue-700 dark:text-blue-400">
+                    {{ 'tripDetail.trainDepartureDateTime' | translate }}
+                  </dt>
+                  <dd class="mt-0.5 text-sm text-blue-900 dark:text-blue-100">{{ formatDateTime(currentTrip.trainBooking.departureDateTime) }}</dd>
+                </div>
+              }
+            </dl>
+          </div>
+        }
+
         <!-- Delete error -->
         @if (deleteError()) {
           <div
