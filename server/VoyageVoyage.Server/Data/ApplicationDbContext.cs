@@ -15,6 +15,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public const string PublicHolidaysContainerName = "public-holidays";
     public const string SchoolHolidaysContainerName = "school-holidays";
     public const string PersonalLeavesContainerName = "personal-leaves";
+    public const string ReceiptsContainerName = "receipts";
 
     public DbSet<Trip> Trips { get; set; }
 
@@ -27,6 +28,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<SchoolHoliday> SchoolHolidays { get; set; }
 
     public DbSet<PersonalLeave> PersonalLeaves { get; set; }
+
+    public DbSet<Receipt> Receipts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -70,6 +73,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.ToContainer(PersonalLeavesContainerName);
             entity.HasPartitionKey(l => l.UserId);
             entity.HasKey(l => l.Id);
+        });
+
+        modelBuilder.Entity<Receipt>(entity =>
+        {
+            entity.ToContainer(ReceiptsContainerName);
+            entity.HasPartitionKey(r => r.UserId);
+            entity.HasKey(r => r.Id);
         });
     }
 }

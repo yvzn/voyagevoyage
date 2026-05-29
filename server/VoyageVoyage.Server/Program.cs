@@ -1,3 +1,4 @@
+using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.EntityFrameworkCore;
@@ -54,6 +55,14 @@ builder.Services.AddScoped<IPublicHolidayService, CosmosDbPublicHolidayService>(
 builder.Services.AddScoped<ISchoolHolidayService, CosmosDbSchoolHolidayService>();
 builder.Services.AddScoped<IPersonalLeaveService, CosmosDbPersonalLeaveService>();
 builder.Services.AddHostedService<DbInitializerHostedService>();
+
+// Azure Blob Storage for receipt file uploads
+var azureStorageConnectionString = builder.Configuration.GetConnectionString("AzureStorage");
+if (string.IsNullOrEmpty(azureStorageConnectionString))
+    throw new InvalidOperationException("Azure Storage connection string 'AzureStorage' is not configured.");
+
+builder.Services.AddSingleton(new BlobServiceClient(azureStorageConnectionString));
+builder.Services.AddScoped<IReceiptService, AzureBlobReceiptService>();
 
 builder.Services.AddHealthChecks()
     .AddCheck<DatabaseHealthCheck>("cosmos-db");

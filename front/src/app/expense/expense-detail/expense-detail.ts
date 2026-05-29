@@ -13,11 +13,12 @@ import {
 } from '../store/expense.selectors';
 import { ExpenseFormComponent } from '../expense-form/expense-form';
 import { LocaleService } from '../../locale.service';
+import { ReceiptUploadComponent } from '../../receipt/receipt-upload/receipt-upload';
 
 @Component({
   selector: 'app-expense-detail',
   standalone: true,
-  imports: [RouterLink, TranslatePipe, DecimalPipe, ExpenseFormComponent],
+  imports: [RouterLink, TranslatePipe, DecimalPipe, ExpenseFormComponent, ReceiptUploadComponent],
   templateUrl: './expense-detail.html',
 })
 export class ExpenseDetailComponent {
