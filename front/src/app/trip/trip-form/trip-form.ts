@@ -44,8 +44,10 @@ function endDateAfterStartDate(group: AbstractControl): ValidationErrors | null 
 export class TripFormComponent implements AfterViewInit {
   /** null = create mode; a Trip object = edit mode */
   readonly trip = input<Trip | null>(null);
-  /** Pre-fill the start/end date when creating a new trip */
+  /** Pre-fill the start date when creating a new trip */
   readonly defaultDate = input<string | null>(null);
+  /** Pre-fill the end date when creating a new trip (falls back to defaultDate when null) */
+  readonly defaultEndDate = input<string | null>(null);
 
   readonly saved = output<void>();
   readonly cancelled = output<void>();
@@ -118,6 +120,7 @@ export class TripFormComponent implements AfterViewInit {
     effect(() => {
       const t = this.trip();
       const d = this.defaultDate();
+      const de = this.defaultEndDate();
       if (t) {
         this.form.setValue({
           destination: t.destination,
@@ -129,7 +132,7 @@ export class TripFormComponent implements AfterViewInit {
         this.form.reset({
           destination: '',
           startDate: d ?? '',
-          endDate: d ?? '',
+          endDate: de ?? d ?? '',
           status: TripStatus.Planned,
         });
       }

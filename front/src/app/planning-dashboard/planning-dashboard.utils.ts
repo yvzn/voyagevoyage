@@ -1,5 +1,6 @@
 import { Trip, TripStatus } from '../trip/trip.model';
-import { TravelConstraints } from '../constraints/constraints.model';
+import { TravelConstraints, PublicHoliday } from '../constraints/constraints.model';
+import { PersonalLeave } from '../personal-leave/personal-leave.model';
 
 export interface PlannedTripItem {
   type: 'planned-trip';
@@ -16,6 +17,12 @@ export interface AvailableMonthItem {
 }
 
 export type PlanningItem = PlannedTripItem | AvailableMonthItem;
+
+export interface TripSlotSuggestion {
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+  durationDays: number;
+}
 
 export const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -86,4 +93,120 @@ export function getPlanningItems(
   }
 
   return items;
+}
+
+/**
+ * Suggests travel slots for the given month that comply with the user's constraints.
+ *
+ * A day is considered "blocked" when it falls outside the allowed days of the week,
+ * coincides with a public holiday (if considerPublicHolidays), or overlaps a personal
+ * leave period (if considerVacationDays).  School holidays are intentionally NOT
+ * treated as blocking (per business rules).
+ *
+ * Returns up to `maxSuggestions` contiguous windows of valid days, each trimmed to
+ * at most `remainingDays` days.
+ */
+export function suggestTripSlots(
+  year: number,
+  /** 0-indexed month (0 = January) */
+  month: number,
+  remainingDays: number,
+  constraints: TravelConstraints,
+  publicHolidays: PublicHoliday[],
+  personalLeaves: PersonalLeave[],
+  maxSuggestions: number = 3,
+): TripSlotSuggestion[] {
+  if (remainingDays <= 0) return [];
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const publicHolidaySet = new Set(publicHolidays.map((h) => h.date));
+
+  const firstDayOfMonth = new Date(year, month, 1);
+  const lastDayOfMonth = new Date(year, month + 1, 0);
+  // Start from today when the target month is the current or past month
+  const startDate = firstDayOfMonth < today ? new Date(today) : new Date(firstDayOfMonth);
+
+  if (startDate > lastDayOfMonth) return [];
+
+  // Collect all valid (non-blocked) dates in the month
+  const validDates: string[] = [];
+  const current = new Date(startDate);
+  while (current <= lastDayOfMonth) {
+    const dateStr = formatDateLocal(current);
+    if (!isDayBlocked(dateStr, current.getDay(), constraints, publicHolidaySet, personalLeaves)) {
+      validDates.push(dateStr);
+    }
+    current.setDate(current.getDate() + 1);
+  }
+
+  if (validDates.length === 0) return [];
+
+  // Split valid dates into consecutive runs
+  const runs: Array<{ start: string; end: string; length: number }> = [];
+  let runStart = 0;
+
+  for (let i = 0; i < validDates.length; i++) {
+    const isLast = i === validDates.length - 1;
+    const isGap =
+      !isLast &&
+      parseISODateUTC(validDates[i + 1]) - parseISODateUTC(validDates[i]) !== MILLISECONDS_PER_DAY;
+
+    if (isLast || isGap) {
+      runs.push({ start: validDates[runStart], end: validDates[i], length: i - runStart + 1 });
+      runStart = i + 1;
+    }
+  }
+
+  // Convert runs to suggestions, trimming each to remainingDays
+  const suggestions: TripSlotSuggestion[] = [];
+
+  for (const run of runs) {
+    if (suggestions.length >= maxSuggestions) break;
+
+    const durationDays = Math.min(run.length, remainingDays);
+    let endDate = run.end;
+
+    if (run.length > remainingDays) {
+      const d = new Date(run.start + 'T00:00:00');
+      d.setDate(d.getDate() + remainingDays - 1);
+      endDate = formatDateLocal(d);
+    }
+
+    suggestions.push({ startDate: run.start, endDate, durationDays });
+  }
+
+  return suggestions;
+}
+
+/** Returns true when a day should be excluded from suggested slots. */
+function isDayBlocked(
+  dateStr: string,
+  dayOfWeek: number,
+  constraints: TravelConstraints,
+  publicHolidaySet: Set<string>,
+  personalLeaves: PersonalLeave[],
+): boolean {
+  if (constraints.allowedDaysOfWeek.length > 0 && !constraints.allowedDaysOfWeek.includes(dayOfWeek)) {
+    return true;
+  }
+  if (constraints.considerPublicHolidays && publicHolidaySet.has(dateStr)) {
+    return true;
+  }
+  if (constraints.considerVacationDays) {
+    for (const leave of personalLeaves) {
+      if (dateStr >= leave.startDate && dateStr <= leave.endDate) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function formatDateLocal(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }

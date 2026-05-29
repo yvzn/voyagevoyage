@@ -122,7 +122,13 @@
     "availableMonthLabel": "Month to fill",
     "tripDaysUsed": "{{used}} / {{max}} days used",
     "viewAllButton": "View all planning",
-    "viewFullCalendar": "View full calendar"
+    "viewFullCalendar": "View full calendar",
+    "suggestSlots": "Suggest slots",
+    "suggestionsHeading": "Suggestions for {{month}}",
+    "noSuggestions": "No valid slots found for this month.",
+    "suggestionLabel": "{{days}} day(s): {{startDate}} – {{endDate}}",
+    "acceptSuggestion": "Accept",
+    "dismissSuggestions": "Close"
   },
   "dashboard": {
     "heading": "Dashboard",

@@ -122,7 +122,13 @@
     "availableMonthLabel": "Mois à compléter",
     "tripDaysUsed": "{{used}} / {{max}} jours utilisés",
     "viewAllButton": "Voir toute la planification",
-    "viewFullCalendar": "Voir le calendrier complet"
+    "viewFullCalendar": "Voir le calendrier complet",
+    "suggestSlots": "Suggérer des créneaux",
+    "suggestionsHeading": "Suggestions pour {{month}}",
+    "noSuggestions": "Aucun créneau valide trouvé pour ce mois.",
+    "suggestionLabel": "{{days}} jour(s) : {{startDate}} – {{endDate}}",
+    "acceptSuggestion": "Accepter",
+    "dismissSuggestions": "Fermer"
   },
   "dashboard": {
     "heading": "Tableau de bord",

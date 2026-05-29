@@ -1,19 +1,29 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, ElementRef, computed, inject, input, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { TripActions } from '../trip/store/trip.actions';
 import { SettingsActions } from '../constraints/store/settings.actions';
+import { PersonalLeaveActions } from '../personal-leave/store/personal-leave.actions';
 import { selectAllTrips, selectTripsLoadStatus } from '../trip/store/trip.selectors';
-import { selectConstraints, selectSettingsLoadStatus } from '../constraints/store/settings.selectors';
+import { selectConstraints, selectPublicHolidays, selectSettingsLoadStatus } from '../constraints/store/settings.selectors';
+import { selectAllPersonalLeaves } from '../personal-leave/store/personal-leave.selectors';
 import { getTripStatusClass, getTripStatusTranslationKey } from '../trip/trip-status.utils';
 import { LocaleService } from '../locale.service';
-import { getPlanningItems, PlanningItem, PlannedTripItem, AvailableMonthItem } from './planning-dashboard.utils';
+import { TripFormComponent } from '../trip/trip-form/trip-form';
+import {
+  getPlanningItems,
+  suggestTripSlots,
+  PlanningItem,
+  PlannedTripItem,
+  AvailableMonthItem,
+  TripSlotSuggestion,
+} from './planning-dashboard.utils';
 
 @Component({
   selector: 'app-planning-dashboard',
   standalone: true,
-  imports: [RouterLink, TranslatePipe],
+  imports: [RouterLink, TranslatePipe, TripFormComponent],
   templateUrl: './planning-dashboard.html',
 })
 export class PlanningDashboardComponent {
@@ -29,12 +39,16 @@ export class PlanningDashboardComponent {
   constructor() {
     this.store.dispatch(TripActions.loadTrips());
     this.store.dispatch(SettingsActions.loadSettings());
+    this.store.dispatch(SettingsActions.loadPublicHolidays());
+    this.store.dispatch(PersonalLeaveActions.loadPersonalLeaves());
   }
 
   private readonly trips = this.store.selectSignal(selectAllTrips);
   protected readonly tripsLoadStatus = this.store.selectSignal(selectTripsLoadStatus);
   protected readonly settingsLoadStatus = this.store.selectSignal(selectSettingsLoadStatus);
   private readonly constraints = this.store.selectSignal(selectConstraints);
+  private readonly publicHolidays = this.store.selectSignal(selectPublicHolidays);
+  private readonly personalLeaves = this.store.selectSignal(selectAllPersonalLeaves);
 
   protected readonly isLoading = computed(
     () => this.tripsLoadStatus() === 'loading' || this.settingsLoadStatus() === 'loading',
@@ -56,9 +70,76 @@ export class PlanningDashboardComponent {
   protected readonly getTripStatusClass = getTripStatusClass;
   protected readonly getTripStatusTranslationKey = getTripStatusTranslationKey;
 
+  private readonly suggestionsDialogEl = viewChild.required<ElementRef<HTMLDialogElement>>('suggestionsDialogEl');
+
+  /** The available-month item currently selected for slot suggestions. */
+  protected readonly selectedMonth = signal<AvailableMonthItem | null>(null);
+
+  /** Slot suggestions computed for the currently selected month. */
+  protected readonly suggestions = computed<TripSlotSuggestion[]>(() => {
+    const month = this.selectedMonth();
+    const constraints = this.constraints();
+    if (!month || !constraints) return [];
+    const remainingDays = month.maxDaysPerMonth - month.tripDaysUsed;
+    return suggestTripSlots(
+      month.year,
+      month.month,
+      remainingDays,
+      constraints,
+      this.publicHolidays(),
+      this.personalLeaves(),
+    );
+  });
+
+  /** Whether the trip-creation form is open. */
+  protected readonly isFormOpen = signal(false);
+  /** Start date to pre-fill in the form when accepting a suggestion. */
+  protected readonly formDefaultDate = signal<string | null>(null);
+  /** End date to pre-fill in the form when accepting a suggestion. */
+  protected readonly formDefaultEndDate = signal<string | null>(null);
+
   retryLoad(): void {
     this.store.dispatch(TripActions.loadTrips());
     this.store.dispatch(SettingsActions.loadSettings());
+  }
+
+  /** Opens the suggestions modal for the given available month. */
+  selectMonth(item: AvailableMonthItem): void {
+    this.selectedMonth.set(item);
+    this.suggestionsDialogEl().nativeElement.showModal();
+  }
+
+  /** Closes the suggestions modal without taking any action. */
+  dismissSuggestions(): void {
+    this.selectedMonth.set(null);
+    const dialog = this.suggestionsDialogEl().nativeElement;
+    if (dialog.open) dialog.close();
+  }
+
+  protected onSuggestionsDialogCancel(event: Event): void {
+    event.preventDefault();
+    this.dismissSuggestions();
+  }
+
+  protected onSuggestionsBackdropClick(event: MouseEvent): void {
+    if (event.target === this.suggestionsDialogEl().nativeElement) {
+      this.dismissSuggestions();
+    }
+  }
+
+  /** Pre-fills the trip form with the accepted suggestion dates and opens it. */
+  acceptSuggestion(suggestion: TripSlotSuggestion): void {
+    this.formDefaultDate.set(suggestion.startDate);
+    this.formDefaultEndDate.set(suggestion.endDate);
+    const dialog = this.suggestionsDialogEl().nativeElement;
+    if (dialog.open) dialog.close();
+    this.selectedMonth.set(null);
+    this.isFormOpen.set(true);
+  }
+
+  /** Closes the trip form. */
+  closeForm(): void {
+    this.isFormOpen.set(false);
   }
 
   isPlannedTripItem(item: PlanningItem): item is PlannedTripItem {
