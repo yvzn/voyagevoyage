@@ -7,7 +7,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { TripStatus } from '../trip.model';
 import { TripActions } from '../store/trip.actions';
-import { selectAllTrips, selectTripsDeleteStatus } from '../store/trip.selectors';
+import { selectAllTrips, selectTripsDeleteStatus, selectTripsUpdateStatus } from '../store/trip.selectors';
 import { TripFormComponent } from '../trip-form/trip-form';
 import { getTripStatusClass, getTripStatusTranslationKey } from '../trip-status.utils';
 import { LocaleService } from '../../locale.service';
@@ -52,11 +52,21 @@ export class TripDetailComponent {
   /** Whether the inline delete confirmation prompt is shown */
   protected readonly showDeleteConfirm = signal(false);
 
+  /** Whether the inline clear-booking confirmation prompt is shown */
+  protected readonly showClearBookingConfirm = signal(false);
+
   private readonly deleteStatus = this.store.selectSignal(selectTripsDeleteStatus);
   protected readonly isDeleting = computed(() => this.deleteStatus() === 'loading');
   protected readonly deleteError = computed<string | null>(() =>
     this.deleteStatus() === 'failure' ? 'tripDetail.deleteError' : null
   );
+
+  private readonly updateStatus = this.store.selectSignal(selectTripsUpdateStatus);
+  private readonly clearBookingPending = signal(false);
+  protected readonly isClearingBooking = computed(() =>
+    this.clearBookingPending() && this.updateStatus() === 'loading',
+  );
+  protected readonly clearBookingError = signal<string | null>(null);
 
   protected readonly expenses = this.store.selectSignal(selectAllExpenses);
   protected readonly expensesLoadStatus = this.store.selectSignal(selectExpensesLoadStatus);
@@ -78,6 +88,19 @@ export class TripDetailComponent {
           this.router.navigate(['/calendar']);
         } else if (ds === 'failure') {
           this.deletePending = false;
+        }
+      }
+    });
+
+    effect(() => {
+      const us = this.updateStatus();
+      if (this.clearBookingPending()) {
+        if (us === 'success') {
+          this.clearBookingPending.set(false);
+          this.showClearBookingConfirm.set(false);
+        } else if (us === 'failure') {
+          this.clearBookingPending.set(false);
+          this.clearBookingError.set('tripDetail.clearTrainBookingError');
         }
       }
     });
@@ -145,6 +168,34 @@ export class TripDetailComponent {
 
   protected cancelDelete(): void {
     this.showDeleteConfirm.set(false);
+  }
+
+  protected requestClearBooking(): void {
+    this.clearBookingError.set(null);
+    this.showClearBookingConfirm.set(true);
+  }
+
+  protected cancelClearBooking(): void {
+    this.showClearBookingConfirm.set(false);
+    this.clearBookingError.set(null);
+  }
+
+  protected onClearBooking(): void {
+    const trip = this.trip();
+    if (!trip || this.isClearingBooking()) return;
+
+    this.clearBookingError.set(null);
+    this.clearBookingPending.set(true);
+    this.store.dispatch(TripActions.updateTrip({
+      id: trip.id,
+      request: {
+        destination: trip.destination,
+        startDate: trip.startDate,
+        endDate: trip.endDate,
+        status: trip.status,
+        trainBooking: null,
+      },
+    }));
   }
 
   protected onDelete(): void {

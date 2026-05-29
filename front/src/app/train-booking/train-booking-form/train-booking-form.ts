@@ -109,23 +109,6 @@ export class TrainBookingFormComponent implements AfterViewInit {
     }));
   }
 
-  protected onClearBooking(): void {
-    const trip = this.trip();
-    if (!trip || this.isSaving()) return;
-
-    this.saveOp = true;
-    this.store.dispatch(TripActions.updateTrip({
-      id: trip.id,
-      request: {
-        destination: trip.destination,
-        startDate: trip.startDate,
-        endDate: trip.endDate,
-        status: trip.status,
-        trainBooking: null,
-      },
-    }));
-  }
-
   protected onCancel(): void {
     this.cancelled.emit();
   }

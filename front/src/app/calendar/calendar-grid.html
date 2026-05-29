@@ -45,7 +45,9 @@
                   >
                     <span class="inline-flex items-center gap-0.5">
                       @if (trip.trainBooking) {
-                        <span aria-hidden="true" class="text-[0.55rem] leading-none">🚅</span>
+                        <svg aria-hidden="true" class="inline-block h-2.5 w-2.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 7.5h12l4.5 4.5-4.5 4.5H4.5A2.25 2.25 0 0 1 2.25 14.25V9.75A2.25 2.25 0 0 1 4.5 7.5ZM9 7.5v9M13.5 7.5v9" />
+                        </svg>
                       }
                       <span class="truncate">{{ trip.destination }}</span>
                     </span>
@@ -164,7 +166,9 @@
                       >
                         <span class="inline-flex items-center gap-0.5">
                           @if (trip.trainBooking) {
-                            <span aria-hidden="true" class="text-[0.6rem] leading-none">🚅</span>
+                            <svg aria-hidden="true" class="inline-block h-2.5 w-2.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 7.5h12l4.5 4.5-4.5 4.5H4.5A2.25 2.25 0 0 1 2.25 14.25V9.75A2.25 2.25 0 0 1 4.5 7.5ZM9 7.5v9M13.5 7.5v9" />
+                            </svg>
                           }
                           <span class="truncate">{{ trip.destination }}</span>
                         </span>

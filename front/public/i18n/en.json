@@ -84,7 +84,13 @@
     "trainDepartureDateTime": "Departure date & time",
     "noTrainBooking": "No train booking registered yet.",
     "addTrainBookingButton": "Add booking",
-    "editTrainBookingButton": "Edit booking"
+    "editTrainBookingButton": "Edit booking",
+    "clearTrainBookingButton": "Clear booking",
+    "clearingTrainBooking": "Clearing…",
+    "clearTrainBookingConfirmMessage": "Are you sure you want to remove the train booking for this trip?",
+    "clearTrainBookingConfirmButton": "Confirm",
+    "clearTrainBookingCancelButton": "Cancel",
+    "clearTrainBookingError": "An error occurred while clearing the booking. Please try again."
   },
   "expenseForm": {
     "createTitle": "New expense",

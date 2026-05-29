@@ -119,7 +119,11 @@
         <li>
           <a routerLink="/train-bookings" routerLinkActive="bg-gray-100 dark:bg-gray-700"
             class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-            <span aria-hidden="true" class="w-6 h-6 flex items-center justify-center text-lg leading-none text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white">🚅</span>
+            <svg aria-hidden="true"
+              class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+              fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 7.5h12l4.5 4.5-4.5 4.5H4.5A2.25 2.25 0 0 1 2.25 14.25V9.75A2.25 2.25 0 0 1 4.5 7.5ZM9 7.5v9M13.5 7.5v9" />
+            </svg>
             <span class="ml-3">{{ 'trainBookingNavItem' | translate }}</span>
           </a>
         </li>

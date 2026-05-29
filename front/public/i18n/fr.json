@@ -84,7 +84,13 @@
     "trainDepartureDateTime": "Date et heure de départ",
     "noTrainBooking": "Aucune réservation de train enregistrée.",
     "addTrainBookingButton": "Ajouter une réservation",
-    "editTrainBookingButton": "Modifier la réservation"
+    "editTrainBookingButton": "Modifier la réservation",
+    "clearTrainBookingButton": "Supprimer la réservation",
+    "clearingTrainBooking": "Suppression…",
+    "clearTrainBookingConfirmMessage": "Êtes-vous sûr de vouloir supprimer la réservation de train pour ce déplacement ?",
+    "clearTrainBookingConfirmButton": "Confirmer",
+    "clearTrainBookingCancelButton": "Annuler",
+    "clearTrainBookingError": "Une erreur est survenue lors de la suppression de la réservation. Veuillez réessayer."
   },
   "expenseForm": {
     "createTitle": "Nouvelle dépense",
