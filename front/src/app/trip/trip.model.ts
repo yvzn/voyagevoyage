@@ -7,7 +7,7 @@ export enum TripStatus {
 export interface TrainBooking {
   departure: string;
   arrival: string;
-  departureDateTime: string | null; // ISO 8601 datetime string or null
+  departureDateTime?: string | null; // ISO 8601 datetime string or null
 }
 
 export interface Trip {
@@ -16,7 +16,7 @@ export interface Trip {
   endDate: string; // ISO 8601 date: YYYY-MM-DD
   destination: string;
   status: TripStatus;
-  trainBooking: TrainBooking | null;
+  trainBooking?: TrainBooking | null;
 }
 
 export interface CreateTripRequest {
@@ -24,7 +24,7 @@ export interface CreateTripRequest {
   endDate: string; // ISO 8601 date: YYYY-MM-DD
   destination: string;
   status: TripStatus;
-  trainBooking: TrainBooking | null;
+  trainBooking?: TrainBooking | null;
 }
 
 export interface UpdateTripRequest {
@@ -32,5 +32,5 @@ export interface UpdateTripRequest {
   endDate: string; // ISO 8601 date: YYYY-MM-DD
   destination: string;
   status: TripStatus;
-  trainBooking: TrainBooking | null;
+  trainBooking?: TrainBooking | null;
 }

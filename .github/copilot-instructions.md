@@ -88,17 +88,21 @@ func start
 ## PR safety checklist (before opening/updating a PR)
 
 1. Scope changes to the relevant subproject (`front`, `server`, or `batch`) and avoid unrelated refactors.
-2. Build/test the touched subproject(s) with the commands above.
-3. For UI changes, verify:
+2. Build **all three subprojects** with the commands above, even if you only touched one — cross-cutting model changes can break other projects:
+   - `cd front && npm ci && npm run build`
+   - `cd server/VoyageVoyage.Server && dotnet build -c Release`
+   - `cd batch && dotnet build -c Release`
+3. Run tests for the touched subproject(s): `cd front && npm test`
+4. For UI changes, verify:
 	- keyboard-only navigation works,
 	- semantic structure is preserved,
 	- status/validation messages are explicit,
 	- no hardcoded user-facing strings.
-4. For API/batch changes, verify:
+5. For API/batch changes, verify:
 	- thin endpoints/triggers,
 	- business logic in services,
 	- no breaking contract changes unless intentionally coordinated.
-5. Update docs when behavior or rules change (`docs/FUNCTIONAL_DOCUMENTATION.md` and/or `docs/UX_GUIDELINES.md`).
+6. Update docs when behavior or rules change (`docs/FUNCTIONAL_DOCUMENTATION.md` and/or `docs/UX_GUIDELINES.md`).
 
 ## Common pitfalls to avoid
 
