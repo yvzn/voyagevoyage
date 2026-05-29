@@ -15,7 +15,7 @@ import { NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Trip, TripStatus, TrainBooking } from '../trip.model';
+import { Trip, TripStatus } from '../trip.model';
 import { TripActions } from '../store/trip.actions';
 import { selectTripsCreateStatus, selectTripsUpdateStatus, selectAllTrips } from '../store/trip.selectors';
 import { LocaleService } from '../../locale.service';
@@ -97,10 +97,6 @@ export class TripFormComponent implements AfterViewInit {
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
       status: [TripStatus.Planned as TripStatus, Validators.required],
-      // Train booking fields (all optional)
-      trainDeparture: [''],
-      trainArrival: [''],
-      trainDepartureDateTime: [''],
     },
     {
       validators: [
@@ -131,9 +127,6 @@ export class TripFormComponent implements AfterViewInit {
           startDate: t.startDate,
           endDate: t.endDate,
           status: t.status,
-          trainDeparture: t.trainBooking?.departure ?? '',
-          trainArrival: t.trainBooking?.arrival ?? '',
-          trainDepartureDateTime: t.trainBooking?.departureDateTime ?? '',
         });
       } else {
         this.form.reset({
@@ -141,9 +134,6 @@ export class TripFormComponent implements AfterViewInit {
           startDate: d ?? '',
           endDate: de ?? d ?? '',
           status: TripStatus.Planned,
-          trainDeparture: '',
-          trainArrival: '',
-          trainDepartureDateTime: '',
         });
       }
     });
@@ -214,24 +204,15 @@ export class TripFormComponent implements AfterViewInit {
     const groupInvalid = this.form.hasError('endBeforeStart') || this.form.hasError('constraintError');
     if (fieldInvalid || groupInvalid || this.isLoading()) return;
 
-    const { destination, startDate, endDate, status, trainDeparture, trainArrival, trainDepartureDateTime } = this.form.getRawValue();
-
-    // Build train booking object only if at least departure or arrival is provided
-    const trainBooking: TrainBooking | null =
-      (trainDeparture?.trim() || trainArrival?.trim())
-        ? {
-            departure: trainDeparture?.trim() ?? '',
-            arrival: trainArrival?.trim() ?? '',
-            departureDateTime: trainDepartureDateTime?.trim() || null,
-          }
-        : null;
+    const { destination, startDate, endDate, status } = this.form.getRawValue();
 
     const request = {
       destination: destination!,
       startDate: startDate!,
       endDate: endDate!,
       status: status!,
-      trainBooking,
+      // Preserve the existing train booking — it is managed via the dedicated train booking form
+      trainBooking: this.trip()?.trainBooking ?? null,
     };
 
     const trip = this.trip();

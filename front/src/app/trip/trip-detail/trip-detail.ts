@@ -15,11 +15,12 @@ import { ExpenseFormComponent } from '../../expense/expense-form/expense-form';
 import { ExpenseActions } from '../../expense/store/expense.actions';
 import { selectAllExpenses, selectExpensesLoadStatus } from '../../expense/store/expense.selectors';
 import { ExpenseCategory } from '../../expense/expense.model';
+import { TrainBookingFormComponent } from '../../train-booking/train-booking-form/train-booking-form';
 
 @Component({
   selector: 'app-trip-detail',
   standalone: true,
-  imports: [NgClass, DecimalPipe, TranslatePipe, TripFormComponent, RouterLink, ExpenseFormComponent],
+  imports: [NgClass, DecimalPipe, TranslatePipe, TripFormComponent, RouterLink, ExpenseFormComponent, TrainBookingFormComponent],
   templateUrl: './trip-detail.html',
 })
 export class TripDetailComponent {
@@ -41,6 +42,9 @@ export class TripDetailComponent {
 
   /** Whether the edit form modal is open */
   protected readonly isFormOpen = signal(false);
+
+  /** Whether the train booking form modal is open */
+  protected readonly isTrainBookingFormOpen = signal(false);
 
   /** Whether the expense form modal is open */
   protected readonly isExpenseFormOpen = signal(false);
@@ -113,6 +117,14 @@ export class TripDetailComponent {
 
   protected closeForm(): void {
     this.isFormOpen.set(false);
+  }
+
+  protected openTrainBookingForm(): void {
+    this.isTrainBookingFormOpen.set(true);
+  }
+
+  protected closeTrainBookingForm(): void {
+    this.isTrainBookingFormOpen.set(false);
   }
 
   protected openExpenseForm(): void {

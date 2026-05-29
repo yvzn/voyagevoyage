@@ -210,9 +210,6 @@ describe('TripFormComponent — validation', () => {
       startDate: '2026-08-01',
       endDate: '2026-08-03',
       status: TripStatus.Planned,
-      trainDeparture: '',
-      trainArrival: '',
-      trainDepartureDateTime: '',
     });
 
     expect(component['form'].invalid).toBe(true);
@@ -230,9 +227,6 @@ describe('TripFormComponent — validation', () => {
       startDate: '2026-08-05',
       endDate: '2026-08-03',
       status: TripStatus.Planned,
-      trainDeparture: '',
-      trainArrival: '',
-      trainDepartureDateTime: '',
     });
 
     expect(component['form'].hasError('endBeforeStart')).toBe(true);
@@ -250,9 +244,6 @@ describe('TripFormComponent — validation', () => {
       startDate: '2026-08-01',
       endDate: '',
       status: TripStatus.Planned,
-      trainDeparture: '',
-      trainArrival: '',
-      trainDepartureDateTime: '',
     });
 
     // Change start date
@@ -275,9 +266,6 @@ describe('TripFormComponent — validation', () => {
       startDate: '2026-08-01',
       endDate: '2026-08-03',
       status: TripStatus.Planned,
-      trainDeparture: '',
-      trainArrival: '',
-      trainDepartureDateTime: '',
     });
 
     // Change start date to after end date
@@ -300,9 +288,6 @@ describe('TripFormComponent — validation', () => {
       startDate: '2026-08-01',
       endDate: '2026-08-05',
       status: TripStatus.Planned,
-      trainDeparture: '',
-      trainArrival: '',
-      trainDepartureDateTime: '',
     });
 
     // Change start date to before end date
@@ -331,9 +316,6 @@ describe('TripFormComponent — date synchronization', () => {
       startDate: '2026-08-01',
       endDate: '',
       status: TripStatus.Planned,
-      trainDeparture: '',
-      trainArrival: '',
-      trainDepartureDateTime: '',
     });
 
     // Change start date
@@ -356,9 +338,6 @@ describe('TripFormComponent — date synchronization', () => {
       startDate: '2026-08-01',
       endDate: '2026-08-03',
       status: TripStatus.Planned,
-      trainDeparture: '',
-      trainArrival: '',
-      trainDepartureDateTime: '',
     });
 
     // Change start date to after end date
@@ -381,9 +360,6 @@ describe('TripFormComponent — date synchronization', () => {
       startDate: '2026-08-01',
       endDate: '2026-08-05',
       status: TripStatus.Planned,
-      trainDeparture: '',
-      trainArrival: '',
-      trainDepartureDateTime: '',
     });
 
     // Change start date to before end date
@@ -423,9 +399,6 @@ describe('TripFormComponent — create operation', () => {
       startDate: '2026-08-01',
       endDate: '2026-08-03',
       status: TripStatus.Planned,
-      trainDeparture: '',
-      trainArrival: '',
-      trainDepartureDateTime: '',
     });
     component['onSubmit']();
 
@@ -487,9 +460,6 @@ describe('TripFormComponent — error handling', () => {
       startDate: '2026-08-01',
       endDate: '2026-08-03',
       status: TripStatus.Planned,
-      trainDeparture: '',
-      trainArrival: '',
-      trainDepartureDateTime: '',
     });
     component['onSubmit']();
 
@@ -528,9 +498,6 @@ describe('TripFormComponent — constraint violation', () => {
       startDate: '2026-08-03', // Monday — not in allowedDaysOfWeek
       endDate: '2026-08-03',
       status: TripStatus.Planned,
-      trainDeparture: '',
-      trainArrival: '',
-      trainDepartureDateTime: '',
     });
 
     expect(component['form'].hasError('constraintWarning')).toBe(true);
@@ -553,9 +520,6 @@ describe('TripFormComponent — constraint violation', () => {
       startDate: '2026-08-03', // Monday — flexible violation
       endDate: '2026-08-03',
       status: TripStatus.Planned,
-      trainDeparture: '',
-      trainArrival: '',
-      trainDepartureDateTime: '',
     });
     component['onSubmit']();
 
@@ -579,9 +543,6 @@ describe('TripFormComponent — constraint violation', () => {
       startDate: '2026-08-03', // Monday — not in allowedDaysOfWeek, strict mode
       endDate: '2026-08-03',
       status: TripStatus.Planned,
-      trainDeparture: '',
-      trainArrival: '',
-      trainDepartureDateTime: '',
     });
 
     expect(component['form'].hasError('constraintError')).toBe(true);
@@ -604,9 +565,6 @@ describe('TripFormComponent — constraint violation', () => {
       startDate: '2026-08-03', // Monday — strict violation
       endDate: '2026-08-03',
       status: TripStatus.Planned,
-      trainDeparture: '',
-      trainArrival: '',
-      trainDepartureDateTime: '',
     });
     component['onSubmit']();
 

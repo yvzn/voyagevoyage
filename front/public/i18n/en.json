@@ -81,7 +81,10 @@
     "trainBookingHeading": "Train booking",
     "trainDeparture": "Departure",
     "trainArrival": "Arrival",
-    "trainDepartureDateTime": "Departure date & time"
+    "trainDepartureDateTime": "Departure date & time",
+    "noTrainBooking": "No train booking registered yet.",
+    "addTrainBookingButton": "Add booking",
+    "editTrainBookingButton": "Edit booking"
   },
   "expenseForm": {
     "createTitle": "New expense",
@@ -272,7 +275,9 @@
     "loadError": "Failed to load data. Please try again.",
     "retry": "Retry",
     "noItems": "No train bookings to make in the coming period.",
-    "viewAllButton": "All train bookings"
+    "viewAllButton": "All train bookings",
+    "description": "Confirmed trips starting within the next {{days}} days without a train booking.",
+    "toBook": "To book"
   },
   "trainBookingList": {
     "heading": "Train bookings",
@@ -282,5 +287,17 @@
     "retry": "Retry",
     "noItems": "No train bookings to make. All confirmed upcoming trips are covered.",
     "toBook": "To book"
+  },
+  "trainBookingForm": {
+    "title": "Train booking",
+    "hint": "Optional. Fill in when you have booked the train for this trip.",
+    "departure": "Departure city / station",
+    "arrival": "Arrival city / station",
+    "departureDateTime": "Departure date & time (optional)",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "clearBooking": "Clear booking",
+    "saveError": "An error occurred while saving. Please try again."
   }
 }

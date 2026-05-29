@@ -29,6 +29,9 @@ export class TrainBookingDashboardComponent {
   /** Whether to display the section heading (default: true). Set to false when embedded in a parent section. */
   readonly showHeading = input<boolean>(true);
 
+  /** Whether to show the description paragraph with the threshold days count (for full-page list view). */
+  readonly showDescription = input<boolean>(false);
+
   constructor() {
     this.store.dispatch(TripActions.loadTrips());
     this.store.dispatch(SettingsActions.loadSettings());
@@ -46,10 +49,12 @@ export class TrainBookingDashboardComponent {
     () => this.tripsLoadStatus() === 'failure' || this.settingsLoadStatus() === 'failure',
   );
 
+  protected readonly thresholdDays = computed<number>(
+    () => this.constraints()?.trainBookingThresholdDays ?? 90,
+  );
+
   protected readonly allPendingTrips = computed<Trip[]>(() => {
-    const constraints = this.constraints();
-    const threshold = constraints?.trainBookingThresholdDays ?? 90;
-    return getTripsNeedingTrainBooking(this.trips(), threshold);
+    return getTripsNeedingTrainBooking(this.trips(), this.thresholdDays());
   });
 
   protected readonly pendingTrips = computed<Trip[]>(() => {
@@ -57,6 +62,9 @@ export class TrainBookingDashboardComponent {
     const all = this.allPendingTrips();
     return max !== null ? all.slice(0, max) : all;
   });
+
+  /** Show "view all" link only when displaying a limited subset (dashboard card mode). */
+  protected readonly showViewAllLink = computed(() => this.maxItems() !== null);
 
   protected readonly getTripStatusClass = getTripStatusClass;
 
