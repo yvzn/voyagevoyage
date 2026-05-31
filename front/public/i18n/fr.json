@@ -27,7 +27,8 @@
     "constraintSchoolHolidayAriaLabel": "Vacances scolaires : {{name}} — aller aux paramètres de contraintes",
     "constraintPersonalLeaveAriaLabel": "Congé personnel : {{label}} — aller à la gestion des congés",
     "constraintAllowedDaysAriaLabel": "Jour non autorisé — aller aux paramètres de contraintes",
-    "trainBookingAriaLabel": "Train réservé : {{departure}} → {{arrival}}"
+    "trainBookingAriaLabel": "Train réservé : {{departure}} → {{arrival}}",
+    "hotelBookingAriaLabel": "Hôtel réservé : {{hotelName}}"
   },
   "tripStatus": {
     "planned": "Planifié",
@@ -90,7 +91,14 @@
     "clearTrainBookingConfirmMessage": "Êtes-vous sûr de vouloir supprimer la réservation de train pour ce déplacement ?",
     "clearTrainBookingConfirmButton": "Confirmer",
     "clearTrainBookingCancelButton": "Annuler",
-    "clearTrainBookingError": "Une erreur est survenue lors de la suppression de la réservation. Veuillez réessayer."
+    "clearTrainBookingError": "Une erreur est survenue lors de la suppression de la réservation. Veuillez réessayer.",
+    "hotelBookingHeading": "Réservation d'hôtel",
+    "hotelBookingDate": "Date de réservation",
+    "hotelName": "Nom de l'hôtel",
+    "hotelAddress": "Adresse de l'hôtel",
+    "noHotelBooking": "Aucune réservation d'hôtel enregistrée.",
+    "addHotelBookingButton": "Ajouter une réservation",
+    "editHotelBookingButton": "Modifier la réservation"
   },
   "expenseForm": {
     "createTitle": "Nouvelle dépense",
@@ -153,7 +161,8 @@
     "heading": "Tableau de bord",
     "calendarSectionHeading": "Prochains déplacements",
     "planningSectionHeading": "Déplacements à planifier",
-    "trainBookingSectionHeading": "Réservations de train à effectuer"
+    "trainBookingSectionHeading": "Réservations de train à effectuer",
+    "hotelBookingSectionHeading": "Réservations d'hôtel à effectuer"
   },
   "constraints": {
     "heading": "Contraintes de déplacement",
@@ -275,6 +284,7 @@
     "saveError": "Une erreur est survenue lors de l'enregistrement de la période de congé. Veuillez réessayer."
   },
   "trainBookingNavItem": "Réservations de train",
+  "hotelBookingNavItem": "Réservations d'hôtel",
   "trainBookingDashboard": {
     "heading": "Réservations de train à effectuer",
     "loading": "Chargement…",
@@ -304,6 +314,36 @@
     "saving": "Enregistrement…",
     "cancel": "Annuler",
     "clearBooking": "Supprimer la réservation",
+    "saveError": "Une erreur est survenue lors de l’enregistrement. Veuillez réessayer."
+  },
+  "hotelBookingDashboard": {
+    "heading": "Réservations d'hôtel à effectuer",
+    "loading": "Chargement…",
+    "loadError": "Impossible de charger les données. Veuillez réessayer.",
+    "retry": "Réessayer",
+    "noItems": "Aucune réservation d'hôtel à effectuer pour la période à venir.",
+    "viewAllButton": "Toutes les réservations d'hôtel",
+    "description": "Voyages confirmés dont le départ a lieu dans les {{days}} prochains jours, sans réservation d'hôtel.",
+    "toBook": "À réserver"
+  },
+  "hotelBookingList": {
+    "heading": "Réservations d'hôtel",
+    "description": "Voyages confirmés dont le départ a lieu dans les {{days}} prochains jours, sans réservation d'hôtel.",
+    "loading": "Chargement…",
+    "loadError": "Impossible de charger les données. Veuillez réessayer.",
+    "retry": "Réessayer",
+    "noItems": "Aucune réservation d'hôtel à effectuer. Tous les voyages confirmés à venir sont couverts.",
+    "toBook": "À réserver"
+  },
+  "hotelBookingForm": {
+    "title": "Réservation d'hôtel",
+    "hint": "Facultatif. À remplir lorsque l'hébergement est réservé pour ce voyage.",
+    "bookingDate": "Date de réservation",
+    "hotelName": "Nom de l'hôtel",
+    "hotelAddress": "Adresse de l'hôtel",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "cancel": "Annuler",
     "saveError": "Une erreur est survenue lors de l’enregistrement. Veuillez réessayer."
   }
 }

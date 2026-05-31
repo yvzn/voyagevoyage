@@ -213,6 +213,8 @@ export class TripFormComponent implements AfterViewInit {
       status: status!,
       // Preserve the existing train booking — it is managed via the dedicated train booking form
       trainBooking: this.trip()?.trainBooking ?? null,
+      // Preserve the existing hotel booking — it is managed via the dedicated hotel booking form
+      hotelBooking: this.trip()?.hotelBooking ?? null,
     };
 
     const trip = this.trip();

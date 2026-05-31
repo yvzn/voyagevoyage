@@ -10,7 +10,8 @@ public record UpdateTripRequest(
     DateOnly EndDate,
     [Required, MinLength(1)] string Destination,
     TripStatus Status,
-    TrainBooking? TrainBooking = null
+    TrainBooking? TrainBooking = null,
+    HotelBooking? HotelBooking = null
 ) : IValidatableObject
 {
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

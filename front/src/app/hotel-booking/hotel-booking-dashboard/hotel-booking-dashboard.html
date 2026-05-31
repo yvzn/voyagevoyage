@@ -1,0 +1,102 @@
+@if (showHeading()) {
+  <div class="mb-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <h2 class="flex items-center gap-1.5 text-base font-semibold text-gray-900 dark:text-white">
+        {{ 'hotelBookingDashboard.heading' | translate }}
+      </h2>
+      <div class="min-w-[1.5rem]" aria-live="polite" aria-atomic="true">
+        @if (isLoading()) {
+          <svg class="h-4 w-4 animate-spin text-gray-500 dark:text-gray-400" role="status" aria-label="{{ 'hotelBookingDashboard.loading' | translate }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.036l3-2.745z"/>
+          </svg>
+        }
+      </div>
+    </div>
+    @if (showViewAllLink()) {
+      <a
+        routerLink="/hotel-bookings"
+        class="rounded-lg px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-blue-400 dark:hover:bg-gray-700"
+      >
+        {{ 'hotelBookingDashboard.viewAllButton' | translate }}
+      </a>
+    }
+  </div>
+}
+
+@if (showDescription() && !isLoading()) {
+  <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">
+    {{ 'hotelBookingDashboard.description' | translate : { days: thresholdDays() } }}
+  </p>
+}
+
+@if (hasError()) {
+  <div
+    role="alert"
+    class="flex flex-wrap items-center gap-3 rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-400"
+  >
+    <span>{{ 'hotelBookingDashboard.loadError' | translate }}</span>
+    <button
+      type="button"
+      (click)="retryLoad()"
+      class="cursor-pointer rounded-lg border border-red-300 px-3 py-1 text-xs font-medium hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-300 dark:border-red-600 dark:hover:bg-red-900/40"
+    >
+      {{ 'hotelBookingDashboard.retry' | translate }}
+    </button>
+  </div>
+} @else if (isLoading()) {
+  <ul class="space-y-1" aria-busy="true" aria-live="polite">
+    @for (_ of [1, 2, 3]; track $index) {
+      <li class="animate-pulse rounded-lg bg-white p-3 shadow-sm dark:bg-gray-800">
+        <div class="h-4 w-32 rounded bg-gray-200 dark:bg-gray-700"></div>
+        <div class="mt-2 h-3 w-24 rounded bg-gray-200 dark:bg-gray-700"></div>
+      </li>
+    }
+  </ul>
+} @else if (pendingTrips().length === 0) {
+  <p class="text-sm text-gray-500 dark:text-gray-400">
+    {{ 'hotelBookingDashboard.noItems' | translate }}
+  </p>
+} @else {
+  @if (!showHeading() && showViewAllLink()) {
+    <div class="mb-2 flex justify-end">
+      <a
+        routerLink="/hotel-bookings"
+        class="rounded-lg px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-blue-400 dark:hover:bg-gray-700"
+      >
+        {{ 'hotelBookingDashboard.viewAllButton' | translate }}
+      </a>
+    </div>
+  }
+  <ul class="divide-y divide-gray-100 dark:divide-gray-700">
+    @for (trip of pendingTrips(); track trip.id) {
+      <li>
+        <a
+          [routerLink]="['/trip', trip.id]"
+          class="flex items-center justify-between py-3 text-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-300 dark:hover:bg-gray-750"
+        >
+          <span class="flex flex-col">
+            <span class="font-medium text-gray-900 dark:text-white">{{ trip.destination }}</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400">
+              {{ formatDate(trip.startDate) }}
+              @if (trip.startDate !== trip.endDate) {
+                <span> — {{ formatDate(trip.endDate) }}</span>
+              }
+            </span>
+          </span>
+          <span class="ml-4 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+            <svg aria-hidden="true" class="h-3.5 w-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 20V9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v11" />
+              <path d="M2 20h20" />
+              <path d="M6.5 20v-5.5h4V20" />
+              <path d="M14 13h4" />
+              <path d="M14 16h4" />
+              <path d="M4 7l8-4 8 4" />
+            </svg>
+            {{ 'hotelBookingDashboard.toBook' | translate }}
+          </span>
+        </a>
+      </li>
+    }
+  </ul>
+}

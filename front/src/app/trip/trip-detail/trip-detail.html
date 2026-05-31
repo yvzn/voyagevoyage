@@ -233,6 +233,57 @@
       </div>
     </section>
 
+    <!-- Hotel booking card -->
+    <section aria-labelledby="hotel-booking-heading" class="mt-6 rounded-xl bg-white shadow-sm dark:bg-gray-800">
+      <div class="p-6">
+        <div class="flex items-center justify-between gap-4">
+          <h2
+            id="hotel-booking-heading"
+            class="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white"
+          >
+            {{ 'tripDetail.hotelBookingHeading' | translate }}
+          </h2>
+          <button
+            type="button"
+            (click)="openHotelBookingForm()"
+            class="cursor-pointer inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+          >
+            <svg class="h-4 w-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
+            </svg>
+            {{ (currentTrip.hotelBooking ? 'tripDetail.editHotelBookingButton' : 'tripDetail.addHotelBookingButton') | translate }}
+          </button>
+        </div>
+
+        @if (currentTrip.hotelBooking) {
+          <dl class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                {{ 'tripDetail.hotelBookingDate' | translate }}
+              </dt>
+              <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ formatDate(currentTrip.hotelBooking.bookingDate) }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                {{ 'tripDetail.hotelName' | translate }}
+              </dt>
+              <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ currentTrip.hotelBooking.hotelName }}</dd>
+            </div>
+            <div class="sm:col-span-2">
+              <dt class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                {{ 'tripDetail.hotelAddress' | translate }}
+              </dt>
+              <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ currentTrip.hotelBooking.hotelAddress }}</dd>
+            </div>
+          </dl>
+        } @else {
+          <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+            {{ 'tripDetail.noHotelBooking' | translate }}
+          </p>
+        }
+      </div>
+    </section>
+
     <!-- Expenses section -->
     <section aria-labelledby="expenses-heading" class="mt-6 rounded-xl bg-white shadow-sm dark:bg-gray-800">
       <div class="p-6">
@@ -313,6 +364,15 @@
     [trip]="trip()"
     (saved)="closeTrainBookingForm()"
     (cancelled)="closeTrainBookingForm()"
+  />
+}
+
+<!-- Hotel booking form modal -->
+@if (isHotelBookingFormOpen()) {
+  <app-hotel-booking-form
+    [trip]="trip()"
+    (saved)="closeHotelBookingForm()"
+    (cancelled)="closeHotelBookingForm()"
   />
 }
 

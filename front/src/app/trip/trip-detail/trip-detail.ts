@@ -16,11 +16,12 @@ import { ExpenseActions } from '../../expense/store/expense.actions';
 import { selectAllExpenses, selectExpensesLoadStatus } from '../../expense/store/expense.selectors';
 import { ExpenseCategory } from '../../expense/expense.model';
 import { TrainBookingFormComponent } from '../../train-booking/train-booking-form/train-booking-form';
+import { HotelBookingFormComponent } from '../../hotel-booking/hotel-booking-form/hotel-booking-form';
 
 @Component({
   selector: 'app-trip-detail',
   standalone: true,
-  imports: [NgClass, DecimalPipe, TranslatePipe, TripFormComponent, RouterLink, ExpenseFormComponent, TrainBookingFormComponent],
+  imports: [NgClass, DecimalPipe, TranslatePipe, TripFormComponent, RouterLink, ExpenseFormComponent, TrainBookingFormComponent, HotelBookingFormComponent],
   templateUrl: './trip-detail.html',
 })
 export class TripDetailComponent {
@@ -48,6 +49,9 @@ export class TripDetailComponent {
 
   /** Whether the expense form modal is open */
   protected readonly isExpenseFormOpen = signal(false);
+
+  /** Whether the hotel booking form modal is open */
+  protected readonly isHotelBookingFormOpen = signal(false);
 
   /** Whether the inline delete confirmation prompt is shown */
   protected readonly showDeleteConfirm = signal(false);
@@ -158,6 +162,14 @@ export class TripDetailComponent {
     this.isExpenseFormOpen.set(false);
   }
 
+  protected openHotelBookingForm(): void {
+    this.isHotelBookingFormOpen.set(true);
+  }
+
+  protected closeHotelBookingForm(): void {
+    this.isHotelBookingFormOpen.set(false);
+  }
+
   protected navigateToExpense(expenseId: string): void {
     this.router.navigate(['/expense', expenseId]);
   }
@@ -194,6 +206,7 @@ export class TripDetailComponent {
         endDate: trip.endDate,
         status: trip.status,
         trainBooking: null,
+        hotelBooking: trip.hotelBooking ?? null,
       },
     }));
   }

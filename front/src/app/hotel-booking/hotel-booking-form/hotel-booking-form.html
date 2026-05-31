@@ -1,0 +1,105 @@
+<dialog
+  #dialogEl
+  (cancel)="onDialogCancel($event)"
+  (click)="onBackdropClick($event)"
+  aria-labelledby="hotel-booking-form-title"
+  class="m-auto w-full max-w-md rounded-xl border-0 bg-white p-0 shadow-xl backdrop:bg-black/50 dark:bg-gray-800"
+>
+  <div class="p-6" (click)="$event.stopPropagation()">
+    <h3
+      id="hotel-booking-form-title"
+      class="mb-4 flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white"
+    >
+      {{ 'hotelBookingForm.title' | translate }}
+    </h3>
+
+    <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+      {{ 'hotelBookingForm.hint' | translate }}
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate [attr.aria-busy]="isSaving() ? 'true' : null">
+      <fieldset [disabled]="isSaving()">
+        <legend class="sr-only">{{ 'hotelBookingForm.title' | translate }}</legend>
+
+        <div class="mb-4">
+          <label
+            for="hb-booking-date"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'hotelBookingForm.bookingDate' | translate }}
+          </label>
+          <input
+            id="hb-booking-date"
+            type="date"
+            formControlName="bookingDate"
+            [lang]="localeService.currentLocale()"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-4">
+          <label
+            for="hb-name"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'hotelBookingForm.hotelName' | translate }}
+          </label>
+          <input
+            id="hb-name"
+            type="text"
+            formControlName="hotelName"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-4">
+          <label
+            for="hb-address"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'hotelBookingForm.hotelAddress' | translate }}
+          </label>
+          <input
+            id="hb-address"
+            type="text"
+            formControlName="hotelAddress"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          />
+        </div>
+      </fieldset>
+
+      @if (saveError()) {
+        <div
+          role="alert"
+          class="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-400"
+        >
+          {{ saveError()! | translate }}
+        </div>
+      }
+
+      <div class="flex items-center justify-end gap-2">
+        <button
+          type="button"
+          (click)="onCancel()"
+          class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+        >
+          {{ 'hotelBookingForm.cancel' | translate }}
+        </button>
+        <button
+          type="submit"
+          [disabled]="isSaving()"
+          [attr.aria-busy]="isSaving() ? 'true' : null"
+          class="cursor-pointer inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
+        >
+          @if (isSaving()) {
+            <svg class="inline h-4 w-4 animate-spin" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.036l3-2.745z"/>
+            </svg>
+          }
+          {{ (isSaving() ? 'hotelBookingForm.saving' : 'hotelBookingForm.save') | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</dialog>

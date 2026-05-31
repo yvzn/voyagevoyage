@@ -30,4 +30,10 @@ public class Trip
     /// Null if no train booking has been recorded yet.
     /// </summary>
     public TrainBooking? TrainBooking { get; set; }
+
+    /// <summary>
+    /// Optional hotel booking details for this trip.
+    /// Null if no accommodation booking has been recorded yet.
+    /// </summary>
+    public HotelBooking? HotelBooking { get; set; }
 }

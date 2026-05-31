@@ -49,6 +49,11 @@
                           <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 7.5h12l4.5 4.5-4.5 4.5H4.5A2.25 2.25 0 0 1 2.25 14.25V9.75A2.25 2.25 0 0 1 4.5 7.5ZM9 7.5v9M13.5 7.5v9" />
                         </svg>
                       }
+                      @if (trip.hotelBooking) {
+                        <svg aria-hidden="true" class="inline-block h-2.5 w-2.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M4 20V9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v11M2 20h20M6.5 20v-5.5h4V20M14 13h4M14 16h4M4 7l8-4 8 4" />
+                        </svg>
+                      }
                       <span class="truncate">{{ trip.destination }}</span>
                     </span>
                   </a>
@@ -175,6 +180,18 @@
                             <rect x="6" y="1.5" width="2.5" height="2" rx="0.5" />
                             <circle cx="2" cy="8" r="1" />
                             <circle cx="8" cy="8" r="1" />
+                          </svg>
+                          }
+                          @if (trip.hotelBooking) {
+                          <svg aria-hidden="true" class="inline-block h-2.5 w-2.5 flex-shrink-0" viewBox="0 0 10 10" fill="none"
+                             stroke="currentColor" stroke-width=".5" stroke-linecap="round" stroke-linejoin="round"
+                             xmlns="http://www.w3.org/2000/svg">
+                             <path d="M1 9V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v5" />
+                             <path d="M0.5 9.5h9" />
+                             <path d="M2.2 9V6.5h2V9" />
+                             <path d="M6.2 5.5h1.8" />
+                             <path d="M6.2 7h1.8" />
+                             <path d="M1 3 5 1l4 2" />
                           </svg>
                           }
                         </span>
