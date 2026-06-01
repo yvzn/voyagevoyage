@@ -18,6 +18,8 @@ import { ExpenseCategory } from '../../expense/expense.model';
 import { TrainBookingFormComponent } from '../../train-booking/train-booking-form/train-booking-form';
 import { HotelBookingFormComponent } from '../../hotel-booking/hotel-booking-form/hotel-booking-form';
 
+type BookingType = 'train' | 'hotel';
+
 @Component({
   selector: 'app-trip-detail',
   standalone: true,
@@ -58,6 +60,7 @@ export class TripDetailComponent {
 
   /** Whether the inline clear-booking confirmation prompt is shown */
   protected readonly showClearBookingConfirm = signal(false);
+  protected readonly clearBookingTarget = signal<BookingType | null>(null);
 
   private readonly deleteStatus = this.store.selectSignal(selectTripsDeleteStatus);
   protected readonly isDeleting = computed(() => this.deleteStatus() === 'loading');
@@ -99,12 +102,18 @@ export class TripDetailComponent {
     effect(() => {
       const us = this.updateStatus();
       if (this.clearBookingPending()) {
+        const target = this.clearBookingTarget();
         if (us === 'success') {
           this.clearBookingPending.set(false);
           this.showClearBookingConfirm.set(false);
+          this.clearBookingTarget.set(null);
         } else if (us === 'failure') {
           this.clearBookingPending.set(false);
-          this.clearBookingError.set('tripDetail.clearTrainBookingError');
+          this.clearBookingError.set(
+            target === 'hotel'
+              ? 'tripDetail.clearHotelBookingError'
+              : 'tripDetail.clearTrainBookingError',
+          );
         }
       }
     });
@@ -182,19 +191,22 @@ export class TripDetailComponent {
     this.showDeleteConfirm.set(false);
   }
 
-  protected requestClearBooking(): void {
+  protected requestClearBooking(type: BookingType): void {
     this.clearBookingError.set(null);
+    this.clearBookingTarget.set(type);
     this.showClearBookingConfirm.set(true);
   }
 
   protected cancelClearBooking(): void {
     this.showClearBookingConfirm.set(false);
+    this.clearBookingTarget.set(null);
     this.clearBookingError.set(null);
   }
 
   protected onClearBooking(): void {
     const trip = this.trip();
-    if (!trip || this.isClearingBooking()) return;
+    const target = this.clearBookingTarget();
+    if (!trip || !target || this.isClearingBooking()) return;
 
     this.clearBookingError.set(null);
     this.clearBookingPending.set(true);
@@ -205,8 +217,8 @@ export class TripDetailComponent {
         startDate: trip.startDate,
         endDate: trip.endDate,
         status: trip.status,
-        trainBooking: null,
-        hotelBooking: trip.hotelBooking ?? null,
+        trainBooking: target === 'train' ? null : trip.trainBooking ?? null,
+        hotelBooking: target === 'hotel' ? null : trip.hotelBooking ?? null,
       },
     }));
   }

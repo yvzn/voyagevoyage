@@ -11,6 +11,7 @@ import { Trip, TripStatus } from '../trip.model';
 import { ApiStatus } from '../store/trip.reducer';
 import { selectAllTrips, selectTripsDeleteStatus } from '../store/trip.selectors';
 import { selectTripsCreateStatus, selectTripsUpdateStatus } from '../store/trip.selectors';
+import { TripActions } from '../store/trip.actions';
 import { selectConstraints } from '../../constraints/store/settings.selectors';
 import { selectAllExpenses, selectExpensesCreateStatus, selectExpensesLoadStatus, selectExpensesUpdateStatus } from '../../expense/store/expense.selectors';
 
@@ -81,6 +82,20 @@ const MOCK_TRIP: Trip = {
   startDate: '2026-06-10',
   endDate: '2026-06-12',
   status: TripStatus.Planned,
+};
+
+const MOCK_TRIP_WITH_BOOKINGS: Trip = {
+  ...MOCK_TRIP,
+  trainBooking: {
+    departure: 'Paris',
+    arrival: 'Lyon',
+    departureDateTime: '2026-06-10T08:30:00Z',
+  },
+  hotelBooking: {
+    bookingDate: '2026-05-05',
+    hotelName: 'Hotel Lumière',
+    hotelAddress: '1 Rue de Lyon, 69000 Lyon',
+  },
 };
 
 // JSDOM does not implement HTMLDialogElement.showModal(); stub it globally
@@ -337,5 +352,35 @@ describe('TripDetailComponent — delete operation', () => {
     TestBed.flushEffects();
 
     expect(fixture.componentInstance['deleteError']()).toBe('tripDetail.deleteError');
+  });
+});
+
+describe('TripDetailComponent — clear booking operation', () => {
+  let store: MockStore;
+
+  beforeEach(async () => {
+    store = await setupModule([MOCK_TRIP_WITH_BOOKINGS]);
+  });
+
+  it('should dispatch updateTrip with hotel booking cleared', () => {
+    const fixture = TestBed.createComponent(TripDetailComponent);
+    fixture.detectChanges();
+
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+
+    fixture.componentInstance['requestClearBooking']('hotel');
+    fixture.componentInstance['onClearBooking']();
+
+    expect(dispatchSpy).toHaveBeenCalledWith(TripActions.updateTrip({
+      id: MOCK_TRIP_WITH_BOOKINGS.id,
+      request: {
+        destination: MOCK_TRIP_WITH_BOOKINGS.destination,
+        startDate: MOCK_TRIP_WITH_BOOKINGS.startDate,
+        endDate: MOCK_TRIP_WITH_BOOKINGS.endDate,
+        status: MOCK_TRIP_WITH_BOOKINGS.status,
+        trainBooking: MOCK_TRIP_WITH_BOOKINGS.trainBooking ?? null,
+        hotelBooking: null,
+      },
+    }));
   });
 });

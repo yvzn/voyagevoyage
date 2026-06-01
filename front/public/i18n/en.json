@@ -98,7 +98,13 @@
     "hotelAddress": "Hotel address",
     "noHotelBooking": "No hotel booking registered yet.",
     "addHotelBookingButton": "Add booking",
-    "editHotelBookingButton": "Edit booking"
+    "editHotelBookingButton": "Edit booking",
+    "clearHotelBookingButton": "Clear booking",
+    "clearingHotelBooking": "Clearing…",
+    "clearHotelBookingConfirmMessage": "Are you sure you want to remove the hotel booking for this trip?",
+    "clearHotelBookingConfirmButton": "Confirm",
+    "clearHotelBookingCancelButton": "Cancel",
+    "clearHotelBookingError": "An error occurred while clearing the booking. Please try again."
   },
   "expenseForm": {
     "createTitle": "New expense",

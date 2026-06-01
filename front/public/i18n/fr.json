@@ -98,7 +98,13 @@
     "hotelAddress": "Adresse de l'hôtel",
     "noHotelBooking": "Aucune réservation d'hôtel enregistrée.",
     "addHotelBookingButton": "Ajouter une réservation",
-    "editHotelBookingButton": "Modifier la réservation"
+    "editHotelBookingButton": "Modifier la réservation",
+    "clearHotelBookingButton": "Supprimer la réservation",
+    "clearingHotelBooking": "Suppression…",
+    "clearHotelBookingConfirmMessage": "Êtes-vous sûr de vouloir supprimer la réservation d'hôtel pour ce déplacement ?",
+    "clearHotelBookingConfirmButton": "Confirmer",
+    "clearHotelBookingCancelButton": "Annuler",
+    "clearHotelBookingError": "Une erreur est survenue lors de la suppression de la réservation. Veuillez réessayer."
   },
   "expenseForm": {
     "createTitle": "Nouvelle dépense",
