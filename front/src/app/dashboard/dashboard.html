@@ -45,11 +45,19 @@
     </section>
 
     <!-- Train Booking Reminders Section -->
-    <section aria-labelledby="dashboard-train-booking-heading" class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800 xl:col-span-2">
+    <section aria-labelledby="dashboard-train-booking-heading" class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
       <h2 id="dashboard-train-booking-heading" class="sr-only">
         {{ 'dashboard.trainBookingSectionHeading' | translate }}
       </h2>
       <app-train-booking-dashboard [maxItems]="5" [showHeading]="true" />
+    </section>
+
+    <!-- Hotel Booking Reminders Section -->
+    <section aria-labelledby="dashboard-hotel-booking-heading" class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+      <h2 id="dashboard-hotel-booking-heading" class="sr-only">
+        {{ 'dashboard.hotelBookingSectionHeading' | translate }}
+      </h2>
+      <app-hotel-booking-dashboard [maxItems]="5" [showHeading]="true" />
     </section>
 
   </div>

@@ -12,18 +12,18 @@ import {
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
-import { Trip, TrainBooking } from '../../trip/trip.model';
+import { HotelBooking, Trip } from '../../trip/trip.model';
 import { TripActions } from '../../trip/store/trip.actions';
 import { selectTripsUpdateStatus } from '../../trip/store/trip.selectors';
 import { LocaleService } from '../../locale.service';
 
 @Component({
-  selector: 'app-train-booking-form',
+  selector: 'app-hotel-booking-form',
   standalone: true,
   imports: [ReactiveFormsModule, TranslatePipe],
-  templateUrl: './train-booking-form.html',
+  templateUrl: './hotel-booking-form.html',
 })
-export class TrainBookingFormComponent implements AfterViewInit {
+export class HotelBookingFormComponent implements AfterViewInit {
   private readonly store = inject(Store);
   protected readonly localeService = inject(LocaleService);
   private readonly fb = inject(FormBuilder);
@@ -35,15 +35,15 @@ export class TrainBookingFormComponent implements AfterViewInit {
   protected readonly dialogEl = viewChild.required<ElementRef<HTMLDialogElement>>('dialogEl');
 
   protected readonly form = this.fb.group({
-    trainDeparture: [''],
-    trainArrival: [''],
-    trainDepartureDateTime: [''],
+    bookingDate: [''],
+    hotelName: [''],
+    hotelAddress: [''],
   });
 
   private readonly updateStatus = this.store.selectSignal(selectTripsUpdateStatus);
   protected readonly isSaving = computed(() => this.updateStatus() === 'loading');
   protected readonly saveError = computed<string | null>(() =>
-    this.updateStatus() === 'failure' ? 'trainBookingForm.saveError' : null,
+    this.updateStatus() === 'failure' ? 'hotelBookingForm.saveError' : null,
   );
 
   private saveOp = false;
@@ -52,9 +52,9 @@ export class TrainBookingFormComponent implements AfterViewInit {
     effect(() => {
       const t = this.trip();
       this.form.reset({
-        trainDeparture: t?.trainBooking?.departure ?? '',
-        trainArrival: t?.trainBooking?.arrival ?? '',
-        trainDepartureDateTime: t?.trainBooking?.departureDateTime ?? '',
+        bookingDate: t?.hotelBooking?.bookingDate ?? t?.startDate ?? '',
+        hotelName: t?.hotelBooking?.hotelName ?? '',
+        hotelAddress: t?.hotelBooking?.hotelAddress ?? '',
       });
     });
 
@@ -86,15 +86,15 @@ export class TrainBookingFormComponent implements AfterViewInit {
     const trip = this.trip();
     if (!trip || this.isSaving()) return;
 
-    const { trainDeparture, trainArrival, trainDepartureDateTime } = this.form.getRawValue();
-    const trainBooking: TrainBooking | null =
-      (trainDeparture?.trim() || trainArrival?.trim())
-        ? {
-            departure: trainDeparture?.trim() ?? '',
-            arrival: trainArrival?.trim() ?? '',
-            departureDateTime: trainDepartureDateTime?.trim() || null,
-          }
-        : null;
+    const { bookingDate, hotelName, hotelAddress } = this.form.getRawValue();
+    const hasAnyField = !!(bookingDate?.trim() || hotelName?.trim() || hotelAddress?.trim());
+    const hotelBooking: HotelBooking | null = hasAnyField
+      ? {
+          bookingDate: bookingDate?.trim() || trip.startDate,
+          hotelName: hotelName?.trim() ?? '',
+          hotelAddress: hotelAddress?.trim() ?? '',
+        }
+      : null;
 
     this.saveOp = true;
     this.store.dispatch(TripActions.updateTrip({
@@ -104,8 +104,8 @@ export class TrainBookingFormComponent implements AfterViewInit {
         startDate: trip.startDate,
         endDate: trip.endDate,
         status: trip.status,
-        trainBooking,
-        hotelBooking: trip.hotelBooking ?? null,
+        trainBooking: trip.trainBooking ?? null,
+        hotelBooking,
       },
     }));
   }

@@ -10,6 +10,12 @@ export interface TrainBooking {
   departureDateTime?: string | null; // ISO 8601 datetime string or null
 }
 
+export interface HotelBooking {
+  bookingDate: string; // ISO 8601 date: YYYY-MM-DD
+  hotelName: string;
+  hotelAddress: string;
+}
+
 export interface Trip {
   id: string;
   startDate: string; // ISO 8601 date: YYYY-MM-DD
@@ -17,6 +23,7 @@ export interface Trip {
   destination: string;
   status: TripStatus;
   trainBooking?: TrainBooking | null;
+  hotelBooking?: HotelBooking | null;
 }
 
 export interface CreateTripRequest {
@@ -25,6 +32,7 @@ export interface CreateTripRequest {
   destination: string;
   status: TripStatus;
   trainBooking?: TrainBooking | null;
+  hotelBooking?: HotelBooking | null;
 }
 
 export interface UpdateTripRequest {
@@ -33,4 +41,5 @@ export interface UpdateTripRequest {
   destination: string;
   status: TripStatus;
   trainBooking?: TrainBooking | null;
+  hotelBooking?: HotelBooking | null;
 }

@@ -27,7 +27,8 @@
     "constraintSchoolHolidayAriaLabel": "School holiday: {{name}} — go to constraints settings",
     "constraintPersonalLeaveAriaLabel": "Personal leave: {{label}} — go to leave management",
     "constraintAllowedDaysAriaLabel": "Restricted day of week — go to constraints settings",
-    "trainBookingAriaLabel": "Train booked: {{departure}} → {{arrival}}"
+    "trainBookingAriaLabel": "Train booked: {{departure}} → {{arrival}}",
+    "hotelBookingAriaLabel": "Hotel booked: {{hotelName}}"
   },
   "tripStatus": {
     "planned": "Planned",
@@ -90,7 +91,20 @@
     "clearTrainBookingConfirmMessage": "Are you sure you want to remove the train booking for this trip?",
     "clearTrainBookingConfirmButton": "Confirm",
     "clearTrainBookingCancelButton": "Cancel",
-    "clearTrainBookingError": "An error occurred while clearing the booking. Please try again."
+    "clearTrainBookingError": "An error occurred while clearing the booking. Please try again.",
+    "hotelBookingHeading": "Hotel booking",
+    "hotelBookingDate": "Booking date",
+    "hotelName": "Hotel name",
+    "hotelAddress": "Hotel address",
+    "noHotelBooking": "No hotel booking registered yet.",
+    "addHotelBookingButton": "Add booking",
+    "editHotelBookingButton": "Edit booking",
+    "clearHotelBookingButton": "Clear booking",
+    "clearingHotelBooking": "Clearing…",
+    "clearHotelBookingConfirmMessage": "Are you sure you want to remove the hotel booking for this trip?",
+    "clearHotelBookingConfirmButton": "Confirm",
+    "clearHotelBookingCancelButton": "Cancel",
+    "clearHotelBookingError": "An error occurred while clearing the booking. Please try again."
   },
   "expenseForm": {
     "createTitle": "New expense",
@@ -153,7 +167,8 @@
     "heading": "Dashboard",
     "calendarSectionHeading": "Upcoming trips",
     "planningSectionHeading": "Trips to plan",
-    "trainBookingSectionHeading": "Train bookings to make"
+    "trainBookingSectionHeading": "Train bookings to make",
+    "hotelBookingSectionHeading": "Hotel bookings to make"
   },
   "constraints": {
     "heading": "Travel constraints",
@@ -275,6 +290,7 @@
     "saveError": "An error occurred while saving the leave period. Please try again."
   },
   "trainBookingNavItem": "Train bookings",
+  "hotelBookingNavItem": "Hotel bookings",
   "trainBookingDashboard": {
     "heading": "Train bookings to make",
     "loading": "Loading…",
@@ -304,6 +320,36 @@
     "saving": "Saving…",
     "cancel": "Cancel",
     "clearBooking": "Clear booking",
+    "saveError": "An error occurred while saving. Please try again."
+  },
+  "hotelBookingDashboard": {
+    "heading": "Hotel bookings to make",
+    "loading": "Loading…",
+    "loadError": "Failed to load data. Please try again.",
+    "retry": "Retry",
+    "noItems": "No hotel bookings to make in the coming period.",
+    "viewAllButton": "All hotel bookings",
+    "description": "Confirmed trips starting within the next {{days}} days without a hotel booking.",
+    "toBook": "To book"
+  },
+  "hotelBookingList": {
+    "heading": "Hotel bookings",
+    "description": "Confirmed trips starting within the next {{days}} days without a hotel booking.",
+    "loading": "Loading…",
+    "loadError": "Failed to load data. Please try again.",
+    "retry": "Retry",
+    "noItems": "No hotel bookings to make. All confirmed upcoming trips are covered.",
+    "toBook": "To book"
+  },
+  "hotelBookingForm": {
+    "title": "Hotel booking",
+    "hint": "Optional. Fill in when accommodation is booked for this trip.",
+    "bookingDate": "Booking date",
+    "hotelName": "Hotel name",
+    "hotelAddress": "Hotel address",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
     "saveError": "An error occurred while saving. Please try again."
   }
 }
