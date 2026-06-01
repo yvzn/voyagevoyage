@@ -50,7 +50,7 @@ export class HotelBookingDashboardComponent {
   );
 
   protected readonly thresholdDays = computed<number>(
-    () => this.constraints()?.trainBookingThresholdDays ?? 90,
+    () => this.constraints()?.planningHorizonDays ?? 90,
   );
 
   protected readonly allPendingTrips = computed<Trip[]>(() => {
