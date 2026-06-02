@@ -8,6 +8,7 @@ export interface TrainBooking {
   departure: string;
   arrival: string;
   departureDateTime?: string | null; // ISO 8601 datetime string or null
+  returnDateTime?: string | null; // ISO 8601 datetime string or null
 }
 
 export interface HotelBooking {

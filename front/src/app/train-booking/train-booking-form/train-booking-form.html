@@ -69,6 +69,23 @@
             class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
           />
         </div>
+
+        <!-- Return date/time -->
+        <div class="mb-4">
+          <label
+            for="tb-return-datetime"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+          >
+            {{ 'trainBookingForm.returnDateTime' | translate }}
+          </label>
+          <input
+            id="tb-return-datetime"
+            type="datetime-local"
+            formControlName="trainReturnDateTime"
+            [lang]="localeService.currentLocale()"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          />
+        </div>
       </fieldset>
 
       <!-- Error message -->

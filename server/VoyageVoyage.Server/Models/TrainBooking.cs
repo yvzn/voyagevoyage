@@ -20,4 +20,9 @@ public class TrainBooking
     /// Departure date and time (ISO 8601). Null if not yet specified.
     /// </summary>
     public DateTime? DepartureDateTime { get; set; }
+
+    /// <summary>
+    /// Return date and time (ISO 8601). Null if not yet specified.
+    /// </summary>
+    public DateTime? ReturnDateTime { get; set; }
 }

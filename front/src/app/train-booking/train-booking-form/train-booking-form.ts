@@ -38,6 +38,7 @@ export class TrainBookingFormComponent implements AfterViewInit {
     trainDeparture: [''],
     trainArrival: [''],
     trainDepartureDateTime: [''],
+    trainReturnDateTime: [''],
   });
 
   private readonly updateStatus = this.store.selectSignal(selectTripsUpdateStatus);
@@ -55,6 +56,7 @@ export class TrainBookingFormComponent implements AfterViewInit {
         trainDeparture: t?.trainBooking?.departure ?? '',
         trainArrival: t?.trainBooking?.arrival ?? '',
         trainDepartureDateTime: t?.trainBooking?.departureDateTime ?? '',
+        trainReturnDateTime: t?.trainBooking?.returnDateTime ?? '',
       });
     });
 
@@ -86,13 +88,14 @@ export class TrainBookingFormComponent implements AfterViewInit {
     const trip = this.trip();
     if (!trip || this.isSaving()) return;
 
-    const { trainDeparture, trainArrival, trainDepartureDateTime } = this.form.getRawValue();
+    const { trainDeparture, trainArrival, trainDepartureDateTime, trainReturnDateTime } = this.form.getRawValue();
     const trainBooking: TrainBooking | null =
       (trainDeparture?.trim() || trainArrival?.trim())
         ? {
             departure: trainDeparture?.trim() ?? '',
             arrival: trainArrival?.trim() ?? '',
             departureDateTime: trainDepartureDateTime?.trim() || null,
+            returnDateTime: trainReturnDateTime?.trim() || null,
           }
         : null;
 

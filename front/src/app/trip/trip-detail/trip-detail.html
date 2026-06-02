@@ -157,11 +157,19 @@
               <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ currentTrip.trainBooking.arrival }}</dd>
             </div>
             @if (currentTrip.trainBooking.departureDateTime) {
-              <div class="sm:col-span-2">
+              <div>
                 <dt class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
                   {{ 'tripDetail.trainDepartureDateTime' | translate }}
                 </dt>
                 <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ formatDateTime(currentTrip.trainBooking.departureDateTime) }}</dd>
+              </div>
+            }
+            @if (currentTrip.trainBooking.returnDateTime) {
+              <div>
+                <dt class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                  {{ 'tripDetail.trainReturnDateTime' | translate }}
+                </dt>
+                <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ formatDateTime(currentTrip.trainBooking.returnDateTime) }}</dd>
               </div>
             }
           </dl>
