@@ -18,7 +18,6 @@ import {
 import { ApiStatus } from '../store/expense.reducer';
 import {
   selectReceiptsByExpenseId,
-  selectReceiptsByTripId,
   selectUploadStatus,
   selectDeleteStatus,
 } from '../../receipt/store/receipt.reducer';
@@ -108,7 +107,6 @@ async function setupModule(
           { selector: selectExpensesCreateStatus, value: 'idle' as ApiStatus },
           { selector: selectExpensesUpdateStatus, value: 'idle' as ApiStatus },
           { selector: selectReceiptsByExpenseId, value: {} },
-          { selector: selectReceiptsByTripId, value: {} },
           { selector: selectUploadStatus, value: 'idle' as ApiStatus },
           { selector: selectDeleteStatus, value: 'idle' as ApiStatus },
         ],

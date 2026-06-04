@@ -20,22 +20,6 @@ export const loadReceiptsForExpenseEffect = createEffect(
   { functional: true },
 );
 
-export const loadReceiptsForTripEffect = createEffect(
-  (actions$ = inject(Actions), receiptService = inject(ReceiptService)) =>
-    actions$.pipe(
-      ofType(ReceiptActions.loadReceiptsForTrip),
-      mergeMap(({ tripId }) =>
-        receiptService.getAllByTrip(tripId).pipe(
-          map((receipts) => ReceiptActions.loadReceiptsForTripSuccess({ tripId, receipts })),
-          catchError((error: unknown) =>
-            of(ReceiptActions.loadReceiptsForTripFailure({ error: String(error) })),
-          ),
-        ),
-      ),
-    ),
-  { functional: true },
-);
-
 export const uploadReceiptForExpenseEffect = createEffect(
   (actions$ = inject(Actions), receiptService = inject(ReceiptService)) =>
     actions$.pipe(
@@ -52,29 +36,13 @@ export const uploadReceiptForExpenseEffect = createEffect(
   { functional: true },
 );
 
-export const uploadReceiptForTripEffect = createEffect(
-  (actions$ = inject(Actions), receiptService = inject(ReceiptService)) =>
-    actions$.pipe(
-      ofType(ReceiptActions.uploadReceiptForTrip),
-      mergeMap(({ tripId, file }) =>
-        receiptService.uploadForTrip(tripId, file).pipe(
-          map((receipt) => ReceiptActions.uploadReceiptForTripSuccess({ tripId, receipt })),
-          catchError((error: unknown) =>
-            of(ReceiptActions.uploadReceiptForTripFailure({ error: String(error) })),
-          ),
-        ),
-      ),
-    ),
-  { functional: true },
-);
-
 export const deleteReceiptEffect = createEffect(
   (actions$ = inject(Actions), receiptService = inject(ReceiptService)) =>
     actions$.pipe(
       ofType(ReceiptActions.deleteReceipt),
-      mergeMap(({ id, linkedEntityType, linkedEntityId }) =>
+      mergeMap(({ id, linkedEntityId }) =>
         receiptService.delete(id).pipe(
-          map(() => ReceiptActions.deleteReceiptSuccess({ id, linkedEntityType, linkedEntityId })),
+          map(() => ReceiptActions.deleteReceiptSuccess({ id, linkedEntityId })),
           catchError((error: unknown) =>
             of(ReceiptActions.deleteReceiptFailure({ error: String(error) })),
           ),

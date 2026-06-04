@@ -1,4 +1,4 @@
-export type ReceiptLinkedEntityType = 'expense' | 'trip';
+export type ReceiptLinkedEntityType = 'expense';
 
 export interface Receipt {
   id: string;

@@ -1,10 +1,10 @@
-import { Component, computed, effect, inject, input } from '@angular/core';
+import { AfterViewInit, Component, computed, effect, inject, input } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
+import { initFlowbite } from 'flowbite';
 import { ReceiptActions } from '../store/receipt.actions';
 import {
   selectReceiptsByExpenseId,
-  selectReceiptsByTripId,
   selectUploadStatus,
   selectDeleteStatus,
 } from '../store/receipt.reducer';
@@ -16,24 +16,18 @@ import { ReceiptService } from '../receipt.service';
   imports: [TranslatePipe],
   templateUrl: './receipt-upload.html',
 })
-export class ReceiptUploadComponent {
+export class ReceiptUploadComponent implements AfterViewInit {
   /** When set, receipts are loaded/uploaded for this expense. */
   readonly expenseId = input<string | null>(null);
-
-  /** When set, receipts are loaded/uploaded for this trip. */
-  readonly tripId = input<string | null>(null);
 
   private readonly store = inject(Store);
   protected readonly receiptService = inject(ReceiptService);
 
   private readonly allByExpense = this.store.selectSignal(selectReceiptsByExpenseId);
-  private readonly allByTrip = this.store.selectSignal(selectReceiptsByTripId);
 
   protected readonly receipts = computed(() => {
     const expenseId = this.expenseId();
-    const tripId = this.tripId();
     if (expenseId) return this.allByExpense()[expenseId] ?? [];
-    if (tripId) return this.allByTrip()[tripId] ?? [];
     return [];
   });
 
@@ -56,13 +50,10 @@ export class ReceiptUploadComponent {
         this.store.dispatch(ReceiptActions.loadReceiptsForExpense({ expenseId }));
       }
     });
+  }
 
-    effect(() => {
-      const tripId = this.tripId();
-      if (tripId) {
-        this.store.dispatch(ReceiptActions.loadReceiptsForTrip({ tripId }));
-      }
-    });
+  ngAfterViewInit(): void {
+    initFlowbite();
   }
 
   protected onFileSelected(event: Event): void {
@@ -74,26 +65,16 @@ export class ReceiptUploadComponent {
     input.value = '';
 
     const expenseId = this.expenseId();
-    const tripId = this.tripId();
-
     if (expenseId) {
       this.store.dispatch(ReceiptActions.uploadReceiptForExpense({ expenseId, file }));
-    } else if (tripId) {
-      this.store.dispatch(ReceiptActions.uploadReceiptForTrip({ tripId, file }));
     }
   }
 
   protected onDelete(id: string): void {
     const expenseId = this.expenseId();
-    const tripId = this.tripId();
-
     if (expenseId) {
       this.store.dispatch(
-        ReceiptActions.deleteReceipt({ id, linkedEntityType: 'expense', linkedEntityId: expenseId }),
-      );
-    } else if (tripId) {
-      this.store.dispatch(
-        ReceiptActions.deleteReceipt({ id, linkedEntityType: 'trip', linkedEntityId: tripId }),
+        ReceiptActions.deleteReceipt({ id, linkedEntityId: expenseId }),
       );
     }
   }

@@ -1,40 +1,48 @@
 <section class="mt-6 rounded-xl bg-white shadow-sm dark:bg-gray-800">
   <div class="p-6">
-    <h2 class="text-base font-semibold text-gray-900 dark:text-white">
-      {{ 'receipt.heading' | translate }}
-    </h2>
+    <div class="flex items-center justify-between">
+      <h2 class="text-base font-semibold text-gray-900 dark:text-white">
+        {{ 'receipt.heading' | translate }}
+      </h2>
 
-    <!-- Upload button -->
-    <div class="mt-4">
-      <label
-        class="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus-within:ring-2 focus-within:ring-blue-300 disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
-        [class.opacity-50]="isUploading()"
-        [class.pointer-events-none]="isUploading()"
-      >
-        @if (isUploading()) {
-          <svg class="h-4 w-4 animate-spin" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.036l3-2.745z"/>
-          </svg>
-          {{ 'receipt.uploading' | translate }}
-        } @else {
-          <svg class="h-4 w-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
-          </svg>
-          {{ 'receipt.uploadButton' | translate }}
-        }
-        <input
-          type="file"
-          class="sr-only"
-          accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.tif,.tiff"
-          [disabled]="isUploading()"
-          (change)="onFileSelected($event)"
-          aria-label="{{ 'receipt.uploadButton' | translate }}"
-        />
-      </label>
-      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-        {{ 'receipt.uploadHint' | translate }}
-      </p>
+      <!-- Upload button with tooltip -->
+      <div>
+        <label
+          data-tooltip-target="tooltip-receipt-upload"
+          class="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 focus-within:ring-2 focus-within:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600"
+          [class.opacity-50]="isUploading()"
+          [class.pointer-events-none]="isUploading()"
+        >
+          @if (isUploading()) {
+            <svg class="h-4 w-4 animate-spin" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.036l3-2.745z"/>
+            </svg>
+            {{ 'receipt.uploading' | translate }}
+          } @else {
+            <svg class="h-4 w-4" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+            </svg>
+            {{ 'receipt.uploadButton' | translate }}
+          }
+          <input
+            type="file"
+            class="sr-only"
+            accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.tif,.tiff"
+            [disabled]="isUploading()"
+            (change)="onFileSelected($event)"
+            aria-label="{{ 'receipt.uploadButton' | translate }}"
+          />
+        </label>
+        <div
+          id="tooltip-receipt-upload"
+          role="tooltip"
+          class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700"
+        >
+          {{ 'receipt.uploadHint' | translate }}
+          <div class="tooltip-arrow" data-popper-arrow></div>
+        </div>
+      </div>
     </div>
 
     <!-- Upload error -->

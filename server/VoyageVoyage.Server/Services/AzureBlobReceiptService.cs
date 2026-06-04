@@ -53,33 +53,11 @@ public class AzureBlobReceiptService(
         return await UploadAsync(userId, ReceiptLinkedEntityType.Expense, expenseId, file);
     }
 
-    public async Task<Receipt?> UploadForTripAsync(string tripId, IFormFile file)
-    {
-        var userId = GetCurrentUserId();
-
-        var trip = await db.Trips
-            .Where(t => t.Id == tripId && t.UserId == userId)
-            .FirstOrDefaultAsync();
-
-        if (trip is null)
-            return null;
-
-        return await UploadAsync(userId, ReceiptLinkedEntityType.Trip, tripId, file);
-    }
-
     public async Task<IReadOnlyList<Receipt>> GetAllByExpenseAsync(string expenseId)
     {
         var userId = GetCurrentUserId();
         return await db.Receipts
             .Where(r => r.LinkedEntityId == expenseId && r.LinkedEntityType == ReceiptLinkedEntityType.Expense && r.UserId == userId)
-            .ToListAsync();
-    }
-
-    public async Task<IReadOnlyList<Receipt>> GetAllByTripAsync(string tripId)
-    {
-        var userId = GetCurrentUserId();
-        return await db.Receipts
-            .Where(r => r.LinkedEntityId == tripId && r.LinkedEntityType == ReceiptLinkedEntityType.Trip && r.UserId == userId)
             .ToListAsync();
     }
 

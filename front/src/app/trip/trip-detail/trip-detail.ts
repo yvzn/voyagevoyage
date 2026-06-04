@@ -15,7 +15,6 @@ import { ExpenseFormComponent } from '../../expense/expense-form/expense-form';
 import { ExpenseActions } from '../../expense/store/expense.actions';
 import { selectAllExpenses, selectExpensesLoadStatus } from '../../expense/store/expense.selectors';
 import { ExpenseCategory } from '../../expense/expense.model';
-import { ReceiptUploadComponent } from '../../receipt/receipt-upload/receipt-upload';
 import { TrainBookingFormComponent } from '../../train-booking/train-booking-form/train-booking-form';
 import { HotelBookingFormComponent } from '../../hotel-booking/hotel-booking-form/hotel-booking-form';
 
@@ -24,7 +23,7 @@ type BookingType = 'train' | 'hotel';
 @Component({
   selector: 'app-trip-detail',
   standalone: true,
-  imports: [NgClass, DecimalPipe, TranslatePipe, TripFormComponent, RouterLink, ExpenseFormComponent, TrainBookingFormComponent, HotelBookingFormComponent, ReceiptUploadComponent],
+  imports: [NgClass, DecimalPipe, TranslatePipe, TripFormComponent, RouterLink, ExpenseFormComponent, TrainBookingFormComponent, HotelBookingFormComponent],
   templateUrl: './trip-detail.html',
 })
 export class TripDetailComponent {

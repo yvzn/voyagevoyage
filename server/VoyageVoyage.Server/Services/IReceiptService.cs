@@ -14,17 +14,8 @@ public interface IReceiptService
     /// </summary>
     Task<Receipt?> UploadForExpenseAsync(string expenseId, IFormFile file);
 
-    /// <summary>
-    /// Uploads a receipt and associates it with an existing trip.
-    /// Returns null if the trip does not exist or does not belong to the current user.
-    /// </summary>
-    Task<Receipt?> UploadForTripAsync(string tripId, IFormFile file);
-
     /// <summary>Returns all receipts linked to the given expense (scoped to current user).</summary>
     Task<IReadOnlyList<Receipt>> GetAllByExpenseAsync(string expenseId);
-
-    /// <summary>Returns all receipts linked to the given trip (scoped to current user).</summary>
-    Task<IReadOnlyList<Receipt>> GetAllByTripAsync(string tripId);
 
     /// <summary>
     /// Downloads the binary content of a receipt by its id.

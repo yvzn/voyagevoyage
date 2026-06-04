@@ -16,7 +16,6 @@ import { selectConstraints } from '../../constraints/store/settings.selectors';
 import { selectAllExpenses, selectExpensesCreateStatus, selectExpensesLoadStatus, selectExpensesUpdateStatus } from '../../expense/store/expense.selectors';
 import {
   selectReceiptsByExpenseId,
-  selectReceiptsByTripId,
   selectUploadStatus,
   selectDeleteStatus,
 } from '../../receipt/store/receipt.reducer';
@@ -144,7 +143,6 @@ async function setupModule(trips: Trip[] = [MOCK_TRIP], tripId = 'trip-1'): Prom
           { selector: selectExpensesCreateStatus, value: 'idle' as ApiStatus },
           { selector: selectExpensesUpdateStatus, value: 'idle' as ApiStatus },
           { selector: selectReceiptsByExpenseId, value: {} },
-          { selector: selectReceiptsByTripId, value: {} },
           { selector: selectUploadStatus, value: 'idle' as ApiStatus },
           { selector: selectDeleteStatus, value: 'idle' as ApiStatus },
         ],

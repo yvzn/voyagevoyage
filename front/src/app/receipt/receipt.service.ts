@@ -13,20 +13,10 @@ export class ReceiptService {
     return this.http.get<Receipt[]>(`/api/expenses/${expenseId}/receipts`);
   }
 
-  getAllByTrip(tripId: string): Observable<Receipt[]> {
-    return this.http.get<Receipt[]>(`/api/trips/${tripId}/receipts`);
-  }
-
   uploadForExpense(expenseId: string, file: File): Observable<Receipt> {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<Receipt>(`/api/expenses/${expenseId}/receipts`, formData);
-  }
-
-  uploadForTrip(tripId: string, file: File): Observable<Receipt> {
-    const formData = new FormData();
-    formData.append('file', file);
-    return this.http.post<Receipt>(`/api/trips/${tripId}/receipts`, formData);
   }
 
   delete(id: string): Observable<void> {
