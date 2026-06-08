@@ -16,6 +16,11 @@ import {
   selectExpensesUpdateStatus,
 } from '../store/expense.selectors';
 import { ApiStatus } from '../store/expense.reducer';
+import {
+  selectReceiptsByExpenseId,
+  selectUploadStatus,
+  selectDeleteStatus,
+} from '../../receipt/store/receipt.reducer';
 
 const EN_TRANSLATIONS = {
   expenseDetail: {
@@ -54,6 +59,18 @@ const EN_TRANSLATIONS = {
     metroBus: 'Metro / Bus',
     other: 'Other',
   },
+  receipt: {
+    heading: 'Receipts',
+    uploadButton: 'Add a receipt',
+    uploading: 'Uploading…',
+    uploadHint: 'PDF, JPEG, PNG, etc. — 10 MB max.',
+    downloadButton: 'Download',
+    deleteButton: 'Delete',
+    empty: 'No receipts attached.',
+    listLabel: 'Attached receipts',
+    uploadError: 'An error occurred while uploading the receipt. Please try again.',
+    deleteError: 'An error occurred while deleting the receipt. Please try again.',
+  },
 };
 
 const MOCK_EXPENSE: Expense = {
@@ -89,6 +106,9 @@ async function setupModule(
           { selector: selectExpensesDeleteStatus, value: 'idle' as ApiStatus },
           { selector: selectExpensesCreateStatus, value: 'idle' as ApiStatus },
           { selector: selectExpensesUpdateStatus, value: 'idle' as ApiStatus },
+          { selector: selectReceiptsByExpenseId, value: {} },
+          { selector: selectUploadStatus, value: 'idle' as ApiStatus },
+          { selector: selectDeleteStatus, value: 'idle' as ApiStatus },
         ],
       }),
     ],

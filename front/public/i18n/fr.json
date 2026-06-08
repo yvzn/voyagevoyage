@@ -351,5 +351,21 @@
     "saving": "Enregistrement…",
     "cancel": "Annuler",
     "saveError": "Une erreur est survenue lors de l’enregistrement. Veuillez réessayer."
+  },
+  "receipt": {
+    "heading": "Justificatifs",
+    "uploadButton": "Ajouter un justificatif",
+    "uploading": "Téléversement…",
+    "uploadHint": "PDF, JPEG, PNG, etc. — 10 Mo max.",
+    "downloadButton": "Télécharger",
+    "deleteButton": "Supprimer",
+    "deleting": "Suppression…",
+    "deleteConfirmMessage": "Êtes-vous sûr de vouloir supprimer ce justificatif ? Cette action est irréversible.",
+    "deleteConfirmButton": "Confirmer la suppression",
+    "deleteCancelButton": "Annuler",
+    "empty": "Aucun justificatif joint.",
+    "listLabel": "Justificatifs joints",
+    "uploadError": "Une erreur est survenue lors du téléversement du justificatif. Veuillez réessayer.",
+    "deleteError": "Une erreur est survenue lors de la suppression du justificatif. Veuillez réessayer."
   }
 }

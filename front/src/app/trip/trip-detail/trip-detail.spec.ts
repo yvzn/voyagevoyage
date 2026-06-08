@@ -14,6 +14,11 @@ import { selectTripsCreateStatus, selectTripsUpdateStatus } from '../store/trip.
 import { TripActions } from '../store/trip.actions';
 import { selectConstraints } from '../../constraints/store/settings.selectors';
 import { selectAllExpenses, selectExpensesCreateStatus, selectExpensesLoadStatus, selectExpensesUpdateStatus } from '../../expense/store/expense.selectors';
+import {
+  selectReceiptsByExpenseId,
+  selectUploadStatus,
+  selectDeleteStatus,
+} from '../../receipt/store/receipt.reducer';
 
 const EN_TRANSLATIONS = {
   tripDetail: {
@@ -74,6 +79,18 @@ const EN_TRANSLATIONS = {
     metroBus: 'Metro / Bus',
     other: 'Other',
   },
+  receipt: {
+    heading: 'Receipts',
+    uploadButton: 'Add a receipt',
+    uploading: 'Uploading…',
+    uploadHint: 'PDF, JPEG, PNG, etc. — 10 MB max.',
+    downloadButton: 'Download',
+    deleteButton: 'Delete',
+    empty: 'No receipts attached.',
+    listLabel: 'Attached receipts',
+    uploadError: 'An error occurred while uploading the receipt. Please try again.',
+    deleteError: 'An error occurred while deleting the receipt. Please try again.',
+  },
 };
 
 const MOCK_TRIP: Trip = {
@@ -125,6 +142,9 @@ async function setupModule(trips: Trip[] = [MOCK_TRIP], tripId = 'trip-1'): Prom
           { selector: selectExpensesLoadStatus, value: 'idle' as ApiStatus },
           { selector: selectExpensesCreateStatus, value: 'idle' as ApiStatus },
           { selector: selectExpensesUpdateStatus, value: 'idle' as ApiStatus },
+          { selector: selectReceiptsByExpenseId, value: {} },
+          { selector: selectUploadStatus, value: 'idle' as ApiStatus },
+          { selector: selectDeleteStatus, value: 'idle' as ApiStatus },
         ],
       }),
     ],

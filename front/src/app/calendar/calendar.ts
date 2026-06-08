@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -21,6 +21,8 @@ import { getTripStatusDotClass, getTripStatusTranslationKey } from '../trip/trip
 import { CalendarGridComponent } from './calendar-grid';
 import { PersonalLeaveActions } from '../personal-leave/store/personal-leave.actions';
 import { selectConstraintsPerDay } from './calendar.selectors';
+import { ExpenseActions } from '../expense/store/expense.actions';
+import { selectAllExpenses } from '../expense/store/expense.selectors';
 
 @Component({
   selector: 'app-calendar',
@@ -39,11 +41,20 @@ export class CalendarComponent {
     this.store.dispatch(SettingsActions.loadPublicHolidays());
     this.store.dispatch(SettingsActions.loadSchoolHolidays());
     this.store.dispatch(PersonalLeaveActions.loadPersonalLeaves());
+
+    // Load expenses for all trips when trips are loaded
+    effect(() => {
+      const trips = this.trips();
+      if (trips.length > 0) {
+        this.store.dispatch(ExpenseActions.loadExpensesForTrips({ tripIds: trips.map(t => t.id) }));
+      }
+    });
   }
 
   protected readonly trips = this.store.selectSignal(selectAllTrips);
   protected readonly tripsLoadStatus = this.store.selectSignal(selectTripsLoadStatus);
   protected readonly tripsError = this.store.selectSignal(selectTripsError);
+  protected readonly expenses = this.store.selectSignal(selectAllExpenses);
 
   protected readonly constraintsPerDay = this.store.selectSignal(selectConstraintsPerDay);
   protected readonly allowedDaysOfWeek = this.store.selectSignal(

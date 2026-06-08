@@ -9,6 +9,9 @@ export const ExpenseActions = createActionGroup({
     'Load Expenses Success': props<{ expenses: Expense[] }>(),
     'Load Expenses Failure': props<{ error: string }>(),
 
+    // Load expenses for multiple trips (for calendar view)
+    'Load Expenses For Trips': props<{ tripIds: string[] }>(),
+
     // Load a single expense by id (expense detail page)
     'Load Expense By Id': props<{ id: string }>(),
     'Load Expense By Id Success': props<{ expense: Expense }>(),

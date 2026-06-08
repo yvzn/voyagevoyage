@@ -119,6 +119,9 @@
       </div>
     </section>
 
+    <!-- Receipts section -->
+    <app-receipt-upload [expenseId]="currentExpense.id" />
+
   } @else if (loadByIdStatus() === 'loading') {
     <!-- Loading state -->
     <div class="mt-6 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
