@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, computed, effect, inject, input } from '@angular/core';
+import { AfterViewInit, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { initFlowbite } from 'flowbite';
@@ -41,6 +41,10 @@ export class ReceiptUploadComponent implements AfterViewInit {
   protected readonly deleteError = computed<string | null>(() =>
     this.deleteStatus() === 'failure' ? 'receipt.deleteError' : null,
   );
+  protected readonly isDeleting = computed(() => this.deleteStatus() === 'loading');
+
+  /** Id of the receipt pending deletion confirmation; null if no confirmation is shown */
+  protected readonly pendingDeleteId = signal<string | null>(null);
 
   constructor() {
     // Load receipts when the entity id becomes known
@@ -70,13 +74,22 @@ export class ReceiptUploadComponent implements AfterViewInit {
     }
   }
 
+  protected requestDelete(id: string): void {
+    this.pendingDeleteId.set(id);
+  }
+
+  protected cancelDelete(): void {
+    this.pendingDeleteId.set(null);
+  }
+
   protected onDelete(id: string): void {
     const expenseId = this.expenseId();
-    if (expenseId) {
-      this.store.dispatch(
-        ReceiptActions.deleteReceipt({ id, linkedEntityId: expenseId }),
-      );
-    }
+    if (!expenseId || this.isDeleting()) return;
+
+    this.pendingDeleteId.set(null);
+    this.store.dispatch(
+      ReceiptActions.deleteReceipt({ id, linkedEntityId: expenseId }),
+    );
   }
 
   protected getDownloadUrl(id: string): string {
