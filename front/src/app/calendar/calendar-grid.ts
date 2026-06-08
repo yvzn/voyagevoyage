@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Trip } from '../trip/trip.model';
+import { Expense } from '../expense/expense.model';
 import { CalendarDay, CalendarWeek } from './calendar.utils';
 import { getTripStatusClass, getTripStatusDotClass, getTripStatusTranslationKey } from '../trip/trip-status.utils';
 import { MILLISECONDS_PER_DAY, parseISODateUTC } from '../planning-dashboard/planning-dashboard.utils';
@@ -35,6 +36,9 @@ export class CalendarGridComponent {
 
   /** All trips to display across the grid (used to compute per-day mapping). */
   readonly trips = input<Trip[]>([]);
+
+  /** All expenses (used to check if a trip has saved expenses). */
+  readonly expenses = input<Expense[]>([]);
 
   /**
    * Pre-built map from ISO date string (YYYY-MM-DD) to the constraints applying on that day.
@@ -129,6 +133,10 @@ export class CalendarGridComponent {
   protected getTripAriaLabel(trip: Trip): string {
     const statusLabel = this.translateService.instant(getTripStatusTranslationKey(trip.status));
     return `${trip.destination} (${statusLabel})`;
+  }
+
+  protected tripHasExpenses(trip: Trip): boolean {
+    return this.expenses().some(e => e.tripId === trip.id);
   }
 
   private dayKey(year: number, month: number, date: number): string {

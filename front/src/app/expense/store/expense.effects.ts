@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { catchError, map, mergeMap, of, switchMap, withLatestFrom } from 'rxjs';
+import { catchError, concatMap, forkJoin, map, mergeMap, of, switchMap, withLatestFrom } from 'rxjs';
 import { ExpenseActions } from './expense.actions';
 import { ExpenseService } from '../expense.service';
 import { TripActions } from '../../trip/store/trip.actions';
@@ -21,6 +21,38 @@ export const loadExpensesEffect = createEffect(
           ),
         ),
       ),
+    ),
+  { functional: true },
+);
+
+export const loadExpensesForTripsEffect = createEffect(
+  (actions$ = inject(Actions), expenseService = inject(ExpenseService)) =>
+    actions$.pipe(
+      ofType(ExpenseActions.loadExpensesForTrips),
+      mergeMap(({ tripIds }) => {
+        if (tripIds.length === 0) {
+          return of();
+        }
+        return forkJoin(
+          tripIds.map((tripId) =>
+            expenseService.getAll(tripId).pipe(
+              catchError((error: unknown) => {
+                console.error(`Failed to load expenses for trip ${tripId}:`, error);
+                return of([]);
+              }),
+            ),
+          ),
+        ).pipe(
+          mergeMap((results) =>
+            results.flat().length > 0
+              ? of(ExpenseActions.loadExpensesSuccess({ expenses: results.flat() }))
+              : of(),
+          ),
+          catchError((error: unknown) =>
+            of(ExpenseActions.loadExpensesFailure({ error: String(error) })),
+          ),
+        );
+      }),
     ),
   { functional: true },
 );
