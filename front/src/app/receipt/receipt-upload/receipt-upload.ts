@@ -9,11 +9,12 @@ import {
   selectDeleteStatus,
 } from '../store/receipt.reducer';
 import { ReceiptService } from '../receipt.service';
+import { ReceiptPreviewComponent } from '../receipt-preview/receipt-preview';
 
 @Component({
   selector: 'app-receipt-upload',
   standalone: true,
-  imports: [TranslatePipe],
+  imports: [TranslatePipe, ReceiptPreviewComponent],
   templateUrl: './receipt-upload.html',
 })
 export class ReceiptUploadComponent implements AfterViewInit {
@@ -45,6 +46,9 @@ export class ReceiptUploadComponent implements AfterViewInit {
 
   /** Id of the receipt pending deletion confirmation; null if no confirmation is shown */
   protected readonly pendingDeleteId = signal<string | null>(null);
+
+  /** Id of the receipt currently being previewed; null if no preview is shown */
+  protected readonly previewReceiptId = signal<string | null>(null);
 
   constructor() {
     // Load receipts when the entity id becomes known
@@ -98,5 +102,30 @@ export class ReceiptUploadComponent implements AfterViewInit {
 
   protected isImage(contentType: string): boolean {
     return contentType.startsWith('image/');
+  }
+
+  /** Open preview for the specified receipt */
+  protected openPreview(receiptId: string): void {
+    this.previewReceiptId.set(receiptId);
+  }
+
+  /** Close the preview modal */
+  protected closePreview(): void {
+    this.previewReceiptId.set(null);
+  }
+
+  /** Get the receipt object by ID for preview */
+  protected getReceiptById(receiptId: string | null): { id: string; fileName: string; contentType: string } | null {
+    if (!receiptId) return null;
+    
+    const receipts = this.receipts();
+    const receipt = receipts.find(r => r.id === receiptId);
+    if (!receipt) return null;
+    
+    return {
+      id: receipt.id,
+      fileName: receipt.fileName,
+      contentType: receipt.contentType
+    };
   }
 }

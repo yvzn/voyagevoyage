@@ -26,4 +26,8 @@ export class ReceiptService {
   getDownloadUrl(id: string): string {
     return `/api/receipts/${id}/download`;
   }
+
+  getPreviewUrl(id: string): string {
+    return `/api/receipts/${id}/preview`;
+  }
 }

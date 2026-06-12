@@ -35,4 +35,20 @@ public class ReceiptController(IReceiptService receiptService) : ControllerBase
 
         return NoContent();
     }
+
+    /// <summary>
+    /// Returns a preview of the receipt that can be displayed in the browser.
+    /// For images: returns the image directly for display
+    /// For PDFs: returns the PDF that can be displayed in an iframe/object tag
+    /// </summary>
+    [HttpGet("{id}/preview")]
+    public async Task<IActionResult> Preview(string id)
+    {
+        var result = await receiptService.DownloadAsync(id);
+        if (result is null)
+            return NotFound();
+
+        var (content, contentType, _) = result.Value;
+        return File(content, contentType);
+    }
 }
