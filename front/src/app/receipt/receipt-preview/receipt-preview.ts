@@ -1,6 +1,7 @@
 import { Component, computed, inject, input, output } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ReceiptService } from '../receipt.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-receipt-preview',
@@ -23,6 +24,7 @@ export class ReceiptPreviewComponent {
   readonly closed = output<void>();
 
   protected readonly receiptService = inject(ReceiptService);
+  protected readonly sanitizer = inject(DomSanitizer);
 
   /** Whether this is a PDF file */
   protected readonly isPdf = computed(() => {
@@ -39,7 +41,7 @@ export class ReceiptPreviewComponent {
   /** URL for the preview */
   protected readonly previewUrl = computed(() => {
     const receipt = this.receipt();
-    return receipt ? this.receiptService.getPreviewUrl(receipt.id) : '';
+    return receipt ? this.sanitizer.bypassSecurityTrustResourceUrl(this.receiptService.getPreviewUrl(receipt.id)) : '';
   });
 
   /** File name for display */
