@@ -72,17 +72,20 @@ internal static class Program
             AnsiConsole.WriteLine();
 
             // Select projects to run
+            var projectChoices = projects.Keys.ToList();
+            projectChoices.Add("[red]Exit[/]");
             var selectedProjects = AnsiConsole.Prompt(
                 new MultiSelectionPrompt<string>()
                     .Title("Select projects to [green]build and run[/]:")
                     .NotRequired()
                     .PageSize(10)
                     .MoreChoicesText("[grey](Move up and down to reveal more projects)[/]")
-                    .InstructionsText("[grey](Press [blue]<spacebar>[/] to toggle a project, [green]<enter>[/] to accept, [red]<ctrl+c>[/] to exit)[/]")
-                    .AddChoices(projects.Keys)
+                    .InstructionsText("[grey](Press [blue]<spacebar>[/] to toggle a project, [green]<enter>[/] to accept)[/]")
+                    .AddChoices(projectChoices)
             );
 
-            if (_shouldExit)
+            // Check if Exit was selected
+            if (selectedProjects.Contains("[red]Exit[/]"))
             {
                 AnsiConsole.MarkupLine("[yellow]Exiting...[/]");
                 return 0;
@@ -93,6 +96,9 @@ internal static class Program
                 AnsiConsole.MarkupLine("[yellow]No projects selected.[/]");
                 return 0;
             }
+            
+            // Remove the Exit option if it was somehow selected (shouldn't happen but just in case)
+            selectedProjects.Remove("[red]Exit[/]");
 
             var runner = new ProjectRunner();
 
@@ -113,9 +119,11 @@ internal static class Program
 
             // Build phase
             AnsiConsole.MarkupLine("\n[bold cyan]Starting build phase...[/]");
-            AnsiConsole.MarkupLine("[grey](Press [red]<ctrl+c>[/] to cancel and skip to next phase)[/]");
+            AnsiConsole.MarkupLine("[grey](Press [red]<q>[/] then [red]<q>[/] again to cancel and skip to next phase)[/]");
             var buildResults = new Dictionary<string, bool>();
             var buildProcesses = new Dictionary<string, Process>();
+            var buildQPressedCount = 0;
+            var buildQPressedTime = DateTime.MinValue;
 
             var projectsWithBuild = resolvedProjects.Where(x => x.Value.Build != null).ToList();
             if (projectsWithBuild.Count > 0)
@@ -143,7 +151,43 @@ internal static class Program
                     }
                     else
                     {
-                        process.WaitForExit();
+                        // Non-blocking wait with q/q detection
+                        while (!process.HasExited)
+                        {
+                            if (_shouldExit)
+                                break;
+                            
+                            // Check for q/Q key presses
+                            if (Console.KeyAvailable)
+                            {
+                                var key = Console.ReadKey(true);
+                                if (key.Key == ConsoleKey.Q)
+                                {
+                                    // Reset count if more than 2 seconds have passed
+                                    if ((DateTime.Now - buildQPressedTime).TotalSeconds > 2)
+                                    {
+                                        buildQPressedCount = 0;
+                                    }
+                                    buildQPressedCount++;
+                                    buildQPressedTime = DateTime.Now;
+                                    
+                                    if (buildQPressedCount >= 2)
+                                    {
+                                        _shouldExit = true;
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    // Reset count if a different key is pressed
+                                    buildQPressedCount = 0;
+                                }
+                            }
+                            
+                            // Short delay to prevent CPU spinning
+                            Task.Delay(100).Wait();
+                        }
+                        
                         buildResults[name] = process.ExitCode == 0;
 
                         if (buildResults[name])
@@ -156,6 +200,9 @@ internal static class Program
                         }
                     }
                 }
+                
+                // Reset q press tracking for next phase
+                buildQPressedCount = 0;
 
                 if (_shouldExit)
                 {
@@ -172,12 +219,17 @@ internal static class Program
                         var choice = AnsiConsole.Prompt(
                             new SelectionPrompt<string>()
                                 .Title("What would you like to do?")
-                                .AddChoices("Continue with successful tasks", "Stop")
+                                .AddChoices("Continue with successful tasks", "Stop", "[red]Exit[/]")
                         );
 
                         if (choice == "Stop")
                         {
                             return 1;
+                        }
+                        if (choice == "[red]Exit[/]")
+                        {
+                            AnsiConsole.MarkupLine("[yellow]Exiting...[/]");
+                            return 0;
                         }
 
                         // Remove failed projects from selected
@@ -210,12 +262,14 @@ internal static class Program
             }
 
             AnsiConsole.MarkupLine("[green]All projects started/monitored. Monitoring health status...[/]");
-            AnsiConsole.MarkupLine("[grey](Press [red]<ctrl+c>[/] to gracefully stop all projects)[/]\n");
+            AnsiConsole.MarkupLine("[grey](Press [red]<q>[/] then [red]<q>[/] again to gracefully stop all projects)[/]\n");
 
             // Health monitoring loop
             var healthChecker = new HealthChecker();
             var delays = new[] { 3000, 5000, 10000, 30000 };
             var healthStatuses = new ConcurrentDictionary<string, bool?>();
+            var qPressedCount = 0;
+            var qPressedTime = DateTime.MinValue;
 
             // Initialize health statuses
             foreach (var name in runningProcesses.Keys)
@@ -275,6 +329,33 @@ internal static class Program
                             break;
                         }
 
+                        // Check for q/Q key presses
+                        if (Console.KeyAvailable)
+                        {
+                            var key = Console.ReadKey(true);
+                            if (key.Key == ConsoleKey.Q)
+                            {
+                                // Reset count if more than 2 seconds have passed
+                                if ((DateTime.Now - qPressedTime).TotalSeconds > 2)
+                                {
+                                    qPressedCount = 0;
+                                }
+                                qPressedCount++;
+                                qPressedTime = DateTime.Now;
+                                
+                                if (qPressedCount >= 2)
+                                {
+                                    _shouldExit = true;
+                                    continue; // Will be handled in the next iteration
+                                }
+                            }
+                            else
+                            {
+                                // Reset count if a different key is pressed
+                                qPressedCount = 0;
+                            }
+                        }
+
                         // Update status display
                         ctx.UpdateTarget(BuildStatusTable(runningProcesses, healthStatuses));
 
@@ -295,8 +376,8 @@ internal static class Program
                         if (!runningProcesses.Any())
                             break;
 
-                        // Wait before next render (1 second)
-                        Task.Delay(1000).Wait();
+                        // Wait before next render (100ms for responsive q key detection)
+                        Task.Delay(100).Wait();
                     }
                 });
 
@@ -364,37 +445,43 @@ internal static class Program
                 return;
             }
 
-            // Try to kill gracefully
+            AnsiConsole.MarkupLine($"[cyan]Stopping {projectName}...[/]");
+            
+            // First, try to close the main window (sends WM_CLOSE on Windows)
+            // This gives the process a chance to clean up
             try
             {
-                // Send Ctrl+C to the process group (on Windows)
                 if (!process.CloseMainWindow())
                 {
-                    // If CloseMainWindow fails, try killing the process
+                    // If CloseMainWindow returns false, the process refused the close request
+                    // Proceed to force kill
                     process.Kill(entireProcessTree: true);
                 }
             }
             catch
             {
-                // Fallback: force kill
-                try
-                {
-                    process.Kill(entireProcessTree: true);
-                }
-                catch
-                {
-                    // Last resort: try Kill without process tree
-                    process.Kill();
-                }
+                // If CloseMainWindow fails, try to kill
+                process.Kill(entireProcessTree: true);
             }
 
-            // Wait a bit for process to exit
-            if (!process.WaitForExit(5000))
+            // Always wait for the process to exit to ensure it's completely stopped
+            // This is critical to avoid issues when re-launching
+            const int maxWaitTime = 10000; // 10 seconds max wait
+            
+            if (!process.WaitForExit(maxWaitTime))
             {
-                AnsiConsole.MarkupLine($"[yellow]⚠ {projectName} did not exit gracefully. Forcing termination...[/]");
+                // Process didn't exit within the timeout, force kill
+                AnsiConsole.MarkupLine($"[yellow]⚠ {projectName} did not exit. Forcing termination...[/]");
                 try
                 {
                     process.Kill(entireProcessTree: true);
+                    // Wait again for the forced kill
+                    if (!process.WaitForExit(5000))
+                    {
+                        AnsiConsole.MarkupLine($"[red]✗ {projectName} still did not exit after forced kill[/]");
+                        AnsiConsole.MarkupLine($"[red]Please stop the process manually (PID: {process.Id})[/]");
+                        return;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -404,7 +491,7 @@ internal static class Program
                 }
             }
 
-            AnsiConsole.MarkupLine($"[cyan]✓ {projectName} stopped gracefully[/]");
+            AnsiConsole.MarkupLine($"[cyan]✓ {projectName} stopped[/]");
         }
         catch (Exception ex)
         {

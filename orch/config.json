@@ -19,9 +19,5 @@
         "run": "func host start",
         "url": "http://localhost:7137/",
         "health": "http://localhost:7137/api/health"
-    },
-    "storage": {
-        "path": "../db/storage",
-        "run": "npm start"
     }
 }
