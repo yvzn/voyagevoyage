@@ -14,14 +14,14 @@ builder.Services
     .AddApplicationInsightsTelemetryWorkerService()
     .ConfigureFunctionsApplicationInsights();
 
-// Cosmos DB for public holidays import
-var cosmosConnectionString = builder.Configuration["ConnectionStrings:CosmosDb"]
-    ?? builder.Configuration["CosmosDb:ConnectionString"];
+// PostgreSQL for public holidays import
+var postgresConnectionString = builder.Configuration["ConnectionStrings:PostgresDb"]
+    ?? builder.Configuration["PostgresDb:ConnectionString"];
 
-if (!string.IsNullOrEmpty(cosmosConnectionString))
+if (!string.IsNullOrEmpty(postgresConnectionString))
 {
     builder.Services.AddDbContextFactory<BatchDbContext>(options =>
-        options.UseCosmos(cosmosConnectionString, BatchDbContext.DatabaseName));
+        options.UseNpgsql(postgresConnectionString));
 }
 
 // HTTP client for France public holiday API
