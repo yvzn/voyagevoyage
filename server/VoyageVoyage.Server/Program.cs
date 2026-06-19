@@ -40,20 +40,20 @@ builder.Services.AddSpaStaticFiles(options =>
 
 builder.Services.AddHttpContextAccessor();
 
-// Cosmos DB via EF Core
-var cosmosConnectionString = builder.Configuration.GetConnectionString("CosmosDb");
-if (string.IsNullOrEmpty(cosmosConnectionString))
-    throw new InvalidOperationException("Cosmos DB connection string 'CosmosDb' is not configured.");
+// PostgreSQL via EF Core
+var postgresConnectionString = builder.Configuration.GetConnectionString("PostgresDb");
+if (string.IsNullOrEmpty(postgresConnectionString))
+    throw new InvalidOperationException("PostgreSQL connection string 'PostgresDb' is not configured.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseCosmos(cosmosConnectionString, ApplicationDbContext.DatabaseName));
+    options.UseNpgsql(postgresConnectionString));
 
-builder.Services.AddScoped<ITripService, CosmosDbTripService>();
-builder.Services.AddScoped<ITravelConstraintsService, CosmosDbTravelConstraintsService>();
-builder.Services.AddScoped<IExpenseService, CosmosDbExpenseService>();
-builder.Services.AddScoped<IPublicHolidayService, CosmosDbPublicHolidayService>();
-builder.Services.AddScoped<ISchoolHolidayService, CosmosDbSchoolHolidayService>();
-builder.Services.AddScoped<IPersonalLeaveService, CosmosDbPersonalLeaveService>();
+builder.Services.AddScoped<ITripService, TripService>();
+builder.Services.AddScoped<ITravelConstraintsService, TravelConstraintsService>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
+builder.Services.AddScoped<ISchoolHolidayService, SchoolHolidayService>();
+builder.Services.AddScoped<IPersonalLeaveService, PersonalLeaveService>();
 builder.Services.AddHostedService<DbInitializerHostedService>();
 
 // Azure Blob Storage for receipt file uploads
@@ -65,7 +65,7 @@ builder.Services.AddSingleton(new BlobServiceClient(azureStorageConnectionString
 builder.Services.AddScoped<IReceiptService, AzureBlobReceiptService>();
 
 builder.Services.AddHealthChecks()
-    .AddCheck<DatabaseHealthCheck>("cosmos-db");
+    .AddCheck<DatabaseHealthCheck>("postgres");
 
 if (builder.Environment.IsDevelopment())
 {

@@ -6,10 +6,10 @@ using VoyageVoyage.Server.Models;
 namespace VoyageVoyage.Server.Services;
 
 /// <summary>
-/// Cosmos DB implementation of <see cref="IPersonalLeaveService"/>.
+/// PostgreSQL implementation of <see cref="IPersonalLeaveService"/>.
 /// All operations are scoped to the authenticated user.
 /// </summary>
-public class CosmosDbPersonalLeaveService(
+public class PersonalLeaveService(
     ApplicationDbContext db,
     ICurrentUserService currentUserService) : IPersonalLeaveService
 {

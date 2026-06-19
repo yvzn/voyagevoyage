@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 namespace VoyageVoyage.Server.Data;
 
 /// <summary>
-/// Background service that initialises the Cosmos DB database on application startup.
+/// Background service that applies pending EF Core migrations and verifies database connectivity on startup.
 /// Runs once when the host starts and stops gracefully.
 /// If initialisation fails, the error is logged and the application continues; the
 /// <c>/api/health</c> endpoint (backed by <see cref="Infrastructure.DatabaseHealthCheck"/>) will
@@ -29,11 +29,15 @@ public class DbInitializerHostedService(
         }
     }
 
-    private static async Task WaitForDatabaseAsync(ApplicationDbContext db, CancellationToken cancellationToken)
+    private async Task WaitForDatabaseAsync(ApplicationDbContext db, CancellationToken cancellationToken)
     {
-        var cosmosClient = db.Database.GetCosmosClient();
-        await cosmosClient.ReadAccountAsync();
-        return;
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            if (await db.Database.CanConnectAsync(cancellationToken))
+                return;
+            logger.LogInformation("Database not ready, retrying in 2 seconds...");
+            await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
+        }
     }
 
     private async Task InitAsync(CancellationToken cancellationToken)
@@ -44,8 +48,8 @@ public class DbInitializerHostedService(
         logger.LogInformation("Checking database connectivity...");
         await WaitForDatabaseAsync(db, cancellationToken);
 
-        logger.LogInformation("Ensuring database and containers exist...");
-        await db.Database.EnsureCreatedAsync(cancellationToken);
+        logger.LogInformation("Applying pending migrations...");
+        await db.Database.MigrateAsync(cancellationToken);
 
         logger.LogInformation("Database initialisation completed successfully.");
     }

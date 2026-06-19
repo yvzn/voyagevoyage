@@ -6,10 +6,10 @@ using VoyageVoyage.Server.Models;
 namespace VoyageVoyage.Server.Services;
 
 /// <summary>
-/// Cosmos DB implementation of <see cref="ITripService"/>, backed by EF Core.
+/// PostgreSQL implementation of <see cref="ITripService"/>, backed by EF Core.
 /// All operations are scoped to the authenticated user.
 /// </summary>
-public class CosmosDbTripService(ApplicationDbContext db, ICurrentUserService currentUserService) : ITripService
+public class TripService(ApplicationDbContext db, ICurrentUserService currentUserService) : ITripService
 {
     private string GetCurrentUserId()
     {

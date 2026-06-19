@@ -6,10 +6,10 @@ using VoyageVoyage.Server.Models;
 namespace VoyageVoyage.Server.Services;
 
 /// <summary>
-/// Cosmos DB implementation of <see cref="ITravelConstraintsService"/>, backed by EF Core.
+/// PostgreSQL implementation of <see cref="ITravelConstraintsService"/>, backed by EF Core.
 /// Each user has at most one constraints document, identified by a fixed <see cref="TravelConstraints.DocumentId"/>.
 /// </summary>
-public class CosmosDbTravelConstraintsService(
+public class TravelConstraintsService(
     ApplicationDbContext db,
     ICurrentUserService currentUserService) : ITravelConstraintsService
 {
