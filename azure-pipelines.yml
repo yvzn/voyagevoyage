@@ -44,7 +44,7 @@ stages:
             displayName: Use Node.js 24
             
           - script: |
-              npm ci
+              npm ci --legacy-peer-deps
               npm run build
             displayName: Build Angular app
             workingDirectory: front
