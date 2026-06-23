@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output } from '@angular/core';
+import { Component, computed, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -21,6 +21,7 @@ import { DayConstraints } from './calendar-constraints.utils';
   selector: 'app-calendar-grid',
   standalone: true,
   imports: [NgClass, RouterLink, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './calendar-grid.html'
 })
 export class CalendarGridComponent {

@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -18,6 +18,7 @@ import { LeaveType } from '../personal-leave.model';
   selector: 'app-personal-leave-detail',
   standalone: true,
   imports: [RouterLink, TranslatePipe, PersonalLeaveFormComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './personal-leave-detail.html',
 })
 export class PersonalLeaveDetailComponent {

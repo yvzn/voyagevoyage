@@ -1,4 +1,4 @@
-import { Component, ElementRef, computed, inject, input, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, computed, inject, input, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
@@ -24,6 +24,7 @@ import {
   selector: 'app-planning-dashboard',
   standalone: true,
   imports: [RouterLink, TranslatePipe, TripFormComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './planning-dashboard.html',
 })
 export class PlanningDashboardComponent {

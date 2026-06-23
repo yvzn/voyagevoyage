@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { NgClass, DecimalPipe } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -24,6 +24,7 @@ type BookingType = 'train' | 'hotel';
   selector: 'app-trip-detail',
   standalone: true,
   imports: [NgClass, DecimalPipe, TranslatePipe, TripFormComponent, RouterLink, ExpenseFormComponent, TrainBookingFormComponent, HotelBookingFormComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trip-detail.html',
 })
 export class TripDetailComponent {

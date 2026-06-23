@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
@@ -16,6 +16,7 @@ import { LocaleService } from '../../locale.service';
   selector: 'app-personal-leave-page',
   standalone: true,
   imports: [RouterLink, TranslatePipe, PersonalLeaveFormComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './personal-leave-page.html',
 })
 export class PersonalLeavePageComponent implements OnInit {

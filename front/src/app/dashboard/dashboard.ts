@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
@@ -16,6 +16,7 @@ import { HotelBookingDashboardComponent } from '../hotel-booking/hotel-booking-d
   selector: 'app-dashboard',
   standalone: true,
   imports: [RouterLink, TranslatePipe, PlanningDashboardComponent, CalendarGridComponent, TrainBookingDashboardComponent, HotelBookingDashboardComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './dashboard.html',
 })
 export class DashboardComponent {

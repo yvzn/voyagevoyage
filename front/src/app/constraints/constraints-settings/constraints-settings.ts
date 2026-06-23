@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, effect, inject } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -18,6 +18,7 @@ import {
   selector: 'app-constraints-settings',
   standalone: true,
   imports: [ReactiveFormsModule, NgClass, RouterLink, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './constraints-settings.html',
 })
 export class ConstraintsSettingsComponent implements OnInit {

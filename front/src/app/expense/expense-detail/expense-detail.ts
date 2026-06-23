@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -19,6 +19,7 @@ import { ReceiptUploadComponent } from '../../receipt/receipt-upload/receipt-upl
   selector: 'app-expense-detail',
   standalone: true,
   imports: [RouterLink, TranslatePipe, DecimalPipe, ExpenseFormComponent, ReceiptUploadComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './expense-detail.html',
 })
 export class ExpenseDetailComponent {

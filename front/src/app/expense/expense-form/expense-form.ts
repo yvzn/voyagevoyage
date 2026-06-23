@@ -8,6 +8,7 @@ import {
   input,
   output,
   viewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { NgClass } from '@angular/common';
@@ -22,6 +23,7 @@ import { LocaleService } from '../../locale.service';
   selector: 'app-expense-form',
   standalone: true,
   imports: [ReactiveFormsModule, NgClass, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './expense-form.html',
 })
 export class ExpenseFormComponent implements AfterViewInit {

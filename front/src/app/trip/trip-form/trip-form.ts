@@ -9,6 +9,7 @@ import {
   input,
   output,
   viewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { NgClass } from '@angular/common';
@@ -39,6 +40,7 @@ function endDateAfterStartDate(group: AbstractControl): ValidationErrors | null 
   selector: 'app-trip-form',
   standalone: true,
   imports: [ReactiveFormsModule, NgClass, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trip-form.html',
 })
 export class TripFormComponent implements AfterViewInit {

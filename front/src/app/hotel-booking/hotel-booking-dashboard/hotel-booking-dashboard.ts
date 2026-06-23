@@ -1,4 +1,4 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
@@ -17,6 +17,7 @@ export { getTripsNeedingHotelBooking } from '../hotel-booking.utils';
   selector: 'app-hotel-booking-dashboard',
   standalone: true,
   imports: [RouterLink, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './hotel-booking-dashboard.html',
 })
 export class HotelBookingDashboardComponent {

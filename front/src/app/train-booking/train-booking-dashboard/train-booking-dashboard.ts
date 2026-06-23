@@ -1,4 +1,4 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
@@ -17,6 +17,7 @@ export { getTripsNeedingTrainBooking } from '../train-booking.utils';
   selector: 'app-train-booking-dashboard',
   standalone: true,
   imports: [RouterLink, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './train-booking-dashboard.html',
 })
 export class TrainBookingDashboardComponent {

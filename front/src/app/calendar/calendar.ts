@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { Router } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -28,6 +28,7 @@ import { selectAllExpenses } from '../expense/store/expense.selectors';
   selector: 'app-calendar',
   standalone: true,
   imports: [NgClass, TranslatePipe, TripFormComponent, CalendarGridComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './calendar.html',
 })
 export class CalendarComponent {

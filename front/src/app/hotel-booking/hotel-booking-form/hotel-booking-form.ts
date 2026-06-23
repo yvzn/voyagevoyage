@@ -8,6 +8,7 @@ import {
   input,
   output,
   viewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -21,6 +22,7 @@ import { LocaleService } from '../../locale.service';
   selector: 'app-hotel-booking-form',
   standalone: true,
   imports: [ReactiveFormsModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './hotel-booking-form.html',
 })
 export class HotelBookingFormComponent implements AfterViewInit {

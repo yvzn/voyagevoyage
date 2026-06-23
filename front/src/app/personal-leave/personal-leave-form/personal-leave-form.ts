@@ -9,6 +9,7 @@ import {
   input,
   output,
   viewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { NgClass } from '@angular/common';
@@ -41,6 +42,7 @@ function endAfterStartValidator(group: AbstractControl): ValidationErrors | null
   selector: 'app-personal-leave-form',
   standalone: true,
   imports: [ReactiveFormsModule, NgClass, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './personal-leave-form.html',
 })
 export class PersonalLeaveFormComponent implements AfterViewInit {

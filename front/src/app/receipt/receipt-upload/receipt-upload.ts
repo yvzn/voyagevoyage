@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, computed, effect, inject, input, signal } from '@angular/core';
+import { AfterViewInit, Component, computed, effect, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { initFlowbite } from 'flowbite';
@@ -15,6 +15,7 @@ import { ReceiptPreviewComponent } from '../receipt-preview/receipt-preview';
   selector: 'app-receipt-upload',
   standalone: true,
   imports: [TranslatePipe, ReceiptPreviewComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './receipt-upload.html',
 })
 export class ReceiptUploadComponent implements AfterViewInit {
