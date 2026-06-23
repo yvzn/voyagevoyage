@@ -6,10 +6,10 @@ using VoyageVoyage.Server.Models;
 namespace VoyageVoyage.Server.Services;
 
 /// <summary>
-/// Cosmos DB implementation of <see cref="IExpenseService"/>, backed by EF Core.
+/// PostgreSQL implementation of <see cref="IExpenseService"/>, backed by EF Core.
 /// All operations are scoped to the authenticated user.
 /// </summary>
-public class CosmosDbExpenseService(ApplicationDbContext db, ICurrentUserService currentUserService) : IExpenseService
+public class ExpenseService(ApplicationDbContext db, ICurrentUserService currentUserService) : IExpenseService
 {
     private string GetCurrentUserId()
     {
@@ -47,7 +47,7 @@ public class CosmosDbExpenseService(ApplicationDbContext db, ICurrentUserService
         var userId = GetCurrentUserId();
 
         // Verify that the trip exists and belongs to the current user.
-        // Note: AnyAsync() can produce unreliable queries in EF Core for Cosmos DB.
+        // Note: AnyAsync() can produce unreliable queries in EF Core for PostgreSQL.
         // FirstOrDefaultAsync() translates more reliably and is preferred.
         var tripOwned = await db.Trips
             .FirstOrDefaultAsync(t => t.Id == tripId && t.UserId == userId);
