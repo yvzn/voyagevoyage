@@ -111,7 +111,8 @@ public class AzureBlobReceiptService(
             contentType = GetContentTypeFromExtension(Path.GetExtension(file.FileName));
         }
 
-        var blobName = $"{userId}/{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+        var uploadedAt = DateTimeOffset.UtcNow;
+        var blobName = $"{userId}/{uploadedAt.Year}/{uploadedAt.Month:00}/{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
 
         var container = GetContainerClient();
         await container.CreateIfNotExistsAsync(PublicAccessType.None);
@@ -129,7 +130,7 @@ public class AzureBlobReceiptService(
             FileName = file.FileName,
             ContentType = contentType,
             BlobName = blobName,
-            UploadedAt = DateTimeOffset.UtcNow,
+            UploadedAt = uploadedAt,
         };
 
         db.Receipts.Add(receipt);
