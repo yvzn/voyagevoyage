@@ -1,7 +1,10 @@
-import { Component, computed, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
+import { BookingConfirmationDialogComponent } from '../../booking-confirmation/booking-confirmation-dialog/booking-confirmation-dialog';
+import { BookingConfirmationActions } from '../../booking-confirmation/store/booking-confirmation.actions';
+import { selectParseStatus } from '../../booking-confirmation/store/booking-confirmation.reducer';
 import { TripActions } from '../../trip/store/trip.actions';
 import { SettingsActions } from '../../constraints/store/settings.actions';
 import { selectAllTrips, selectTripsLoadStatus } from '../../trip/store/trip.selectors';
@@ -16,12 +19,18 @@ export { getTripsNeedingTrainBooking } from '../train-booking.utils';
 @Component({
   selector: 'app-train-booking-dashboard',
   standalone: true,
-  imports: [RouterLink, TranslatePipe],
+  imports: [RouterLink, TranslatePipe, BookingConfirmationDialogComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './train-booking-dashboard.html',
 })
 export class TrainBookingDashboardComponent {
   private readonly store = inject(Store);
+
+  protected readonly isImportOpen = signal(false);
+
+  private readonly parseStatus = this.store.selectSignal(selectParseStatus);
+  protected readonly isParsing = computed(() => this.parseStatus() === 'loading');
+
   protected readonly localeService = inject(LocaleService);
 
   /** When set, limits the number of items displayed (used in preview mode). */
@@ -33,9 +42,23 @@ export class TrainBookingDashboardComponent {
   /** Whether to show the description paragraph with the threshold days count (for full-page list view). */
   readonly showDescription = input<boolean>(false);
 
+  /** Whether to show the import confirmation button. Set to false in dashboard preview cards. */
+  readonly showImport = input<boolean>(true);
+
   constructor() {
     this.store.dispatch(TripActions.loadTrips());
     this.store.dispatch(SettingsActions.loadSettings());
+    effect(() => {
+      if (this.parseStatus() === 'success') this.isImportOpen.set(true);
+    });
+  }
+
+  protected onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    input.value = '';
+    this.store.dispatch(BookingConfirmationActions.parseConfirmation({ file }));
   }
 
   private readonly trips = this.store.selectSignal(selectAllTrips);

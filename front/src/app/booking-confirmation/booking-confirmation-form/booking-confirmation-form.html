@@ -1,0 +1,168 @@
+<dialog
+  #dialogEl
+  (cancel)="onDialogCancel($event)"
+  (click)="onBackdropClick($event)"
+  class="m-auto w-full max-w-lg rounded-xl border-0 bg-white p-0 shadow-xl backdrop:bg-black/50 dark:bg-gray-800"
+>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-6 p-6">
+    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+      {{ 'bookingConfirmation.formHeading' | translate }}
+    </h2>
+
+    <!-- Disclaimer -->
+    <p class="rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+      {{ 'bookingConfirmation.disclaimer' | translate }}
+    </p>
+
+    <!-- Type -->
+    <div class="flex flex-col gap-1">
+      <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        {{ 'bookingConfirmation.typeLabel' | translate }}
+      </label>
+      <div class="flex gap-4">
+        <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+          <input type="radio" formControlName="type" value="train" class="accent-blue-600" />
+          {{ 'bookingConfirmation.typeTrain' | translate }}
+        </label>
+        <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+          <input type="radio" formControlName="type" value="hotel" class="accent-blue-600" />
+          {{ 'bookingConfirmation.typeHotel' | translate }}
+        </label>
+      </div>
+    </div>
+
+    <!-- Trip picker -->
+    <div class="flex flex-col gap-1">
+      <label for="tripId" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        {{ 'bookingConfirmation.tripLabel' | translate }}
+      </label>
+      <select
+        id="tripId"
+        formControlName="tripId"
+        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+      >
+        <option value="">{{ 'bookingConfirmation.newTrip' | translate }}</option>
+        @for (trip of suggestedTrips(); track trip.id) {
+          <option [value]="trip.id">{{ trip.destination }} — {{ formatDate(trip.startDate) }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- New trip fields (only when creating new) -->
+    @if (isCreatingNewTrip()) {
+      <div class="flex flex-col gap-4 rounded-lg border border-gray-200 p-4 dark:border-gray-600">
+        <p class="text-xs text-gray-500 dark:text-gray-400">{{ 'bookingConfirmation.newTripHint' | translate }}</p>
+        <div class="flex flex-col gap-1">
+          <label for="tripDestination" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {{ 'bookingConfirmation.destinationLabel' | translate }}
+          </label>
+          <input
+            id="tripDestination"
+            type="text"
+            formControlName="tripDestination"
+            class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          />
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1">
+            <label for="tripStartDate" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {{ 'bookingConfirmation.startDateLabel' | translate }}
+            </label>
+            <input id="tripStartDate" type="date" formControlName="tripStartDate" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+          </div>
+          <div class="flex flex-col gap-1">
+            <label for="tripEndDate" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {{ 'bookingConfirmation.endDateLabel' | translate }}
+            </label>
+            <input id="tripEndDate" type="date" formControlName="tripEndDate" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Train fields -->
+    @if (isTrainType()) {
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label for="departure" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {{ 'bookingConfirmation.departureLabel' | translate }}
+          </label>
+          <input id="departure" type="text" formControlName="departure" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="arrival" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {{ 'bookingConfirmation.arrivalLabel' | translate }}
+          </label>
+          <input id="arrival" type="text" formControlName="arrival" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1">
+          <label for="departureDateTime" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {{ 'bookingConfirmation.departureDateTimeLabel' | translate }}
+          </label>
+          <input id="departureDateTime" type="datetime-local" formControlName="departureDateTime" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="returnDateTime" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {{ 'bookingConfirmation.returnDateTimeLabel' | translate }}
+          </label>
+          <input id="returnDateTime" type="datetime-local" formControlName="returnDateTime" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+        </div>
+      </div>
+    } @else {
+      <!-- Hotel fields -->
+      <div class="flex flex-col gap-1">
+        <label for="hotelName" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+          {{ 'bookingConfirmation.hotelNameLabel' | translate }}
+        </label>
+        <input id="hotelName" type="text" formControlName="hotelName" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label for="hotelAddress" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+          {{ 'bookingConfirmation.hotelAddressLabel' | translate }}
+        </label>
+        <input id="hotelAddress" type="text" formControlName="hotelAddress" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label for="bookingDate" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+          {{ 'bookingConfirmation.checkInLabel' | translate }}
+        </label>
+        <input id="bookingDate" type="date" formControlName="bookingDate" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+      </div>
+    }
+
+    <!-- Save error -->
+    @if (saveError()) {
+      <div role="alert" class="rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-400">
+        {{ saveError()! | translate }}
+      </div>
+    }
+
+    <!-- Actions -->
+    <div class="flex justify-end gap-3">
+      <button
+        type="button"
+        (click)="onCancel()"
+        [disabled]="isSaving()"
+        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+      >
+        {{ 'bookingConfirmation.cancelButton' | translate }}
+      </button>
+      <button
+        type="submit"
+        [disabled]="isSaving()"
+        [attr.aria-busy]="isSaving() ? 'true' : null"
+        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50 dark:bg-blue-500"
+      >
+        @if (isSaving()) {
+          <svg class="h-4 w-4 animate-spin" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.036l3-2.745z"/>
+          </svg>
+        }
+        {{ (isSaving() ? 'bookingConfirmation.saving' : 'bookingConfirmation.saveButton') | translate }}
+      </button>
+    </div>
+  </form>
+</dialog>

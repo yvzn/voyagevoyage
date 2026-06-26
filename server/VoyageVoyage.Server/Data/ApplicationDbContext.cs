@@ -12,6 +12,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<SchoolHoliday> SchoolHolidays { get; set; }
     public DbSet<PersonalLeave> PersonalLeaves { get; set; }
     public DbSet<Receipt> Receipts { get; set; }
+    public DbSet<BookingConfirmation> BookingConfirmations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -57,6 +58,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         {
             entity.HasKey(r => r.Id);
             entity.HasIndex(r => r.UserId);
+        });
+
+        modelBuilder.Entity<BookingConfirmation>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.HasIndex(c => c.UserId);
+            entity.HasIndex(c => c.TripId);
         });
     }
 }

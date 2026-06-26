@@ -1,0 +1,6 @@
+<app-booking-confirmation-form
+  [parsed]="parsedConfirmation()"
+  [file]="parsedFile()"
+  (saved)="onSaved($event)"
+  (cancelled)="onCancelled()"
+/>

@@ -63,6 +63,8 @@ if (string.IsNullOrEmpty(azureStorageConnectionString))
 
 builder.Services.AddSingleton(new BlobServiceClient(azureStorageConnectionString));
 builder.Services.AddScoped<IReceiptService, AzureBlobReceiptService>();
+builder.Services.AddScoped<IBookingConfirmationService, AzureBlobBookingConfirmationService>();
+builder.Services.AddScoped<IBookingConfirmationParserService, BookingConfirmationParserService>();
 
 builder.Services.AddHealthChecks()
     .AddCheck<DatabaseHealthCheck>("postgres");

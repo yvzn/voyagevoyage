@@ -12,6 +12,10 @@ import { TripFormComponent } from '../trip-form/trip-form';
 import { getTripStatusClass, getTripStatusTranslationKey } from '../trip-status.utils';
 import { LocaleService } from '../../locale.service';
 import { ExpenseFormComponent } from '../../expense/expense-form/expense-form';
+import { BookingConfirmationDialogComponent } from '../../booking-confirmation/booking-confirmation-dialog/booking-confirmation-dialog';
+import { BookingConfirmationService } from '../../booking-confirmation/booking-confirmation.service';
+import { BookingConfirmationActions } from '../../booking-confirmation/store/booking-confirmation.actions';
+import { selectConfirmationsByTripId, selectDeleteStatus as selectConfirmationDeleteStatus, selectParseStatus } from '../../booking-confirmation/store/booking-confirmation.reducer';
 import { ExpenseActions } from '../../expense/store/expense.actions';
 import { selectAllExpenses, selectExpensesLoadStatus } from '../../expense/store/expense.selectors';
 import { ExpenseCategory } from '../../expense/expense.model';
@@ -23,12 +27,13 @@ type BookingType = 'train' | 'hotel';
 @Component({
   selector: 'app-trip-detail',
   standalone: true,
-  imports: [NgClass, DecimalPipe, TranslatePipe, TripFormComponent, RouterLink, ExpenseFormComponent, TrainBookingFormComponent, HotelBookingFormComponent],
+  imports: [NgClass, DecimalPipe, TranslatePipe, TripFormComponent, RouterLink, ExpenseFormComponent, TrainBookingFormComponent, HotelBookingFormComponent, BookingConfirmationDialogComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trip-detail.html',
 })
 export class TripDetailComponent {
   private readonly store = inject(Store);
+  protected readonly confirmationService = inject(BookingConfirmationService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   protected readonly localeService = inject(LocaleService);
@@ -46,6 +51,9 @@ export class TripDetailComponent {
 
   /** Whether the edit form modal is open */
   protected readonly isFormOpen = signal(false);
+  protected readonly isConfirmationImportOpen = signal(false);
+  protected readonly confirmationPendingDeleteId = signal<string | null>(null);
+  private confirmationDeletePending = false;
 
   /** Whether the train booking form modal is open */
   protected readonly isTrainBookingFormOpen = signal(false);
@@ -77,6 +85,18 @@ export class TripDetailComponent {
   protected readonly clearBookingError = signal<string | null>(null);
 
   protected readonly expenses = this.store.selectSignal(selectAllExpenses);
+
+  private readonly allConfirmations = this.store.selectSignal(selectConfirmationsByTripId);
+  protected readonly tripConfirmations = computed(() => {
+    const tripId = this.tripId();
+    if (!tripId) return [];
+    return this.allConfirmations()[tripId] ?? [];
+  });
+
+  private readonly confirmationParseStatus = this.store.selectSignal(selectParseStatus);
+  protected readonly isConfirmationParsing = computed(() => this.confirmationParseStatus() === 'loading');
+  private readonly confirmationDeleteStatus = this.store.selectSignal(selectConfirmationDeleteStatus);
+  protected readonly isDeletingConfirmation = computed(() => this.confirmationDeleteStatus() === 'loading');
   protected readonly expensesLoadStatus = this.store.selectSignal(selectExpensesLoadStatus);
 
   protected readonly TripStatus = TripStatus;
@@ -124,6 +144,20 @@ export class TripDetailComponent {
       const id = this.tripId();
       if (id) {
         this.store.dispatch(ExpenseActions.loadExpenses({ tripId: id }));
+        this.store.dispatch(BookingConfirmationActions.loadConfirmationsForTrip({ tripId: id }));
+      }
+    });
+
+    effect(() => {
+      if (this.confirmationParseStatus() === 'success') this.isConfirmationImportOpen.set(true);
+    });
+
+    effect(() => {
+      const status = this.confirmationDeleteStatus();
+      if (!this.confirmationDeletePending) return;
+      if (status === 'success' || status === 'failure') {
+        this.confirmationDeletePending = false;
+        if (status === 'success') this.confirmationPendingDeleteId.set(null);
       }
     });
   }
@@ -178,6 +212,40 @@ export class TripDetailComponent {
 
   protected closeHotelBookingForm(): void {
     this.isHotelBookingFormOpen.set(false);
+  }
+
+  protected onConfirmationFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    input.value = '';
+    this.store.dispatch(BookingConfirmationActions.parseConfirmation({ file }));
+  }
+
+  protected closeConfirmationImport(): void {
+    this.isConfirmationImportOpen.set(false);
+    const tripId = this.tripId();
+    if (tripId) {
+      this.store.dispatch(BookingConfirmationActions.loadConfirmationsForTrip({ tripId }));
+    }
+  }
+
+  protected getConfirmationDownloadUrl(id: string): string {
+    return this.confirmationService.getDownloadUrl(id);
+  }
+
+  protected requestDeleteConfirmation(id: string): void {
+    this.confirmationPendingDeleteId.set(id);
+  }
+
+  protected cancelDeleteConfirmation(): void {
+    this.confirmationPendingDeleteId.set(null);
+  }
+
+  protected onDeleteConfirmation(id: string, tripId: string): void {
+    if (this.isDeletingConfirmation()) return;
+    this.confirmationDeletePending = true;
+    this.store.dispatch(BookingConfirmationActions.deleteConfirmation({ id, tripId }));
   }
 
   protected navigateToExpense(expenseId: string): void {

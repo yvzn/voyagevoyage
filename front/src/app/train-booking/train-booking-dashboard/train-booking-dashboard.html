@@ -1,3 +1,7 @@
+@if (isImportOpen()) {
+  <app-booking-confirmation-dialog (closed)="isImportOpen.set(false)" />
+}
+
 @if (showHeading()) {
   <div class="mb-3 flex items-center justify-between">
     <div class="flex items-center gap-3">
@@ -14,14 +18,36 @@
         }
       </div>
     </div>
-    @if (showViewAllLink()) {
-      <a
-        routerLink="/train-bookings"
-        class="rounded-lg px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-blue-400 dark:hover:bg-gray-700"
-      >
-        {{ 'trainBookingDashboard.viewAllButton' | translate }}
-      </a>
-    }
+    <div class="flex items-center gap-2">
+      @if (showImport()) {
+        <label
+          class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+          [class.opacity-50]="isParsing()"
+          [class.pointer-events-none]="isParsing()"
+        >
+          @if (isParsing()) {
+            <svg class="h-3.5 w-3.5 animate-spin" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.036l3-2.745z"/>
+            </svg>
+          } @else {
+            <svg class="h-3.5 w-3.5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+            </svg>
+          }
+          {{ 'bookingConfirmation.importButton' | translate }}
+          <input type="file" class="sr-only" accept=".ics,.pdf" [disabled]="isParsing()" (change)="onFileSelected($event)" />
+        </label>
+      }
+      @if (showViewAllLink()) {
+        <a
+          routerLink="/train-bookings"
+          class="rounded-lg px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-blue-400 dark:hover:bg-gray-700"
+        >
+          {{ 'trainBookingDashboard.viewAllButton' | translate }}
+        </a>
+      }
+    </div>
   </div>
 }
 
