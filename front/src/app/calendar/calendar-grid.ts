@@ -128,7 +128,7 @@ export class CalendarGridComponent {
     if (hasBlockingConstraint) {
       return 'hover:bg-gray-50 dark:hover:bg-gray-700/30';
     }
-    return 'border-l-4 border-blue-200 hover:bg-gray-50 dark:hover:bg-gray-700/30 dark:border-blue-700/50';
+    return 'border-3 border-blue-100 hover:bg-blue-50 dark:hover:bg-blue-700/30 dark:border-blue-700/50';
   }
 
   protected getTripAriaLabel(trip: Trip): string {
