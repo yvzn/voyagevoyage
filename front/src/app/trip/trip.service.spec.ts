@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { TripService } from './trip.service';
-import { Trip, TripStatus, CreateTripRequest, UpdateTripRequest } from './trip.model';
+import { Trip, TripStatus, CreateTripRequest, UpdateTripRequest, PatchTripRequest } from './trip.model';
 
 const MOCK_TRIPS: Trip[] = [
   { id: '1', startDate: '2026-04-06', endDate: '2026-04-08', destination: 'Lyon', status: TripStatus.Confirmed },
@@ -98,6 +98,32 @@ describe('TripService', () => {
       service.update('1', request).subscribe((t) => (result = t));
 
       httpMock.expectOne({ method: 'PUT', url: '/api/trips/1' }).flush(updated);
+
+      expect(result).toEqual(updated);
+    });
+  });
+
+  describe('patch', () => {
+    it('should PATCH /api/trips/:id with bookings only and return the updated trip', () => {
+      const trainBooking = { departure: 'Paris', arrival: 'Lyon', departureDateTime: '2026-04-06T10:00', returnDateTime: '2026-04-09T18:00' };
+      const request: PatchTripRequest = {
+        trainBooking,
+        hotelBooking: null,
+      };
+      const updated: Trip = {
+        id: '1',
+        destination: 'Lyon',
+        startDate: '2026-04-06',
+        endDate: '2026-04-09',
+        status: TripStatus.Confirmed,
+        trainBooking,
+        hotelBooking: null,
+      };
+
+      let result: Trip | undefined;
+      service.patch('1', request).subscribe((t) => (result = t));
+
+      httpMock.expectOne({ method: 'PATCH', url: '/api/trips/1' }).flush(updated);
 
       expect(result).toEqual(updated);
     });

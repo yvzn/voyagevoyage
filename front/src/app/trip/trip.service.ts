@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Trip, CreateTripRequest, UpdateTripRequest } from './trip.model';
+import { Trip, CreateTripRequest, UpdateTripRequest, PatchTripRequest } from './trip.model';
 
 @Injectable({
   providedIn: 'root',
@@ -19,6 +19,10 @@ export class TripService {
 
   update(id: string, request: UpdateTripRequest): Observable<Trip> {
     return this.http.put<Trip>(`/api/trips/${id}`, request);
+  }
+
+  patch(id: string, request: PatchTripRequest): Observable<Trip> {
+    return this.http.patch<Trip>(`/api/trips/${id}`, request);
   }
 
   delete(id: string): Observable<void> {

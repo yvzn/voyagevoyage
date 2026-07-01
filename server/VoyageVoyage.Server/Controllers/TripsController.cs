@@ -51,6 +51,17 @@ public class TripsController(ITripService tripService) : ControllerBase
         return Ok(trip);
     }
 
+    /// <summary>Patches a trip (trainBooking/hotelBooking only).</summary>
+    [HttpPatch("{id}")]
+    public async Task<ActionResult<Trip>> Patch(string id, [FromBody] PatchTripRequest request)
+    {
+        var trip = await tripService.PatchAsync(id, request);
+        if (trip is null)
+            return NotFound();
+
+        return Ok(trip);
+    }
+
     /// <summary>Deletes a trip.</summary>
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)

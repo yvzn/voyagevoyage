@@ -44,3 +44,8 @@ export interface UpdateTripRequest {
   trainBooking?: TrainBooking | null;
   hotelBooking?: HotelBooking | null;
 }
+
+export interface PatchTripRequest {
+  trainBooking?: TrainBooking | null;
+  hotelBooking?: HotelBooking | null;
+}

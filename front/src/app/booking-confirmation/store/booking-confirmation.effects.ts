@@ -84,22 +84,29 @@ export const applyBookingConfirmationEffect = createEffect(
       ofType(BookingConfirmationActions.applyBookingConfirmation),
       switchMap(({ file, tripId, tripDestination, tripStartDate, tripEndDate, tripStatus, trainBooking, hotelBooking }) => {
         const tripData = { destination: tripDestination, startDate: tripStartDate, endDate: tripEndDate, status: tripStatus };
+        const isNewTrip = !tripId;
 
-        const resolveTripId$ = tripId
-          ? of(tripId)
-          : tripService.create({ ...tripData, trainBooking: null, hotelBooking: null }).pipe(map((t) => t.id));
+        const resolveTripId$ = isNewTrip
+          ? tripService.create({ ...tripData, trainBooking: null, hotelBooking: null }).pipe(map((t) => t.id))
+          : of(tripId);
 
         return resolveTripId$.pipe(
           switchMap((resolvedTripId) =>
             service.uploadForTrip(resolvedTripId, file).pipe(
-              switchMap(() =>
-                tripService.update(resolvedTripId, { ...tripData, trainBooking, hotelBooking }).pipe(
+              switchMap(() => {
+                // For new trips, use full update (includes destination/dates/status).
+                // For existing trips, use patch (trainBooking/hotelBooking only, preserves status).
+                const updateTrip$ = isNewTrip
+                  ? tripService.update(resolvedTripId, { ...tripData, trainBooking, hotelBooking })
+                  : tripService.patch(resolvedTripId, { trainBooking, hotelBooking });
+
+                return updateTrip$.pipe(
                   mergeMap((trip) => [
                     TripActions.updateTripSuccess({ trip }),
                     BookingConfirmationActions.applyBookingConfirmationSuccess({ tripId: resolvedTripId }),
                   ]),
-                ),
-              ),
+                );
+              }),
             ),
           ),
           catchError((error: unknown) =>

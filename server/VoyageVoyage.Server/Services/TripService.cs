@@ -73,6 +73,24 @@ public class TripService(ApplicationDbContext db, ICurrentUserService currentUse
         return trip;
     }
 
+    public async Task<Trip?> PatchAsync(string id, PatchTripRequest request)
+    {
+        var userId = GetCurrentUserId();
+        var trip = await db.Trips
+            .Where(t => t.Id == id && t.UserId == userId)
+            .FirstOrDefaultAsync();
+
+        if (trip is null)
+            return null;
+
+        if (request.TrainBooking is not null)
+            trip.TrainBooking = request.TrainBooking;
+        if (request.HotelBooking is not null)
+            trip.HotelBooking = request.HotelBooking;
+        await db.SaveChangesAsync();
+        return trip;
+    }
+
     public async Task<bool> DeleteAsync(string id)
     {
         var userId = GetCurrentUserId();
