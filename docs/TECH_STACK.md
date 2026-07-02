@@ -26,7 +26,7 @@ At a high level:
 
 - the Angular front end handles screens, forms, navigation, and client-side state
 - the .NET Web API exposes application endpoints and contains the core business logic
-- Azure Cosmos DB stores application data
+- PostgreSQL stores application data
 - Azure Storage stores uploaded files such as receipts or other supporting documents
 - Azure Functions handle occasional background processing, scheduled jobs, or technical workflows that should not run inside the main API request cycle
 
@@ -48,7 +48,7 @@ At a high level:
 
 - .NET Web API
 - Controller / service decomposition
-- Azure Cosmos DB
+- PostgreSQL
 - Azure Storage
 
 ### Batch / background processing
@@ -308,7 +308,7 @@ Every product feature must be implemented end-to-end — both the front end (Ang
 Practical rules:
 - do not ship front-end features backed only by mock or static data
 - do not ship back-end endpoints without a matching Angular service that calls them
-- use the actual persistence layer (Cosmos DB) from day one; the emulator is available for local development
+- use the actual persistence layer (PostgreSQL) from day one; a local PostgreSQL instance is available for development
 - in-memory or mock service implementations are not acceptable as a substitute for real persistence in any environment
 
 ### 5.1 .NET Web API
@@ -353,9 +353,9 @@ This separation matters because VoyageVoyage has rules-heavy workflows such as:
 - deductible amount calculations
 - receipt and file association logic
 
-### 5.3 Azure Cosmos DB
+### 5.3 PostgreSQL
 
-Azure Cosmos DB is the main application database.
+PostgreSQL is the main application database.
 
 It is intended to store business data such as:
 - trips
@@ -365,35 +365,36 @@ It is intended to store business data such as:
 - fiscal rule sets
 - reporting-related aggregates or supporting records where needed
 
-Why Cosmos DB fits this project:
-- flexible schema evolution for incremental product batches
-- good support for document-oriented application models
-- suitable for cloud-native workloads
+Why PostgreSQL fits this project:
+- strong relational modeling for business entities and relationships
+- predictable query behavior for application and reporting workloads
+- good fit for EF Core-based application development and schema evolution
+- works well with the current service-oriented architecture and local development setup
 
 Important mindset for developers:
-- model data around access patterns, not only around abstract entities
-- think early about partitioning and query behavior
-- avoid writing generic repository layers that hide important query costs
+- model data around the actual relationships and access patterns of the domain
+- keep queries explicit and efficient, especially for list and reporting scenarios
+- avoid generic repository layers that hide important query costs or schema assumptions
 
 #### EF Core as the data access layer
 
-EF Core with the Cosmos DB provider (`Microsoft.EntityFrameworkCore.Cosmos`) is used as the data access layer.
+EF Core with the PostgreSQL provider (`Npgsql.EntityFrameworkCore.PostgreSQL`) is used as the data access layer.
 
 Practical rules:
 - access data through `ApplicationDbContext` (`DbSet<T>` per entity)
-- entity types are mapped in `OnModelCreating` with explicit container names and partition keys
-- partition keys must always be used in queries (add `.Where(e => e.PartitionKey == value)` before querying)
-- user-owned data uses `UserId` as the partition key; always filter by the current user from `ICurrentUserService`
+- entity types are mapped in `OnModelCreating` with explicit table and relationship configuration
+- query filters should remain explicit and consistent with the domain model
+- user-owned data should always be scoped by the current user from `ICurrentUserService`
 
-#### Known EF Core / Cosmos DB query caveats
+#### Known EF Core / PostgreSQL query caveats
 
 **Avoid `AnyAsync()` for existence checks.**
-`AnyAsync()` can translate to queries that do not work reliably with the EF Core Cosmos DB provider, especially during emulator initialization or on certain query shapes.
+`AnyAsync()` can be less reliable for some EF Core query shapes and provider translations, especially during local development and migrations.
 
 Use `FirstOrDefaultAsync() != null` instead:
 
 ```csharp
-// ❌ Can fail silently with EF Core for Cosmos DB
+// ❌ Prefer avoiding this pattern for existence checks
 var exists = await db.Trips.AnyAsync(t => t.Id == id && t.UserId == userId);
 
 // ✅ Preferred: translates reliably
@@ -405,15 +406,14 @@ This applies to all `DbSet<T>` queries in services. Use `FirstOrDefaultAsync`, `
 
 #### Local development
 
-Use the [Azure Cosmos DB Emulator](https://aka.ms/cosmosemulator) for local development.
-The default emulator connection string is pre-configured in `appsettings.Development.json`.
+Use a local PostgreSQL instance for development. The default connection string is configured in `appsettings.Development.json`.
 
-For production, set the `ConnectionStrings__CosmosDb` environment variable (or equivalent App Service configuration) to the actual account connection string.
+For production, set the `ConnectionStrings__PostgresDb` environment variable (or equivalent App Service configuration) to the actual PostgreSQL connection string.
 
 #### No in-memory or mock data stores
 
-All service implementations must use the actual persistence layer (Cosmos DB).
-In-memory or mock service implementations are not acceptable for features — use the emulator for local development instead.
+All service implementations must use the actual persistence layer (PostgreSQL).
+In-memory or mock service implementations are not acceptable for features — use a local PostgreSQL instance for development instead.
 
 
 ### 5.4 Azure Storage
@@ -421,7 +421,7 @@ In-memory or mock service implementations are not acceptable for features — us
 Azure Storage is used to store files, especially uploaded receipts or other documents.
 
 Typical split:
-- Cosmos DB stores metadata and references
+- PostgreSQL stores metadata and references
 - Azure Storage stores the actual binary files
 
 This separation is important because application records and binary documents have different storage concerns.
@@ -575,7 +575,7 @@ Put in the API:
 - persistence logic
 - calculation rules that must remain authoritative
 - file metadata coordination
-- integration with Cosmos DB and Azure Storage
+- integration with PostgreSQL and Azure Storage
 
 ### In Azure Functions
 
@@ -605,7 +605,7 @@ Put in Functions only when the work is:
 - keep controllers thin
 - place business rules in services
 - design persistence around the actual read and write patterns
-- store structured data in Cosmos DB and files in Azure Storage
+- store structured data in PostgreSQL and files in Azure Storage
 
 ### 8.3 When adding a batch process
 
@@ -647,8 +647,8 @@ For a typical feature such as expense creation:
 3. Use signals for local interaction state.
 4. Use NgRx if the feature state must be shared, cached, or coordinated across multiple screens.
 5. Call a .NET API endpoint.
-6. Let the backend service enforce business rules and persist data in Cosmos DB.
-7. Store uploaded files in Azure Storage and save their metadata in Cosmos DB.
+6. Let the backend service enforce business rules and persist data in PostgreSQL.
+7. Store uploaded files in Azure Storage and save their metadata in PostgreSQL.
 8. Use Azure Functions only if background processing is needed after the main transaction.
 
 ## 11. Related documents
