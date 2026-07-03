@@ -12,3 +12,5 @@ await builder.addJavaScriptApp('front', '../front')
     .withRunScript('start');
 
 await builder.build().run();
+
+

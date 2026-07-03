@@ -16,7 +16,6 @@ Do not assume this is a monorepo with one root build command. Build and test eac
 
 Before implementing features, align with these project rules from docs:
 
-- Follow incremental product scope (batches 1-6) and preserve existing behavior in completed batches.
 - Accessibility is mandatory: target WCAG 2.2 AA minimum (AAA when feasible), semantic HTML first, full keyboard support, visible focus.
 - All user-facing strings must be internationalized (no hardcoded visible text in templates/components).
 - Prefer Angular + Tailwind + Flowbite existing patterns over custom UI patterns.
@@ -36,7 +35,7 @@ Before implementing features, align with these project rules from docs:
 
 - Keep controllers/endpoints thin; business logic belongs in services.
 - Preserve clear request validation and stable response contracts.
-- Data model intent is Cosmos DB + Azure Storage split (metadata in DB, binaries in storage).
+- Data model intent is PostgreSQL + Azure Storage split (metadata in DB, binaries in storage).
 
 ### Batch (`batch/`)
 
@@ -92,7 +91,7 @@ func start
    - `cd front && npm ci && npm run build`
    - `cd server/VoyageVoyage.Server && dotnet build -c Release`
    - `cd batch && dotnet build -c Release`
-3. Run tests for the touched subproject(s): `cd front && npm test`
+3. Run tests for the touched subproject(s): `cd front && npm test` and `cd server && dotnet test`.
 4. For UI changes, verify:
 	- keyboard-only navigation works,
 	- semantic structure is preserved,

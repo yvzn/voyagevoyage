@@ -21,13 +21,15 @@ import { selectAllExpenses, selectExpensesLoadStatus } from '../../expense/store
 import { ExpenseCategory } from '../../expense/expense.model';
 import { TrainBookingFormComponent } from '../../train-booking/train-booking-form/train-booking-form';
 import { HotelBookingFormComponent } from '../../hotel-booking/hotel-booking-form/hotel-booking-form';
+import { AddFrequentExpensesModalComponent } from '../add-frequent-expenses-modal/add-frequent-expenses-modal';
+import { FrequentExpenseWithDateOverride } from '../../frequent-expense/frequent-expense.model';
 
 type BookingType = 'train' | 'hotel';
 
 @Component({
   selector: 'app-trip-detail',
   standalone: true,
-  imports: [NgClass, DecimalPipe, TranslatePipe, TripFormComponent, RouterLink, ExpenseFormComponent, TrainBookingFormComponent, HotelBookingFormComponent, BookingConfirmationDialogComponent],
+  imports: [NgClass, DecimalPipe, TranslatePipe, TripFormComponent, RouterLink, ExpenseFormComponent, TrainBookingFormComponent, HotelBookingFormComponent, BookingConfirmationDialogComponent, AddFrequentExpensesModalComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trip-detail.html',
 })
@@ -64,6 +66,9 @@ export class TripDetailComponent {
   /** Whether the hotel booking form modal is open */
   protected readonly isHotelBookingFormOpen = signal(false);
 
+  /** Whether the add frequent expenses modal is open */
+  protected readonly isAddFrequentExpensesOpen = signal(false);
+
   /** Whether the inline delete confirmation prompt is shown */
   protected readonly showDeleteConfirm = signal(false);
 
@@ -90,7 +95,8 @@ export class TripDetailComponent {
   protected readonly tripConfirmations = computed(() => {
     const tripId = this.tripId();
     if (!tripId) return [];
-    return this.allConfirmations()[tripId] ?? [];
+    const confirmations = this.allConfirmations();
+    return confirmations ? (confirmations[tripId] ?? []) : [];
   });
 
   private readonly confirmationParseStatus = this.store.selectSignal(selectParseStatus);
@@ -212,6 +218,31 @@ export class TripDetailComponent {
 
   protected closeHotelBookingForm(): void {
     this.isHotelBookingFormOpen.set(false);
+  }
+
+  protected openAddFrequentExpensesModal(): void {
+    this.isAddFrequentExpensesOpen.set(true);
+  }
+
+  protected closeAddFrequentExpensesModal(): void {
+    this.isAddFrequentExpensesOpen.set(false);
+  }
+
+  protected onAddFrequentExpenses(expenses: FrequentExpenseWithDateOverride[]): void {
+    const tripId = this.tripId();
+    if (!tripId) return;
+
+    expenses.forEach(expense => {
+      const createExpenseRequest = {
+        date: expense.dateOverride,
+        category: expense.category,
+        amount: expense.amount,
+        description: expense.description,
+      };
+      this.store.dispatch(ExpenseActions.createExpense({ tripId, request: createExpenseRequest }));
+    });
+
+    this.closeAddFrequentExpensesModal();
   }
 
   protected onConfirmationFileSelected(event: Event): void {

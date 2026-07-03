@@ -9,7 +9,7 @@ A travel and expense management assistant for recurring professional trips. It s
 | Front end | Angular 21, Tailwind CSS, Flowbite, NgRx, ngx-translate |
 | Backend | ASP.NET Core Web API (.NET 10) |
 | Background jobs | Azure Functions isolated worker (.NET 10, Functions v4) |
-| Storage | Azure Cosmos DB (metadata) + Azure Storage (files/receipts) |
+| Storage | PostgreSQL (metadata) + Azure Storage (files/receipts) |
 
 ## Project structure
 
@@ -25,9 +25,9 @@ db/         Scripts and data for local database emulator / storage emulator
 
 - [Node.js](https://nodejs.org/) 24 or later
 - [.NET SDK](https://dotnet.microsoft.com/download) 10 or later
+- A development PostgreSQL database
 - Azure Functions Core Tools (for running `batch/` locally)
 - Azure Storage emulator running locally (e.g. Azurite) configured with `UseDevelopmentStorage=true`
-- Azure Cosmos DB emulator running locally (default endpoint: `https://localhost:8081/` with master key)
 
 ## Build & run
 
@@ -42,7 +42,7 @@ npm start       # dev server on http://localhost:4200
 
 **Backend**
 
-Ensure the Cosmos DB emulator is running before starting the server, as it depends on it for data storage.
+Ensure the Azure Storage emulator and the PostgreSQL database are running before starting the server, as it depends on them for data storage.
 
 ```bash
 cd server/VoyageVoyage.Server
@@ -53,7 +53,7 @@ dotnet run
 
 **Batch (Azure Functions)**
 
-Ensure the Azure Storage emulator and Cosmos DB emulator are running before starting the functions, as they depend on them for storage and data.
+Ensure the Azure Storage emulator and the PostgreSQL database are running before starting the server, as it depends on them for data storage.
 
 ```bash
 cd batch
@@ -67,4 +67,3 @@ func start
 - [Functional documentation](docs/FUNCTIONAL_DOCUMENTATION.md)
 - [Tech stack & developer onboarding](docs/TECH_STACK.md)
 - [UX guidelines & accessibility](docs/UX_GUIDELINES.md)
-- [Azure App Service deployment](docs/DEPLOYMENT_AZURE_APP_SERVICE.md)

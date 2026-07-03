@@ -10,12 +10,14 @@ import { routes } from './app.routes';
 import { tripsFeature } from './trip/store/trip.reducer';
 import { settingsFeature } from './constraints/store/settings.reducer';
 import { expensesFeature } from './expense/store/expense.reducer';
+import { frequentExpenseFeature } from './frequent-expense/store/frequent-expense.reducer';
 import { personalLeaveFeature } from './personal-leave/store/personal-leave.reducer';
 import { receiptsFeature } from './receipt/store/receipt.reducer';
 import { bookingConfirmationsFeature } from './booking-confirmation/store/booking-confirmation.reducer';
 import * as tripEffects from './trip/store/trip.effects';
 import * as settingsEffects from './constraints/store/settings.effects';
 import * as expenseEffects from './expense/store/expense.effects';
+import * as frequentExpenseEffects from './frequent-expense/store/frequent-expense.effects';
 import * as personalLeaveEffects from './personal-leave/store/personal-leave.effects';
 import * as receiptEffects from './receipt/store/receipt.effects';
 import * as bookingConfirmationEffects from './booking-confirmation/store/booking-confirmation.effects';
@@ -37,10 +39,11 @@ export const appConfig: ApplicationConfig = {
       [tripsFeature.name]: tripsFeature.reducer,
       [settingsFeature.name]: settingsFeature.reducer,
       [expensesFeature.name]: expensesFeature.reducer,
+      [frequentExpenseFeature.name]: frequentExpenseFeature.reducer,
       [personalLeaveFeature.name]: personalLeaveFeature.reducer,
       [receiptsFeature.name]: receiptsFeature.reducer,
       [bookingConfirmationsFeature.name]: bookingConfirmationsFeature.reducer,
     }),
-    provideEffects(tripEffects, settingsEffects, expenseEffects, personalLeaveEffects, receiptEffects, bookingConfirmationEffects),
+    provideEffects(tripEffects, settingsEffects, expenseEffects, frequentExpenseEffects, personalLeaveEffects, receiptEffects, bookingConfirmationEffects),
   ],
 };

@@ -77,6 +77,7 @@
     "deleteError": "Une erreur est survenue lors de la suppression du déplacement. Veuillez réessayer.",
     "expensesHeading": "Dépenses",
     "addExpenseButton": "Ajouter une dépense",
+    "addFrequentExpensesButton": "Dépenses fréquentes",
     "noExpenses": "Aucune dépense enregistrée pour ce déplacement.",
     "notFound": "Déplacement introuvable.",
     "trainBookingHeading": "Réservation de train",
@@ -146,6 +147,7 @@
   "planningDashboardNavItem": "Planification",
   "dashboardNavItem": "Tableau de bord",
   "personalLeaveNavItem": "Congés personnels",
+  "frequentExpenseSettingsNavItem": "Dépenses fréquentes",
   "planningDashboard": {
     "heading": "Déplacements à planifier",
     "loading": "Chargement…",
@@ -409,5 +411,45 @@
     "deleteConfirmButton": "Confirmer",
     "cancelDeleteButton": "Annuler",
     "departureLabel": "Gare de départ"
+  },
+  "frequentExpenseSettings": {
+    "title": "Dépenses fréquentes",
+    "loading": "Chargement…"
+  },
+  "frequentExpenseForm": {
+    "createTitle": "Créer une dépense fréquente",
+    "editTitle": "Modifier une dépense fréquente",
+    "category": "Catégorie",
+    "categoryRequired": "La catégorie est requise.",
+    "amount": "Montant",
+    "amountRequired": "Le montant doit être supérieur à 0.",
+    "description": "Description",
+    "descriptionPlaceholder": "Notes optionnelles sur ce modèle…",
+    "descriptionTooLong": "La description ne doit pas dépasser 500 caractères.",
+    "createButton": "Créer le modèle",
+    "updateButton": "Mettre à jour le modèle"
+  },
+  "frequentExpenseList": {
+    "createButton": "Créer un modèle",
+    "empty": "Aucun modèle de dépense fréquente. Créez-en un pour commencer.",
+    "category": "Catégorie",
+    "amount": "Montant",
+    "description": "Description",
+    "actions": "Actions",
+    "editButton": "Modifier",
+    "deleteButton": "Supprimer",
+    "deleteConfirm": "Supprimer le modèle",
+    "deleteConfirmMessage": "Êtes-vous sûr de vouloir supprimer ce modèle ? Cette action ne peut pas être annulée.",
+    "deleteConfirmButton": "Supprimer"
+  },
+  "addFrequentExpensesModal": {
+    "title": "Ajouter des dépenses fréquentes au voyage",
+    "noPresets": "Aucun modèle de dépense fréquente disponible. Créez-en d'abord dans les paramètres.",
+    "date": "Date",
+    "confirmButton": "Ajouter la sélection",
+    "cancelButton": "Annuler"
+  },
+  "common": {
+    "cancel": "Annuler"
   }
 }

@@ -108,13 +108,18 @@ Help users identify valid trip slots quickly.
 - Suggestions must be explainable (why a date is valid/invalid).
 - Conflict alerts should be proactive and actionable.
 
-## Batch 3 - Receipt and proof management
+## Batch 3 - Expense management and presets
 
 ### Objective
-Centralize expense proofs and structure spending data.
+Centralize expense proofs, structure spending data, and streamline frequent expenses through presets.
 
 ### Features
-- Receipt upload:
+- Frequent expense presets:
+  - create expense templates with category, amount, and description
+  - save presets at user level for reuse across trips
+  - manage presets: edit, delete
+  - quick-apply presets to trips with optional date override per preset
+- Receipt and proof management:
   - supported files: PDF and images
   - attach to a trip or a specific day
   - categories: Train, Hotel, Meal, Urban transport, Other
@@ -127,6 +132,9 @@ Centralize expense proofs and structure spending data.
   - proof preview
 
 ### UX expectations
+- Frequent expense preset management should be accessible from a dedicated settings page.
+- Quick-apply modal should clearly show which presets will be added with a checkbox interface.
+- Date override fields should default to the trip start date but allow per-preset customization.
 - Upload must be fast and mobile-friendly.
 - Expense form should prefill context from selected trip/day when possible.
 - Missing mandatory fields must be highlighted clearly.
