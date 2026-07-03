@@ -147,6 +147,7 @@
   "planningDashboardNavItem": "Planning",
   "dashboardNavItem": "Dashboard",
   "personalLeaveNavItem": "Personal leave",
+  "frequentExpenseSettingsNavItem": "Frequent expenses",
   "planningDashboard": {
     "heading": "Trips to plan",
     "loading": "Loading…",
@@ -413,7 +414,7 @@
   },
   "frequentExpenseSettings": {
     "title": "Frequent Expenses",
-    "description": "Create and manage your frequently-used expense presets."
+    "loading": "Loading…"
   },
   "frequentExpenseForm": {
     "createTitle": "Create Frequent Expense",

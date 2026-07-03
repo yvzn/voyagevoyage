@@ -147,6 +147,7 @@
   "planningDashboardNavItem": "Planification",
   "dashboardNavItem": "Tableau de bord",
   "personalLeaveNavItem": "Congés personnels",
+  "frequentExpenseSettingsNavItem": "Dépenses fréquentes",
   "planningDashboard": {
     "heading": "Déplacements à planifier",
     "loading": "Chargement…",
@@ -413,7 +414,7 @@
   },
   "frequentExpenseSettings": {
     "title": "Dépenses fréquentes",
-    "description": "Créez et gérez vos modèles de dépenses les plus utilisés."
+    "loading": "Chargement…"
   },
   "frequentExpenseForm": {
     "createTitle": "Créer une dépense fréquente",

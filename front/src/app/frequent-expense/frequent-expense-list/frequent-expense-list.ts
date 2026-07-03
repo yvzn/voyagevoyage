@@ -3,7 +3,7 @@ import { CommonModule, DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { FrequentExpense, CreateFrequentExpenseRequest, UpdateFrequentExpenseRequest } from '../frequent-expense.model';
-import { selectAllFrequentExpenses, selectDeleteStatus } from '../store/frequent-expense.selectors';
+import { selectAllFrequentExpenses, selectDeleteStatus, selectLoadStatus } from '../store/frequent-expense.selectors';
 import { FrequentExpenseActions } from '../store/frequent-expense.actions';
 import { FrequentExpenseFormComponent } from '../frequent-expense-form/frequent-expense-form';
 
@@ -19,19 +19,21 @@ export class FrequentExpenseListComponent {
 
   protected readonly frequentExpenses = this.store.selectSignal(selectAllFrequentExpenses);
   protected readonly deleteStatus = this.store.selectSignal(selectDeleteStatus);
+  protected readonly loadStatus = this.store.selectSignal(selectLoadStatus);
 
   protected readonly isFormOpen = signal(false);
   protected readonly selectedExpense = signal<FrequentExpense | null>(null);
   protected readonly expenseToDelete = signal<FrequentExpense | null>(null);
 
   protected readonly isDeleting = computed(() => this.deleteStatus() === 'loading');
+  readonly isLoading = computed(() => this.loadStatus() === 'loading');
 
   protected onEdit(expense: FrequentExpense): void {
     this.selectedExpense.set(expense);
     this.isFormOpen.set(true);
   }
 
-  protected onCreate(): void {
+  onCreate(): void {
     this.selectedExpense.set(null);
     this.isFormOpen.set(true);
   }
