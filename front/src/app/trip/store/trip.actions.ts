@@ -9,6 +9,11 @@ export const TripActions = createActionGroup({
     'Load Trips Success': props<{ trips: Trip[] }>(),
     'Load Trips Failure': props<{ error: string }>(),
 
+    // Load a single trip by id (trip detail page, direct navigation)
+    'Load Trip By Id': props<{ id: string }>(),
+    'Load Trip By Id Success': props<{ trip: Trip }>(),
+    'Load Trip By Id Failure': props<{ error: string }>(),
+
     // Create
     'Create Trip': props<{ request: CreateTripRequest }>(),
     'Create Trip Success': props<{ trip: Trip }>(),

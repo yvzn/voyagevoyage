@@ -7,6 +7,7 @@ export type ApiStatus = 'idle' | 'loading' | 'success' | 'failure';
 export interface TripsState {
   trips: Trip[];
   loadStatus: ApiStatus;
+  loadByIdStatus: ApiStatus;
   createStatus: ApiStatus;
   updateStatus: ApiStatus;
   deleteStatus: ApiStatus;
@@ -18,6 +19,7 @@ export interface TripsState {
 const initialState: TripsState = {
   trips: [],
   loadStatus: 'idle',
+  loadByIdStatus: 'idle',
   createStatus: 'idle',
   updateStatus: 'idle',
   deleteStatus: 'idle',
@@ -45,6 +47,25 @@ export const tripsFeature = createFeature({
     on(TripActions.loadTripsFailure, (state, { error }) => ({
       ...state,
       loadStatus: 'failure' as ApiStatus,
+      error,
+    })),
+
+    // Load by id (trip detail page, direct navigation)
+    on(TripActions.loadTripById, (state) => ({
+      ...state,
+      loadByIdStatus: 'loading' as ApiStatus,
+      error: null,
+    })),
+    on(TripActions.loadTripByIdSuccess, (state, { trip }) => ({
+      ...state,
+      trips: state.trips.some((t) => t.id === trip.id)
+        ? state.trips.map((t) => (t.id === trip.id ? trip : t))
+        : [...state.trips, trip],
+      loadByIdStatus: 'success' as ApiStatus,
+    })),
+    on(TripActions.loadTripByIdFailure, (state, { error }) => ({
+      ...state,
+      loadByIdStatus: 'failure' as ApiStatus,
       error,
     })),
 
@@ -114,6 +135,7 @@ export const {
   selectTripsState,
   selectTrips,
   selectLoadStatus,
+  selectLoadByIdStatus,
   selectCreateStatus,
   selectUpdateStatus,
   selectDeleteStatus,

@@ -81,6 +81,7 @@
     "addExpenseButton": "Add expense",
     "addFrequentExpensesButton": "Frequent expenses",
     "noExpenses": "No expenses recorded for this trip.",
+    "loading": "Loading…",
     "notFound": "Trip not found.",
     "trainBookingHeading": "Train booking",
     "trainDeparture": "Departure",

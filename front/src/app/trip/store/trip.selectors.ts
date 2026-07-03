@@ -3,6 +3,10 @@ import { selectTripsState } from './trip.reducer';
 
 export const selectAllTrips = createSelector(selectTripsState, (state) => state.trips);
 export const selectTripsLoadStatus = createSelector(selectTripsState, (state) => state.loadStatus);
+export const selectTripsLoadByIdStatus = createSelector(
+  selectTripsState,
+  (state) => state.loadByIdStatus,
+);
 export const selectTripsCreateStatus = createSelector(
   selectTripsState,
   (state) => state.createStatus,

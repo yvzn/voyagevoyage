@@ -20,6 +20,22 @@ export const loadTripsEffect = createEffect(
   { functional: true },
 );
 
+export const loadTripByIdEffect = createEffect(
+  (actions$ = inject(Actions), tripService = inject(TripService)) =>
+    actions$.pipe(
+      ofType(TripActions.loadTripById),
+      mergeMap(({ id }) =>
+        tripService.getById(id).pipe(
+          map((trip) => TripActions.loadTripByIdSuccess({ trip })),
+          catchError((error: unknown) =>
+            of(TripActions.loadTripByIdFailure({ error: String(error) })),
+          ),
+        ),
+      ),
+    ),
+  { functional: true },
+);
+
 export const createTripEffect = createEffect(
   (actions$ = inject(Actions), tripService = inject(TripService)) =>
     actions$.pipe(

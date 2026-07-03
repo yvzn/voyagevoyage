@@ -81,6 +81,7 @@
     "addExpenseButton": "Ajouter une dépense",
     "addFrequentExpensesButton": "Dépenses fréquentes",
     "noExpenses": "Aucune dépense enregistrée pour ce déplacement.",
+    "loading": "Chargement…",
     "notFound": "Déplacement introuvable.",
     "trainBookingHeading": "Réservation de train",
     "trainDeparture": "Départ",

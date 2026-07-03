@@ -7,7 +7,12 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { TripStatus } from '../trip.model';
 import { TripActions } from '../store/trip.actions';
-import { selectAllTrips, selectTripsDeleteStatus, selectTripsUpdateStatus } from '../store/trip.selectors';
+import {
+  selectAllTrips,
+  selectTripsDeleteStatus,
+  selectTripsUpdateStatus,
+  selectTripsLoadByIdStatus,
+} from '../store/trip.selectors';
 import { TripFormComponent } from '../trip-form/trip-form';
 import { getTripStatusClass, getTripStatusTranslationKey } from '../trip-status.utils';
 import { LocaleService } from '../../locale.service';
@@ -50,6 +55,7 @@ export class TripDetailComponent {
   protected readonly trip = computed(() =>
     this.allTrips().find((t) => t.id === this.tripId()) ?? null
   );
+  protected readonly loadByIdStatus = this.store.selectSignal(selectTripsLoadByIdStatus);
 
   /** Whether the edit form modal is open */
   protected readonly isFormOpen = signal(false);
@@ -149,6 +155,7 @@ export class TripDetailComponent {
     effect(() => {
       const id = this.tripId();
       if (id) {
+        this.store.dispatch(TripActions.loadTripById({ id }));
         this.store.dispatch(ExpenseActions.loadExpenses({ tripId: id }));
         this.store.dispatch(BookingConfirmationActions.loadConfirmationsForTrip({ tripId: id }));
       }

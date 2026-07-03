@@ -522,6 +522,13 @@
       </div>
     </section>
 
+  } @else if (loadByIdStatus() === 'loading') {
+    <!-- Loading state -->
+    <div class="mt-6 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">
+      <p class="text-sm text-gray-500 dark:text-gray-400" role="status">
+        {{ 'tripDetail.loading' | translate }}
+      </p>
+    </div>
   } @else {
     <!-- Trip not found -->
     <div class="mt-6 rounded-xl bg-white p-6 shadow-sm dark:bg-gray-800">

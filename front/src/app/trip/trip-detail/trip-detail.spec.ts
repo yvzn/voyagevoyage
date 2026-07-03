@@ -11,6 +11,7 @@ import { Trip, TripStatus } from '../trip.model';
 import { ApiStatus } from '../store/trip.reducer';
 import { selectAllTrips, selectTripsDeleteStatus } from '../store/trip.selectors';
 import { selectTripsCreateStatus, selectTripsUpdateStatus } from '../store/trip.selectors';
+import { selectTripsLoadByIdStatus } from '../store/trip.selectors';
 import { TripActions } from '../store/trip.actions';
 import { selectConstraints } from '../../constraints/store/settings.selectors';
 import { selectAllExpenses, selectExpensesCreateStatus, selectExpensesLoadStatus, selectExpensesUpdateStatus } from '../../expense/store/expense.selectors';
@@ -137,6 +138,7 @@ async function setupModule(trips: Trip[] = [MOCK_TRIP], tripId = 'trip-1'): Prom
           { selector: selectTripsDeleteStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsCreateStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsUpdateStatus, value: 'idle' as ApiStatus },
+          { selector: selectTripsLoadByIdStatus, value: 'success' as ApiStatus },
           { selector: selectConstraints, value: null },
           { selector: selectAllExpenses, value: [] },
           { selector: selectExpensesLoadStatus, value: 'idle' as ApiStatus },

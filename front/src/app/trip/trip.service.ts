@@ -13,6 +13,10 @@ export class TripService {
     return this.http.get<Trip[]>('/api/trips');
   }
 
+  getById(id: string): Observable<Trip> {
+    return this.http.get<Trip>(`/api/trips/${id}`);
+  }
+
   create(request: CreateTripRequest): Observable<Trip> {
     return this.http.post<Trip>('/api/trips', request);
   }
