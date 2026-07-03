@@ -5,7 +5,9 @@
   "sidenavLabel": "Menu de navigation",
   "calendarNavItem": "Calendrier",
   "constraintsNavItem": "Contraintes de déplacement",
-  "calendarHeading": "Calendrier des voyages",
+  "travelNavSection": "Voyage",
+  "settingsNavSection": "Paramètres",
+  "calendarHeading": "Calendrier",
   "calendarNavLabel": "Navigation du calendrier",
   "previousMonthLabel": "Mois précédent",
   "nextMonthLabel": "Mois suivant",
@@ -144,12 +146,12 @@
     "metroBus": "Métro / Bus",
     "other": "Autre"
   },
-  "planningDashboardNavItem": "Planification",
+  "planningDashboardNavItem": "Planification des voyages",
   "dashboardNavItem": "Tableau de bord",
   "personalLeaveNavItem": "Congés personnels",
-  "frequentExpenseSettingsNavItem": "Dépenses fréquentes",
+  "frequentExpenseSettingsNavItem": "Modèles de dépenses",
   "planningDashboard": {
-    "heading": "Déplacements à planifier",
+    "heading": "Planification des voyages",
     "loading": "Chargement…",
     "loadError": "Impossible de charger les données. Veuillez réessayer.",
     "retry": "Réessayer",
@@ -295,7 +297,7 @@
   "trainBookingNavItem": "Réservations de train",
   "hotelBookingNavItem": "Réservations d'hôtel",
   "trainBookingDashboard": {
-    "heading": "Réservations de train à effectuer",
+    "heading": "Réservations de train",
     "loading": "Chargement…",
     "loadError": "Impossible de charger les données. Veuillez réessayer.",
     "retry": "Réessayer",
@@ -327,7 +329,7 @@
     "saveError": "Une erreur est survenue lors de l’enregistrement. Veuillez réessayer."
   },
   "hotelBookingDashboard": {
-    "heading": "Réservations d'hôtel à effectuer",
+    "heading": "Réservations d'hôtel",
     "loading": "Chargement…",
     "loadError": "Impossible de charger les données. Veuillez réessayer.",
     "retry": "Réessayer",
@@ -413,7 +415,7 @@
     "departureLabel": "Gare de départ"
   },
   "frequentExpenseSettings": {
-    "title": "Dépenses fréquentes",
+    "title": "Modèles de dépenses",
     "loading": "Chargement…"
   },
   "frequentExpenseForm": {

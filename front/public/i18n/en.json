@@ -5,7 +5,9 @@
   "sidenavLabel": "Side navigation",
   "calendarNavItem": "Calendar",
   "constraintsNavItem": "Travel constraints",
-  "calendarHeading": "Trip calendar",
+  "travelNavSection": "Travel",
+  "settingsNavSection": "Settings",
+  "calendarHeading": "Calendar",
   "calendarNavLabel": "Calendar navigation",
   "previousMonthLabel": "Previous month",
   "nextMonthLabel": "Next month",
@@ -144,12 +146,12 @@
     "metroBus": "Metro / Bus",
     "other": "Other"
   },
-  "planningDashboardNavItem": "Planning",
+  "planningDashboardNavItem": "Trip Planning",
   "dashboardNavItem": "Dashboard",
   "personalLeaveNavItem": "Personal leave",
-  "frequentExpenseSettingsNavItem": "Frequent expenses",
+  "frequentExpenseSettingsNavItem": "Expense Templates",
   "planningDashboard": {
-    "heading": "Trips to plan",
+    "heading": "Trip Planning",
     "loading": "Loading…",
     "loadError": "Failed to load data. Please try again.",
     "retry": "Retry",
@@ -295,7 +297,7 @@
   "trainBookingNavItem": "Train bookings",
   "hotelBookingNavItem": "Hotel bookings",
   "trainBookingDashboard": {
-    "heading": "Train bookings to make",
+    "heading": "Train bookings",
     "loading": "Loading…",
     "loadError": "Failed to load data. Please try again.",
     "retry": "Retry",
@@ -327,7 +329,7 @@
     "saveError": "An error occurred while saving. Please try again."
   },
   "hotelBookingDashboard": {
-    "heading": "Hotel bookings to make",
+    "heading": "Hotel bookings",
     "loading": "Loading…",
     "loadError": "Failed to load data. Please try again.",
     "retry": "Retry",
@@ -413,7 +415,7 @@
     "parseError": "Could not parse the file. Check the format and try again."
   },
   "frequentExpenseSettings": {
-    "title": "Frequent Expenses",
+    "title": "Expense Templates",
     "loading": "Loading…"
   },
   "frequentExpenseForm": {
