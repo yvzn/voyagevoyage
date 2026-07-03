@@ -6,7 +6,8 @@ export function getTripsNeedingTrainBooking(
   trips: Trip[],
   thresholdDays: number,
 ): Trip[] {
-  const todayTs = Date.now();
+  const now = new Date();
+  const todayTs = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
   const thresholdTs = todayTs + thresholdDays * MILLISECONDS_PER_DAY;
 
   return trips

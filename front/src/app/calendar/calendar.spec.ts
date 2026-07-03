@@ -12,6 +12,7 @@ import { selectConstraints } from '../constraints/store/settings.selectors';
 import { selectConstraintsPerDay } from './calendar.selectors';
 import { ApiStatus } from '../trip/store/trip.reducer';
 import { TripActions } from '../trip/store/trip.actions';
+import { selectAllExpenses } from '../expense/store/expense.selectors';
 
 const EN_TRANSLATIONS = {
   calendarHeading: 'Trip calendar',
@@ -89,6 +90,7 @@ async function setupWithMockStore(trips: Trip[] = []): Promise<MockStore> {
           { selector: selectTripsDeleteStatus, value: 'idle' as ApiStatus },
           { selector: selectCalendarMonth, value: new Date().getMonth() },
           { selector: selectCalendarYear, value: new Date().getFullYear() },
+          { selector: selectAllExpenses, value: [] },
         ],
       }),
     ],
