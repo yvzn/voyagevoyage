@@ -1,4 +1,4 @@
-import { Component, input, output, inject, signal, computed, ChangeDetectionStrategy, AfterViewInit, ElementRef, viewChild } from '@angular/core';
+import { Component, input, output, inject, signal, computed, effect, ChangeDetectionStrategy, AfterViewInit, ElementRef, viewChild } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormArray, Validators } from '@angular/forms';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -35,7 +35,7 @@ export class AddFrequentExpensesModalComponent implements AfterViewInit {
 
   constructor() {
     this.store.dispatch(FrequentExpenseActions.loadFrequentExpenses());
-    this.updateExpensesFormArray();
+    effect(() => this.updateExpensesFormArray());
   }
 
   private updateExpensesFormArray(): void {
