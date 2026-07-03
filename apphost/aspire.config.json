@@ -8,10 +8,10 @@
   },
   "profiles": {
     "https": {
-      "applicationUrl": "https://localhost:27616;http://localhost:33827",
+      "applicationUrl": "https://localhost:20478;http://localhost:43530",
       "environmentVariables": {
-        "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:43327",
-        "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:20462"
+        "ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:28380",
+        "ASPIRE_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:23705"
       }
     }
   },
