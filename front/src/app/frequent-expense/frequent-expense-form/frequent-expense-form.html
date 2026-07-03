@@ -1,0 +1,102 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate [attr.aria-busy]="isSubmitting() ? 'true' : null">
+  <fieldset [disabled]="isSubmitting()">
+    <legend class="sr-only">{{ (isEdit() ? 'frequentExpenseForm.editTitle' : 'frequentExpenseForm.createTitle') | translate }}</legend>
+
+    <!-- Category -->
+    <div class="mb-4">
+      <label
+        for="frequent-expense-category"
+        class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+      >
+        {{ 'frequentExpenseForm.category' | translate }}
+        <span class="text-red-600" aria-hidden="true">*</span>
+      </label>
+      <select
+        id="frequent-expense-category"
+        formControlName="category"
+        class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+      >
+        @for (cat of expenseCategories; track cat) {
+          <option [value]="cat">{{ getCategoryTranslationKey(cat) | translate }}</option>
+        }
+      </select>
+      @if (form.get('category')?.invalid && form.get('category')?.touched) {
+        <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+          {{ 'frequentExpenseForm.categoryRequired' | translate }}
+        </p>
+      }
+    </div>
+
+    <!-- Amount -->
+    <div class="mb-4">
+      <label
+        for="frequent-expense-amount"
+        class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+      >
+        {{ 'frequentExpenseForm.amount' | translate }}
+        <span class="text-red-600" aria-hidden="true">*</span>
+      </label>
+      <input
+        id="frequent-expense-amount"
+        type="number"
+        formControlName="amount"
+        min="0.01"
+        step="0.01"
+        class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+        [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('amount')?.invalid && form.get('amount')?.touched }"
+      />
+      @if (form.get('amount')?.invalid && form.get('amount')?.touched) {
+        <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+          {{ 'frequentExpenseForm.amountRequired' | translate }}
+        </p>
+      }
+    </div>
+
+    <!-- Description -->
+    <div class="mb-6">
+      <label
+        for="frequent-expense-description"
+        class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+      >
+        {{ 'frequentExpenseForm.description' | translate }}
+      </label>
+      <textarea
+        id="frequent-expense-description"
+        formControlName="description"
+        rows="3"
+        class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+        placeholder="{{ 'frequentExpenseForm.descriptionPlaceholder' | translate }}"
+      ></textarea>
+      @if (form.get('description')?.invalid && form.get('description')?.touched) {
+        <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+          {{ 'frequentExpenseForm.descriptionTooLong' | translate }}
+        </p>
+      }
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex items-center justify-end gap-2">
+      <button
+        type="button"
+        (click)="onCancel()"
+        [disabled]="isSubmitting()"
+        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+      >
+        {{ 'common.cancel' | translate }}
+      </button>
+      <button
+        type="submit"
+        [disabled]="form.invalid || isSubmitting()"
+        class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
+      >
+        @if (isSubmitting()) {
+          <svg class="h-4 w-4 animate-spin mr-2 inline" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        }
+        {{ (isEdit() ? 'frequentExpenseForm.updateButton' : 'frequentExpenseForm.createButton') | translate }}
+      </button>
+    </div>
+  </fieldset>
+</form>

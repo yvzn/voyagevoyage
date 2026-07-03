@@ -9,6 +9,7 @@ import { PersonalLeavePageComponent } from './personal-leave/personal-leave-page
 import { PersonalLeaveDetailComponent } from './personal-leave/personal-leave-detail/personal-leave-detail';
 import { TrainBookingListComponent } from './train-booking/train-booking-list/train-booking-list';
 import { HotelBookingListComponent } from './hotel-booking/hotel-booking-list/hotel-booking-list';
+import { FrequentExpenseSettingsComponent } from './frequent-expense/frequent-expense-settings/frequent-expense-settings';
 
 export const routes: Routes = [
   {
@@ -43,6 +44,10 @@ export const routes: Routes = [
   {
     path: 'constraints',
     component: ConstraintsSettingsComponent,
+  },
+  {
+    path: 'frequent-expenses',
+    component: FrequentExpenseSettingsComponent,
   },
   {
     path: 'personal-leaves',

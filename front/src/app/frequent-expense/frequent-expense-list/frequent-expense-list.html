@@ -1,0 +1,96 @@
+<div class="space-y-4">
+  <!-- Create Button -->
+  <button
+    (click)="onCreate()"
+    class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer"
+  >
+    {{ 'frequentExpenseList.createButton' | translate }}
+  </button>
+
+  <!-- Empty State -->
+  @if (frequentExpenses().length === 0) {
+    <div class="rounded-lg bg-gray-50 p-6 text-center dark:bg-gray-800">
+      <p class="text-gray-600 dark:text-gray-400">{{ 'frequentExpenseList.empty' | translate }}</p>
+    </div>
+  } @else {
+    <!-- List Table -->
+    <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-gray-100 dark:bg-gray-800">
+          <tr>
+            <th class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ 'frequentExpenseList.category' | translate }}</th>
+            <th class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ 'frequentExpenseList.amount' | translate }}</th>
+            <th class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ 'frequentExpenseList.description' | translate }}</th>
+            <th class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ 'frequentExpenseList.actions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (expense of frequentExpenses(); track expense.id) {
+            <tr class="border-t border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
+              <td class="px-4 py-3">{{ ('expenseCategory.' + expense.category) | translate }}</td>
+              <td class="px-4 py-3">{{ expense.amount | number: '1.2-2' }}</td>
+              <td class="px-4 py-3 max-w-xs truncate">{{ expense.description || '-' }}</td>
+              <td class="px-4 py-3 flex gap-2">
+                <button
+                  (click)="onEdit(expense)"
+                  class="text-blue-600 hover:underline dark:text-blue-400 cursor-pointer"
+                >
+                  {{ 'frequentExpenseList.editButton' | translate }}
+                </button>
+                <button
+                  (click)="onDeleteClick(expense)"
+                  class="text-red-600 hover:underline dark:text-red-400 cursor-pointer"
+                >
+                  {{ 'frequentExpenseList.deleteButton' | translate }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- Form Modal -->
+  @if (isFormOpen()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
+        <h2 class="mb-4 text-lg font-semibold">
+          {{ (selectedExpense() ? 'frequentExpenseForm.editTitle' : 'frequentExpenseForm.createTitle') | translate }}
+        </h2>
+        <app-frequent-expense-form
+          [frequentExpense]="selectedExpense()"
+          [isSubmitting]="false"
+          (saved)="onFormSaved($event)"
+          (cancelled)="onFormCancelled()"
+        />
+      </div>
+    </div>
+  }
+
+  <!-- Delete Confirmation Dialog -->
+  @if (expenseToDelete()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div class="w-full max-w-sm rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
+        <h3 class="mb-4 text-lg font-semibold">{{ 'frequentExpenseList.deleteConfirm' | translate }}</h3>
+        <p class="mb-6 text-gray-600 dark:text-gray-400">{{ 'frequentExpenseList.deleteConfirmMessage' | translate }}</p>
+        <div class="flex gap-2">
+          <button
+            (click)="onConfirmDelete()"
+            [disabled]="isDeleting()"
+            class="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer"
+          >
+            {{ 'frequentExpenseList.deleteConfirmButton' | translate }}
+          </button>
+          <button
+            (click)="onCancelDelete()"
+            [disabled]="isDeleting()"
+            class="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 disabled:bg-gray-100 disabled:cursor-not-allowed dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 cursor-pointer"
+          >
+            {{ 'common.cancel' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
