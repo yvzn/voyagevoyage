@@ -22,6 +22,7 @@ export interface TripSlotSuggestion {
   startDate: string; // YYYY-MM-DD
   endDate: string; // YYYY-MM-DD
   durationDays: number;
+  hasExistingTrip: boolean;
 }
 
 export const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -114,7 +115,8 @@ export function suggestTripSlots(
   constraints: TravelConstraints,
   publicHolidays: PublicHoliday[],
   personalLeaves: PersonalLeave[],
-  maxSuggestions: number = 3,
+  maxSuggestions: number = 4,
+  trips: Trip[] = [],
 ): TripSlotSuggestion[] {
   if (remainingDays <= 0) return [];
 
@@ -161,6 +163,7 @@ export function suggestTripSlots(
 
   // Convert runs to suggestions, trimming each to remainingDays
   const suggestions: TripSlotSuggestion[] = [];
+  const activeTrips = trips.filter((t) => t.status !== TripStatus.Cancelled);
 
   for (const run of runs) {
     if (suggestions.length >= maxSuggestions) break;
@@ -174,7 +177,11 @@ export function suggestTripSlots(
       endDate = formatDateLocal(d);
     }
 
-    suggestions.push({ startDate: run.start, endDate, durationDays });
+    const hasExistingTrip = activeTrips.some(
+      (t) => t.startDate <= endDate && t.endDate >= run.start,
+    );
+
+    suggestions.push({ startDate: run.start, endDate, durationDays, hasExistingTrip });
   }
 
   return suggestions;

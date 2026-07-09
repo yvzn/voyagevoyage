@@ -167,6 +167,7 @@
     "noSuggestions": "No valid slots found for this month.",
     "suggestionLabel": "{{days}} day(s): {{startDate}} – {{endDate}}",
     "acceptSuggestion": "Accept",
+    "existingTripWarning": "A trip already exists on these dates.",
     "dismissSuggestions": "Close"
   },
   "dashboard": {

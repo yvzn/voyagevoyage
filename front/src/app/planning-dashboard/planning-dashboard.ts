@@ -89,6 +89,8 @@ export class PlanningDashboardComponent {
       constraints,
       this.publicHolidays(),
       this.personalLeaves(),
+      4,
+      this.trips(),
     );
   });
 

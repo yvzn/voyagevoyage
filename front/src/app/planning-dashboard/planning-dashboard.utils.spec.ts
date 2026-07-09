@@ -228,4 +228,30 @@ describe('suggestTripSlots', () => {
     expect(result[0].endDate).toBe('2026-03-02');
     expect(result[1].startDate).toBe('2026-03-04');
   });
+
+  it('returns up to 4 suggestions by default', () => {
+    const constraints = { ...SUGGEST_CONSTRAINTS, allowedDaysOfWeek: [DayOfWeek.Monday] };
+    // Every Monday in March 2026 is its own isolated run → more than 4 candidate windows
+    const result = suggestTripSlots(2026, 2, 1, constraints, [], []);
+    expect(result.length).toBeLessThanOrEqual(4);
+    expect(result.length).toBe(4);
+  });
+
+  it('flags a suggestion that overlaps an existing non-cancelled trip', () => {
+    const trip = makeTrip({ id: 't1', startDate: '2026-03-01', endDate: '2026-03-02', status: TripStatus.Planned });
+    const result = suggestTripSlots(2026, 2, 5, SUGGEST_CONSTRAINTS, [], [], 1, [trip]);
+    expect(result[0].hasExistingTrip).toBe(true);
+  });
+
+  it('does not flag a suggestion when the overlapping trip is cancelled', () => {
+    const trip = makeTrip({ id: 't1', startDate: '2026-03-01', endDate: '2026-03-02', status: TripStatus.Cancelled });
+    const result = suggestTripSlots(2026, 2, 5, SUGGEST_CONSTRAINTS, [], [], 1, [trip]);
+    expect(result[0].hasExistingTrip).toBe(false);
+  });
+
+  it('does not flag a suggestion with no overlapping trip', () => {
+    const trip = makeTrip({ id: 't1', startDate: '2026-04-01', endDate: '2026-04-02', status: TripStatus.Planned });
+    const result = suggestTripSlots(2026, 2, 5, SUGGEST_CONSTRAINTS, [], [], 1, [trip]);
+    expect(result[0].hasExistingTrip).toBe(false);
+  });
 });

@@ -167,6 +167,7 @@
     "noSuggestions": "Aucun créneau valide trouvé pour ce mois.",
     "suggestionLabel": "{{days}} jour(s) : {{startDate}} – {{endDate}}",
     "acceptSuggestion": "Accepter",
+    "existingTripWarning": "Un déplacement existe déjà à ces dates.",
     "dismissSuggestions": "Fermer"
   },
   "dashboard": {
