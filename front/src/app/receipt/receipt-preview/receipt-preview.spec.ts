@@ -107,7 +107,7 @@ describe('ReceiptPreviewComponent', () => {
     const emitSpy = vi.spyOn(component['closed'], 'emit');
     
     // Find and click the close button
-    const closeButton = fixture.nativeElement.querySelector('button[aria-label*="Close"]');
+    const closeButton = fixture.nativeElement.querySelector('#receipt-preview-close-button');
     expect(closeButton).toBeTruthy();
     
     closeButton.click();
