@@ -2,7 +2,7 @@
 
 ## Repo layout and ownership
 
-- `front/`: Angular 21 application (UI).
+- `front/`: Angular 22 application (UI).
 - `server/`: ASP.NET Core Web API (`net10.0`).
 - `batch/`: Azure Functions isolated worker (`net10.0`, Functions v4).
 - `docs/`: product constraints. Read before non-trivial changes:
@@ -25,7 +25,7 @@ Before implementing features, align with these project rules from docs:
 
 ### Frontend (`front/`)
 
-- Angular 21 standalone component style.
+- Angular 22 standalone component style.
 - Use Reactive Forms for business forms and non-trivial validation.
 - Use NgRx for shared/business-crossing state; use signals for local UI state.
 - Prefer modern Angular template control flow blocks.

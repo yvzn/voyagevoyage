@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { provideRouter } from '@angular/router';
 import { Router } from '@angular/router';
@@ -92,8 +92,9 @@ async function setupModule(
   expenseId = 'expense-1',
 ): Promise<MockStore> {
   await TestBed.configureTestingModule({
-    imports: [ExpenseDetailComponent, TranslateModule.forRoot()],
+    imports: [ExpenseDetailComponent],
     providers: [
+      provideTranslateService(),
       provideRouter([]),
       {
         provide: ActivatedRoute,

@@ -1,7 +1,7 @@
-import { ApplicationConfig, importProvidersFrom, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withXhr } from '@angular/common/http';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
@@ -27,13 +27,9 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideHttpClient(withXhr()),
-    importProvidersFrom(
-      TranslateModule.forRoot({
-        lang: 'en',
-      })
-    ),
-    // provideTranslateHttpLoader must come after forRoot so its TranslateLoader
-    // registration overrides the default TranslateNoOpLoader registered by forRoot.
+    // provideTranslateHttpLoader must come after provideTranslateService so its
+    // TranslateLoader registration overrides the default TranslateNoOpLoader.
+    provideTranslateService({ lang: 'en' }),
     provideTranslateHttpLoader({ prefix: '/i18n/', suffix: '.json' }),
     provideStore({
       [tripsFeature.name]: tripsFeature.reducer,

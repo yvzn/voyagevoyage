@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { PersonalLeaveFormComponent } from './personal-leave-form';
 import { PersonalLeave, LeaveType } from '../personal-leave.model';
@@ -39,8 +39,9 @@ beforeEach(() => {
 
 async function setupModule(): Promise<MockStore> {
   await TestBed.configureTestingModule({
-    imports: [PersonalLeaveFormComponent, TranslateModule.forRoot()],
+    imports: [PersonalLeaveFormComponent],
     providers: [
+      provideTranslateService(),
       provideMockStore({
         selectors: [
           { selector: selectPersonalLeavesCreateStatus, value: 'idle' as ApiStatus },

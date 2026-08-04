@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { provideMockStore } from '@ngrx/store/testing';
 import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
@@ -37,8 +37,9 @@ const EN_TRANSLATIONS = {
 
 async function setupWithMockStore(trips: Trip[] = []): Promise<void> {
   await TestBed.configureTestingModule({
-    imports: [DashboardComponent, TranslateModule.forRoot()],
+    imports: [DashboardComponent],
     providers: [
+      provideTranslateService(),
       provideRouter([]),
       provideMockStore({
         selectors: [

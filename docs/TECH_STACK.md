@@ -270,8 +270,8 @@ Mandatory rules:
 - dates, numbers, currencies, and percentages must be formatted using JavaScript's `Intl` APIs (`Intl.DateTimeFormat`, `Intl.NumberFormat`), passing the active locale from `LocaleService.currentLocale()`
 - translation files are maintained as JSON assets under `front/public/i18n/`
 - `TranslatePipe` must be explicitly imported in every standalone component that uses it
-- `TranslateModule.forRoot(...)` is configured once in `app.config.ts` with `TranslateHttpLoader` pointing to `/i18n/{lang}.json`
-- in tests, use `TranslateModule.forRoot()` and load translations via `TranslateService.setTranslation()` in `beforeEach`
+- `provideTranslateService(...)` is configured once in `app.config.ts` with `provideTranslateHttpLoader` pointing to `/i18n/{lang}.json`
+- in tests, add `provideTranslateService()` to `TestBed`'s `providers` and load translations via `TranslateService.setTranslation()` in `beforeEach`
 
 Expected usage in templates:
 ```html

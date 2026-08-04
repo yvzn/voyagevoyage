@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { vi } from 'vitest';
 import { ApiStatus as ExpenseApiStatus } from '../store/expense.reducer';
@@ -48,8 +48,9 @@ beforeEach(() => {
 
 async function setupModule(): Promise<MockStore> {
   await TestBed.configureTestingModule({
-    imports: [ExpenseFormComponent, TranslateModule.forRoot()],
+    imports: [ExpenseFormComponent],
     providers: [
+      provideTranslateService(),
       provideMockStore({
         selectors: [
           { selector: selectExpensesCreateStatus, value: 'idle' as ExpenseApiStatus },

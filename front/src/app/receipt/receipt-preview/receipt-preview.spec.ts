@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { ReceiptPreviewComponent } from './receipt-preview';
 import { ReceiptService } from '../receipt.service';
 import { vi } from 'vitest';
@@ -12,10 +12,9 @@ describe('ReceiptPreviewComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      imports: [TranslateModule.forRoot()],
       providers: [
+        provideTranslateService(),
         { provide: ReceiptService, useValue: receiptServiceSpy },
-        TranslateService
       ]
     }).compileComponents();
   });

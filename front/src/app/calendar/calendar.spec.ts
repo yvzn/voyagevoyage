@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { provideRouter } from '@angular/router';
 import { Router } from '@angular/router';
@@ -75,8 +75,9 @@ const EN_TRANSLATIONS = {
 async function setupWithMockStore(trips: Trip[] = []): Promise<MockStore> {
   let store: MockStore;
   await TestBed.configureTestingModule({
-    imports: [CalendarComponent, TranslateModule.forRoot()],
+    imports: [CalendarComponent],
     providers: [
+      provideTranslateService(),
       provideRouter([]),
       provideMockStore({
         selectors: [

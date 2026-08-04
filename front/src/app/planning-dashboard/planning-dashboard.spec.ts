@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { provideMockStore } from '@ngrx/store/testing';
 import { provideRouter } from '@angular/router';
 import { vi } from 'vitest';
@@ -54,8 +54,9 @@ async function setupWithMockStore(
   constraints: TravelConstraints | null = DEFAULT_CONSTRAINTS,
 ): Promise<void> {
   await TestBed.configureTestingModule({
-    imports: [PlanningDashboardComponent, TranslateModule.forRoot()],
+    imports: [PlanningDashboardComponent],
     providers: [
+      provideTranslateService(),
       provideRouter([]),
       provideMockStore({
         selectors: [
@@ -169,8 +170,9 @@ describe('PlanningDashboardComponent', () => {
   it('should show retry button on error', async () => {
     await TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
-      imports: [PlanningDashboardComponent, TranslateModule.forRoot()],
+      imports: [PlanningDashboardComponent],
       providers: [
+        provideTranslateService(),
         provideRouter([]),
         provideMockStore({
           selectors: [

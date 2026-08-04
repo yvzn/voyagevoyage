@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { TripFormComponent } from './trip-form';
 import { Trip, TripStatus } from '../trip.model';
@@ -48,8 +48,9 @@ async function setupModule(
   constraints: TravelConstraints | null = null,
 ): Promise<MockStore> {
   await TestBed.configureTestingModule({
-    imports: [TripFormComponent, TranslateModule.forRoot()],
+    imports: [TripFormComponent],
     providers: [
+      provideTranslateService(),
       provideMockStore({
         selectors: [
           { selector: selectConstraints, value: constraints },

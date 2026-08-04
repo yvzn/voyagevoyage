@@ -6,7 +6,7 @@ A travel and expense management assistant for recurring professional trips. It s
 
 | Layer | Technology |
 |---|---|
-| Front end | Angular 21, Tailwind CSS, Flowbite, NgRx, ngx-translate |
+| Front end | Angular 22, Tailwind CSS, Flowbite, NgRx, ngx-translate |
 | Backend | ASP.NET Core Web API (.NET 10) |
 | Background jobs | Azure Functions isolated worker (.NET 10, Functions v4) |
 | Storage | PostgreSQL (metadata) + Azure Storage (files/receipts) |

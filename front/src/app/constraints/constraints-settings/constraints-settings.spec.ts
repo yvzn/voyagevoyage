@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { vi } from 'vitest';
 import { ConstraintsSettingsComponent } from './constraints-settings';
@@ -60,8 +60,9 @@ async function setupModule(
   loadStatus: ApiStatus = 'idle',
 ): Promise<MockStore> {
   await TestBed.configureTestingModule({
-    imports: [ConstraintsSettingsComponent, TranslateModule.forRoot()],
+    imports: [ConstraintsSettingsComponent],
     providers: [
+      provideTranslateService(),
       provideRouter([]),
       provideMockStore({
         selectors: [
