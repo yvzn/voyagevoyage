@@ -1,0 +1,119 @@
+<div>
+  <!-- Loading skeleton -->
+  @if (isLoading()) {
+    <ul class="space-y-3" aria-busy="true" aria-live="polite">
+      @for (_ of [1, 2, 3]; track $index) {
+        <li class="animate-pulse rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div class="flex items-center gap-2">
+            <div class="h-4 w-24 rounded bg-gray-200 dark:bg-gray-700"></div>
+            <div class="h-4 w-16 rounded bg-gray-200 dark:bg-gray-700"></div>
+          </div>
+          <div class="mt-2 h-3 w-32 rounded bg-gray-200 dark:bg-gray-700"></div>
+        </li>
+      }
+    </ul>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading() && fiscalRules().length === 0) {
+    <p class="text-sm text-gray-500 dark:text-gray-400">{{ 'fiscalRuleList.empty' | translate }}</p>
+  } @else if (!isLoading()) {
+    <ul class="space-y-3">
+      @for (rule of fiscalRules(); track rule.id) {
+        <li class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="font-medium text-gray-900 dark:text-white">
+                  {{ rule.startDate | date: 'mediumDate' }} — {{ rule.endDate | date: 'mediumDate' }}
+                </span>
+              </div>
+              <dl class="mt-2 grid grid-cols-1 gap-x-4 gap-y-1 text-sm text-gray-600 dark:text-gray-300 sm:grid-cols-3">
+                <div class="flex gap-1">
+                  <dt class="font-medium">{{ 'fiscalRuleList.mealAllowance' | translate }}:</dt>
+                  <dd>{{ rule.mealAllowance | number: '1.2-2' }}</dd>
+                </div>
+                <div class="flex gap-1">
+                  <dt class="font-medium">{{ 'fiscalRuleList.mealVoucherContribution' | translate }}:</dt>
+                  <dd>{{ rule.mealVoucherContribution | number: '1.2-2' }}</dd>
+                </div>
+                <div class="flex gap-1">
+                  <dt class="font-medium">{{ 'fiscalRuleList.remoteWorkAllowance' | translate }}:</dt>
+                  <dd>{{ rule.remoteWorkAllowance | number: '1.2-2' }}</dd>
+                </div>
+              </dl>
+            </div>
+            <div class="flex flex-shrink-0 gap-2">
+              <button
+                type="button"
+                (click)="onEdit(rule)"
+                class="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+              >
+                <svg class="h-3.5 w-3.5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
+                </svg>
+                {{ 'fiscalRuleList.editButton' | translate }}
+              </button>
+              <button
+                type="button"
+                (click)="onDeleteClick(rule)"
+                class="inline-flex items-center gap-1 rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300 dark:border-red-600 dark:bg-gray-700 dark:text-red-400 dark:hover:bg-gray-600"
+              >
+                <svg class="h-3.5 w-3.5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                </svg>
+                {{ 'fiscalRuleList.deleteButton' | translate }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Inline delete confirmation -->
+          @if (ruleToDelete()?.id === rule.id) {
+            <div class="mt-3 flex flex-wrap items-center gap-3 rounded-lg bg-red-50 p-3 text-sm dark:bg-red-900/20">
+              <span class="flex-1 text-red-800 dark:text-red-300">{{ 'fiscalRuleList.deleteConfirmMessage' | translate }}</span>
+              <button
+                type="button"
+                (click)="onConfirmDelete()"
+                [disabled]="isDeleting()"
+                class="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300 disabled:opacity-50 dark:bg-red-700 dark:hover:bg-red-600"
+              >
+                @if (isDeleting()) {
+                  <svg class="h-3.5 w-3.5 animate-spin" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.036l3-2.745z"/>
+                  </svg>
+                }
+                {{ 'fiscalRuleList.deleteConfirmButton' | translate }}
+              </button>
+              <button
+                type="button"
+                (click)="onCancelDelete()"
+                [disabled]="isDeleting()"
+                class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+              >
+                {{ 'common.cancel' | translate }}
+              </button>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+
+  <!-- Form Modal -->
+  @if (isFormOpen()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
+        <h2 class="mb-4 text-lg font-semibold">
+          {{ (selectedRule() ? 'fiscalRuleForm.editTitle' : 'fiscalRuleForm.createTitle') | translate }}
+        </h2>
+        <app-fiscal-rule-form
+          [fiscalRule]="selectedRule()"
+          [isSubmitting]="false"
+          (saved)="onFormSaved($event)"
+          (cancelled)="onFormCancelled()"
+        />
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,158 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate [attr.aria-busy]="isSubmitting() ? 'true' : null">
+  <fieldset [disabled]="isSubmitting()">
+    <legend class="sr-only">{{ (isEdit() ? 'fiscalRuleForm.editTitle' : 'fiscalRuleForm.createTitle') | translate }}</legend>
+
+    <!-- Period -->
+    <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div>
+        <label
+          for="fiscal-rule-start-date"
+          class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+        >
+          {{ 'fiscalRuleForm.startDate' | translate }}
+          <span class="text-red-600" aria-hidden="true">*</span>
+        </label>
+        <input
+          id="fiscal-rule-start-date"
+          type="date"
+          formControlName="startDate"
+          class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('startDate')?.invalid && form.get('startDate')?.touched }"
+        />
+        @if (form.get('startDate')?.invalid && form.get('startDate')?.touched) {
+          <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+            {{ 'fiscalRuleForm.startDateRequired' | translate }}
+          </p>
+        }
+      </div>
+
+      <div>
+        <label
+          for="fiscal-rule-end-date"
+          class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+        >
+          {{ 'fiscalRuleForm.endDate' | translate }}
+          <span class="text-red-600" aria-hidden="true">*</span>
+        </label>
+        <input
+          id="fiscal-rule-end-date"
+          type="date"
+          formControlName="endDate"
+          class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('endDate')?.invalid && form.get('endDate')?.touched }"
+        />
+        @if (form.get('endDate')?.invalid && form.get('endDate')?.touched) {
+          <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+            {{ 'fiscalRuleForm.endDateRequired' | translate }}
+          </p>
+        }
+      </div>
+    </div>
+
+    @if (form.errors?.['dateRangeInvalid'] && form.get('endDate')?.touched) {
+      <p class="mb-4 text-xs text-red-600 dark:text-red-400" role="alert">
+        {{ 'fiscalRuleForm.dateRangeInvalid' | translate }}
+      </p>
+    }
+
+    <!-- Meal allowance -->
+    <div class="mb-4">
+      <label
+        for="fiscal-rule-meal-allowance"
+        class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+      >
+        {{ 'fiscalRuleForm.mealAllowance' | translate }}
+        <span class="text-red-600" aria-hidden="true">*</span>
+      </label>
+      <input
+        id="fiscal-rule-meal-allowance"
+        type="number"
+        formControlName="mealAllowance"
+        min="0"
+        step="0.01"
+        class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+        [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('mealAllowance')?.invalid && form.get('mealAllowance')?.touched }"
+      />
+      @if (form.get('mealAllowance')?.invalid && form.get('mealAllowance')?.touched) {
+        <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+          {{ 'fiscalRuleForm.amountRequired' | translate }}
+        </p>
+      }
+    </div>
+
+    <!-- Meal voucher contribution -->
+    <div class="mb-4">
+      <label
+        for="fiscal-rule-meal-voucher-contribution"
+        class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+      >
+        {{ 'fiscalRuleForm.mealVoucherContribution' | translate }}
+        <span class="text-red-600" aria-hidden="true">*</span>
+      </label>
+      <input
+        id="fiscal-rule-meal-voucher-contribution"
+        type="number"
+        formControlName="mealVoucherContribution"
+        min="0"
+        step="0.01"
+        class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+        [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('mealVoucherContribution')?.invalid && form.get('mealVoucherContribution')?.touched }"
+      />
+      @if (form.get('mealVoucherContribution')?.invalid && form.get('mealVoucherContribution')?.touched) {
+        <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+          {{ 'fiscalRuleForm.amountRequired' | translate }}
+        </p>
+      }
+    </div>
+
+    <!-- Remote work allowance -->
+    <div class="mb-6">
+      <label
+        for="fiscal-rule-remote-work-allowance"
+        class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+      >
+        {{ 'fiscalRuleForm.remoteWorkAllowance' | translate }}
+        <span class="text-red-600" aria-hidden="true">*</span>
+      </label>
+      <input
+        id="fiscal-rule-remote-work-allowance"
+        type="number"
+        formControlName="remoteWorkAllowance"
+        min="0"
+        step="0.01"
+        class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+        [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('remoteWorkAllowance')?.invalid && form.get('remoteWorkAllowance')?.touched }"
+      />
+      @if (form.get('remoteWorkAllowance')?.invalid && form.get('remoteWorkAllowance')?.touched) {
+        <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+          {{ 'fiscalRuleForm.amountRequired' | translate }}
+        </p>
+      }
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex items-center justify-end gap-2">
+      <button
+        type="button"
+        (click)="onCancel()"
+        [disabled]="isSubmitting()"
+        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+      >
+        {{ 'common.cancel' | translate }}
+      </button>
+      <button
+        type="submit"
+        [disabled]="form.invalid || isSubmitting()"
+        class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
+      >
+        @if (isSubmitting()) {
+          <svg class="h-4 w-4 animate-spin mr-2 inline" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        }
+        {{ (isEdit() ? 'fiscalRuleForm.updateButton' : 'fiscalRuleForm.createButton') | translate }}
+      </button>
+    </div>
+  </fieldset>
+</form>

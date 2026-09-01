@@ -151,6 +151,7 @@
   "dashboardNavItem": "Dashboard",
   "personalLeaveNavItem": "Personal leave",
   "frequentExpenseSettingsNavItem": "Expense Templates",
+  "fiscalRuleSettingsNavItem": "Fiscal Rules",
   "planningDashboard": {
     "heading": "Trip Planning",
     "loading": "Loading…",
@@ -444,6 +445,37 @@
     "deleteButton": "Delete",
     "deleteConfirm": "Delete Preset",
     "deleteConfirmMessage": "Are you sure you want to delete this preset? This action cannot be undone.",
+    "deleteConfirmButton": "Delete"
+  },
+  "fiscalRuleSettings": {
+    "title": "Fiscal Rules",
+    "loading": "Loading…"
+  },
+  "fiscalRuleForm": {
+    "createTitle": "Create Fiscal Rule",
+    "editTitle": "Edit Fiscal Rule",
+    "startDate": "Start date",
+    "startDateRequired": "Start date is required.",
+    "endDate": "End date",
+    "endDateRequired": "End date is required.",
+    "dateRangeInvalid": "End date must be on or after the start date.",
+    "mealAllowance": "Fiscal meal allowance",
+    "mealVoucherContribution": "Meal voucher (titre-restaurant) contribution",
+    "remoteWorkAllowance": "Remote work allowance",
+    "amountRequired": "Amount must be 0 or greater.",
+    "createButton": "Create Rule",
+    "updateButton": "Update Rule"
+  },
+  "fiscalRuleList": {
+    "createButton": "Create Rule",
+    "empty": "No fiscal rules configured yet. Create one to get started.",
+    "mealAllowance": "Meal allowance",
+    "mealVoucherContribution": "Meal voucher contribution",
+    "remoteWorkAllowance": "Remote work allowance",
+    "editButton": "Edit",
+    "deleteButton": "Delete",
+    "deleteConfirm": "Delete Rule",
+    "deleteConfirmMessage": "Are you sure you want to delete this fiscal rule? This action cannot be undone.",
     "deleteConfirmButton": "Delete"
   },
   "addFrequentExpensesModal": {
