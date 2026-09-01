@@ -52,6 +52,7 @@ builder.Services.AddScoped<ITripService, TripService>();
 builder.Services.AddScoped<ITravelConstraintsService, TravelConstraintsService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
 builder.Services.AddScoped<IFrequentExpenseService, FrequentExpenseService>();
+builder.Services.AddScoped<IFiscalRuleService, FiscalRuleService>();
 builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
 builder.Services.AddScoped<ISchoolHolidayService, SchoolHolidayService>();
 builder.Services.AddScoped<IPersonalLeaveService, PersonalLeaveService>();

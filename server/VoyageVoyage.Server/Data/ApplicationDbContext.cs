@@ -9,6 +9,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TravelConstraints> TravelConstraints { get; set; }
     public DbSet<Expense> Expenses { get; set; }
     public DbSet<FrequentExpense> FrequentExpenses { get; set; }
+    public DbSet<FiscalRule> FiscalRules { get; set; }
     public DbSet<PublicHoliday> PublicHolidays { get; set; }
     public DbSet<SchoolHoliday> SchoolHolidays { get; set; }
     public DbSet<PersonalLeave> PersonalLeaves { get; set; }
@@ -41,6 +42,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         {
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.UserId);
+        });
+
+        modelBuilder.Entity<FiscalRule>(entity =>
+        {
+            entity.HasKey(r => r.Id);
+            entity.HasIndex(r => r.UserId);
         });
 
         modelBuilder.Entity<PublicHoliday>(entity =>
