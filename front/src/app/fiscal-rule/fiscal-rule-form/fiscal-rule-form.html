@@ -80,27 +80,53 @@
       }
     </div>
 
-    <!-- Meal voucher contribution -->
+    <!-- Meal voucher face value -->
     <div class="mb-4">
       <label
-        for="fiscal-rule-meal-voucher-contribution"
+        for="fiscal-rule-meal-voucher-face-value"
         class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
       >
-        {{ 'fiscalRuleForm.mealVoucherContribution' | translate }}
+        {{ 'fiscalRuleForm.mealVoucherFaceValue' | translate }}
         <span class="text-red-600" aria-hidden="true">*</span>
       </label>
       <input
-        id="fiscal-rule-meal-voucher-contribution"
+        id="fiscal-rule-meal-voucher-face-value"
         type="number"
-        formControlName="mealVoucherContribution"
+        formControlName="mealVoucherFaceValue"
         min="0"
         step="0.01"
         class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
-        [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('mealVoucherContribution')?.invalid && form.get('mealVoucherContribution')?.touched }"
+        [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('mealVoucherFaceValue')?.invalid && form.get('mealVoucherFaceValue')?.touched }"
       />
-      @if (form.get('mealVoucherContribution')?.invalid && form.get('mealVoucherContribution')?.touched) {
+      @if (form.get('mealVoucherFaceValue')?.invalid && form.get('mealVoucherFaceValue')?.touched) {
         <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
           {{ 'fiscalRuleForm.amountRequired' | translate }}
+        </p>
+      }
+    </div>
+
+    <!-- Meal voucher employer contribution percentage -->
+    <div class="mb-4">
+      <label
+        for="fiscal-rule-meal-voucher-employer-contribution-percentage"
+        class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+      >
+        {{ 'fiscalRuleForm.mealVoucherEmployerContributionPercentage' | translate }}
+        <span class="text-red-600" aria-hidden="true">*</span>
+      </label>
+      <input
+        id="fiscal-rule-meal-voucher-employer-contribution-percentage"
+        type="number"
+        formControlName="mealVoucherEmployerContributionPercentage"
+        min="0"
+        max="100"
+        step="0.01"
+        class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+        [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('mealVoucherEmployerContributionPercentage')?.invalid && form.get('mealVoucherEmployerContributionPercentage')?.touched }"
+      />
+      @if (form.get('mealVoucherEmployerContributionPercentage')?.invalid && form.get('mealVoucherEmployerContributionPercentage')?.touched) {
+        <p class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+          {{ 'fiscalRuleForm.percentageRequired' | translate }}
         </p>
       }
     </div>

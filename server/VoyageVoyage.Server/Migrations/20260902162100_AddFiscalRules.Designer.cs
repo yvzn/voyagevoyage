@@ -13,7 +13,7 @@ using VoyageVoyage.Server.Data;
 namespace VoyageVoyage.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260901122810_AddFiscalRules")]
+    [Migration("20260902162100_AddFiscalRules")]
     partial class AddFiscalRules
     {
         /// <inheritdoc />
@@ -119,7 +119,10 @@ namespace VoyageVoyage.Server.Migrations
                     b.Property<decimal>("MealAllowance")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal>("MealVoucherContribution")
+                    b.Property<decimal>("MealVoucherEmployerContributionPercentage")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("MealVoucherFaceValue")
                         .HasColumnType("numeric");
 
                     b.Property<decimal>("RemoteWorkAllowance")

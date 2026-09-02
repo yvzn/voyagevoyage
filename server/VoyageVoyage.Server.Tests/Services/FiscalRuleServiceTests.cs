@@ -32,7 +32,8 @@ public class FiscalRuleServiceTests
             StartDate = new DateOnly(2026, 1, 1),
             EndDate = new DateOnly(2026, 12, 31),
             MealAllowance = 20m,
-            MealVoucherContribution = 6m,
+            MealVoucherFaceValue = 10m,
+            MealVoucherEmployerContributionPercentage = 60m,
             RemoteWorkAllowance = 2.5m,
             CreatedAt = now,
             UpdatedAt = now
@@ -45,7 +46,8 @@ public class FiscalRuleServiceTests
             StartDate = new DateOnly(2026, 1, 1),
             EndDate = new DateOnly(2026, 12, 31),
             MealAllowance = 22m,
-            MealVoucherContribution = 7m,
+            MealVoucherFaceValue = 11m,
+            MealVoucherEmployerContributionPercentage = 70m,
             RemoteWorkAllowance = 3m,
             CreatedAt = now,
             UpdatedAt = now
@@ -74,7 +76,8 @@ public class FiscalRuleServiceTests
             StartDate = new DateOnly(2026, 1, 1),
             EndDate = new DateOnly(2026, 12, 31),
             MealAllowance = 20.20m,
-            MealVoucherContribution = 6.91m,
+            MealVoucherFaceValue = 10m,
+            MealVoucherEmployerContributionPercentage = 69.1m,
             RemoteWorkAllowance = 2.6m
         };
 
@@ -86,7 +89,8 @@ public class FiscalRuleServiceTests
         Assert.Equal(new DateOnly(2026, 1, 1), result.StartDate);
         Assert.Equal(new DateOnly(2026, 12, 31), result.EndDate);
         Assert.Equal(20.20m, result.MealAllowance);
-        Assert.Equal(6.91m, result.MealVoucherContribution);
+        Assert.Equal(10m, result.MealVoucherFaceValue);
+        Assert.Equal(69.1m, result.MealVoucherEmployerContributionPercentage);
         Assert.Equal(2.6m, result.RemoteWorkAllowance);
         Assert.Equal("user-1", result.UserId);
 
@@ -108,7 +112,8 @@ public class FiscalRuleServiceTests
             StartDate = new DateOnly(2026, 1, 1),
             EndDate = new DateOnly(2026, 12, 31),
             MealAllowance = 20m,
-            MealVoucherContribution = 6m,
+            MealVoucherFaceValue = 10m,
+            MealVoucherEmployerContributionPercentage = 60m,
             RemoteWorkAllowance = 2.5m,
             CreatedAt = now,
             UpdatedAt = now
@@ -122,7 +127,8 @@ public class FiscalRuleServiceTests
             StartDate = new DateOnly(2027, 1, 1),
             EndDate = new DateOnly(2027, 12, 31),
             MealAllowance = 21m,
-            MealVoucherContribution = 6.5m,
+            MealVoucherFaceValue = 10m,
+            MealVoucherEmployerContributionPercentage = 65m,
             RemoteWorkAllowance = 2.7m
         };
 
@@ -134,7 +140,8 @@ public class FiscalRuleServiceTests
         Assert.Equal(new DateOnly(2027, 1, 1), result.StartDate);
         Assert.Equal(new DateOnly(2027, 12, 31), result.EndDate);
         Assert.Equal(21m, result.MealAllowance);
-        Assert.Equal(6.5m, result.MealVoucherContribution);
+        Assert.Equal(10m, result.MealVoucherFaceValue);
+        Assert.Equal(65m, result.MealVoucherEmployerContributionPercentage);
         Assert.Equal(2.7m, result.RemoteWorkAllowance);
     }
 
@@ -148,7 +155,8 @@ public class FiscalRuleServiceTests
             StartDate = new DateOnly(2026, 1, 1),
             EndDate = new DateOnly(2026, 12, 31),
             MealAllowance = 21m,
-            MealVoucherContribution = 6.5m,
+            MealVoucherFaceValue = 10m,
+            MealVoucherEmployerContributionPercentage = 65m,
             RemoteWorkAllowance = 2.7m
         };
 
@@ -171,7 +179,8 @@ public class FiscalRuleServiceTests
             StartDate = new DateOnly(2026, 1, 1),
             EndDate = new DateOnly(2026, 12, 31),
             MealAllowance = 20m,
-            MealVoucherContribution = 6m,
+            MealVoucherFaceValue = 10m,
+            MealVoucherEmployerContributionPercentage = 60m,
             RemoteWorkAllowance = 2.5m,
             CreatedAt = now,
             UpdatedAt = now
@@ -185,7 +194,8 @@ public class FiscalRuleServiceTests
             StartDate = new DateOnly(2026, 1, 1),
             EndDate = new DateOnly(2026, 12, 31),
             MealAllowance = 21m,
-            MealVoucherContribution = 6.5m,
+            MealVoucherFaceValue = 10m,
+            MealVoucherEmployerContributionPercentage = 65m,
             RemoteWorkAllowance = 2.7m
         };
 
@@ -208,7 +218,8 @@ public class FiscalRuleServiceTests
             StartDate = new DateOnly(2026, 1, 1),
             EndDate = new DateOnly(2026, 12, 31),
             MealAllowance = 20m,
-            MealVoucherContribution = 6m,
+            MealVoucherFaceValue = 10m,
+            MealVoucherEmployerContributionPercentage = 60m,
             RemoteWorkAllowance = 2.5m,
             CreatedAt = now,
             UpdatedAt = now
@@ -253,7 +264,8 @@ public class FiscalRuleServiceTests
             StartDate = new DateOnly(2026, 1, 1),
             EndDate = new DateOnly(2026, 12, 31),
             MealAllowance = 20m,
-            MealVoucherContribution = 6m,
+            MealVoucherFaceValue = 10m,
+            MealVoucherEmployerContributionPercentage = 60m,
             RemoteWorkAllowance = 2.5m,
             CreatedAt = now,
             UpdatedAt = now

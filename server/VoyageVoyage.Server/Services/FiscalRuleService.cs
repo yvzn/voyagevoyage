@@ -23,7 +23,8 @@ public class FiscalRuleService(ApplicationDbContext dbContext) : IFiscalRuleServ
             StartDate = request.StartDate,
             EndDate = request.EndDate,
             MealAllowance = request.MealAllowance,
-            MealVoucherContribution = request.MealVoucherContribution,
+            MealVoucherFaceValue = request.MealVoucherFaceValue,
+            MealVoucherEmployerContributionPercentage = request.MealVoucherEmployerContributionPercentage,
             RemoteWorkAllowance = request.RemoteWorkAllowance,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -44,7 +45,8 @@ public class FiscalRuleService(ApplicationDbContext dbContext) : IFiscalRuleServ
         fiscalRule.StartDate = request.StartDate;
         fiscalRule.EndDate = request.EndDate;
         fiscalRule.MealAllowance = request.MealAllowance;
-        fiscalRule.MealVoucherContribution = request.MealVoucherContribution;
+        fiscalRule.MealVoucherFaceValue = request.MealVoucherFaceValue;
+        fiscalRule.MealVoucherEmployerContributionPercentage = request.MealVoucherEmployerContributionPercentage;
         fiscalRule.RemoteWorkAllowance = request.RemoteWorkAllowance;
         fiscalRule.UpdatedAt = DateTime.UtcNow;
 

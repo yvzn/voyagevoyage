@@ -20,7 +20,8 @@ namespace VoyageVoyage.Server.Migrations
                     StartDate = table.Column<DateOnly>(type: "date", nullable: false),
                     EndDate = table.Column<DateOnly>(type: "date", nullable: false),
                     MealAllowance = table.Column<decimal>(type: "numeric", nullable: false),
-                    MealVoucherContribution = table.Column<decimal>(type: "numeric", nullable: false),
+                    MealVoucherFaceValue = table.Column<decimal>(type: "numeric", nullable: false),
+                    MealVoucherEmployerContributionPercentage = table.Column<decimal>(type: "numeric", nullable: false),
                     RemoteWorkAllowance = table.Column<decimal>(type: "numeric", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)

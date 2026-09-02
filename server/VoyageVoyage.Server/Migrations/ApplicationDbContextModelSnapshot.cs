@@ -116,7 +116,10 @@ namespace VoyageVoyage.Server.Migrations
                     b.Property<decimal>("MealAllowance")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal>("MealVoucherContribution")
+                    b.Property<decimal>("MealVoucherEmployerContributionPercentage")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("MealVoucherFaceValue")
                         .HasColumnType("numeric");
 
                     b.Property<decimal>("RemoteWorkAllowance")

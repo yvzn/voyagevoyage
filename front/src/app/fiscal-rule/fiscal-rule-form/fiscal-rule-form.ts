@@ -32,7 +32,8 @@ export class FiscalRuleFormComponent {
     startDate: ['', Validators.required],
     endDate: ['', Validators.required],
     mealAllowance: [0, [Validators.required, Validators.min(0)]],
-    mealVoucherContribution: [0, [Validators.required, Validators.min(0)]],
+    mealVoucherFaceValue: [0, [Validators.required, Validators.min(0)]],
+    mealVoucherEmployerContributionPercentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
     remoteWorkAllowance: [0, [Validators.required, Validators.min(0)]],
   }, { validators: dateRangeValidator });
 
@@ -44,7 +45,8 @@ export class FiscalRuleFormComponent {
           startDate: rule.startDate,
           endDate: rule.endDate,
           mealAllowance: rule.mealAllowance,
-          mealVoucherContribution: rule.mealVoucherContribution,
+          mealVoucherFaceValue: rule.mealVoucherFaceValue,
+          mealVoucherEmployerContributionPercentage: rule.mealVoucherEmployerContributionPercentage,
           remoteWorkAllowance: rule.remoteWorkAllowance,
         });
       } else {
@@ -52,7 +54,8 @@ export class FiscalRuleFormComponent {
           startDate: '',
           endDate: '',
           mealAllowance: 0,
-          mealVoucherContribution: 0,
+          mealVoucherFaceValue: 0,
+          mealVoucherEmployerContributionPercentage: 0,
           remoteWorkAllowance: 0,
         });
       }
@@ -71,7 +74,8 @@ export class FiscalRuleFormComponent {
       startDate: formValue.startDate,
       endDate: formValue.endDate,
       mealAllowance: formValue.mealAllowance,
-      mealVoucherContribution: formValue.mealVoucherContribution,
+      mealVoucherFaceValue: formValue.mealVoucherFaceValue,
+      mealVoucherEmployerContributionPercentage: formValue.mealVoucherEmployerContributionPercentage,
       remoteWorkAllowance: formValue.remoteWorkAllowance,
     };
 

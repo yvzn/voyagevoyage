@@ -33,9 +33,15 @@ public class FiscalRule
     public decimal MealAllowance { get; set; }
 
     /// <summary>
-    /// Employer's meal voucher (titre-restaurant) contribution amount, deducted from the meal allowance.
+    /// Face value of the meal voucher (titre-restaurant), in euros.
     /// </summary>
-    public decimal MealVoucherContribution { get; set; }
+    public decimal MealVoucherFaceValue { get; set; }
+
+    /// <summary>
+    /// Percentage of the meal voucher face value subsidized by the employer (e.g. 60 for 60%).
+    /// The amount deducted from the meal allowance is <see cref="MealVoucherFaceValue"/> multiplied by this percentage.
+    /// </summary>
+    public decimal MealVoucherEmployerContributionPercentage { get; set; }
 
     /// <summary>
     /// Daily remote work (télétravail) allowance.
