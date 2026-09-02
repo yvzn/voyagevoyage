@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": "^20.19.0 || ^22.13.0 || >=24"
+    "node": "^20.19.0 || ^22.13.0 || \u003E=24"
   },
   "scripts": {
-    "aspire:lint": "eslint apphost.ts",
+    "aspire:lint": "eslint apphost.mts",
     "aspire:start": "aspire run",
     "aspire:build": "tsc -p tsconfig.apphost.json",
     "aspire:dev": "tsc --watch -p tsconfig.apphost.json"
