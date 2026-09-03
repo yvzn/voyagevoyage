@@ -151,6 +151,7 @@
   "dashboardNavItem": "Tableau de bord",
   "personalLeaveNavItem": "Congés personnels",
   "frequentExpenseSettingsNavItem": "Modèles de dépenses",
+  "fiscalRuleSettingsNavItem": "Règles fiscales",
   "planningDashboard": {
     "heading": "Planification des voyages",
     "loading": "Chargement…",
@@ -444,6 +445,40 @@
     "deleteButton": "Supprimer",
     "deleteConfirm": "Supprimer le modèle",
     "deleteConfirmMessage": "Êtes-vous sûr de vouloir supprimer ce modèle ? Cette action ne peut pas être annulée.",
+    "deleteConfirmButton": "Supprimer"
+  },
+  "fiscalRuleSettings": {
+    "title": "Règles fiscales",
+    "loading": "Chargement…"
+  },
+  "fiscalRuleForm": {
+    "createTitle": "Créer une règle fiscale",
+    "editTitle": "Modifier une règle fiscale",
+    "startDate": "Date de début",
+    "startDateRequired": "La date de début est requise.",
+    "endDate": "Date de fin",
+    "endDateRequired": "La date de fin est requise.",
+    "dateRangeInvalid": "La date de fin doit être postérieure ou égale à la date de début.",
+    "mealAllowance": "Forfait repas fiscal",
+    "mealVoucherFaceValue": "Valeur faciale du titre-restaurant",
+    "mealVoucherEmployerContributionPercentage": "Part employeur du titre-restaurant (%)",
+    "remoteWorkAllowance": "Forfait télétravail",
+    "amountRequired": "Le montant doit être supérieur ou égal à 0.",
+    "percentageRequired": "Le pourcentage doit être compris entre 0 et 100.",
+    "createButton": "Créer la règle",
+    "updateButton": "Mettre à jour la règle"
+  },
+  "fiscalRuleList": {
+    "createButton": "Créer une règle",
+    "empty": "Aucune règle fiscale configurée. Créez-en une pour commencer.",
+    "mealAllowance": "Forfait repas",
+    "mealVoucherFaceValue": "Valeur faciale du titre-restaurant",
+    "mealVoucherEmployerContributionPercentage": "Part employeur",
+    "remoteWorkAllowance": "Forfait télétravail",
+    "editButton": "Modifier",
+    "deleteButton": "Supprimer",
+    "deleteConfirm": "Supprimer la règle",
+    "deleteConfirmMessage": "Êtes-vous sûr de vouloir supprimer cette règle fiscale ? Cette action ne peut pas être annulée.",
     "deleteConfirmButton": "Supprimer"
   },
   "addFrequentExpensesModal": {

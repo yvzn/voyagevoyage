@@ -10,6 +10,7 @@ import { PersonalLeaveDetailComponent } from './personal-leave/personal-leave-de
 import { TrainBookingListComponent } from './train-booking/train-booking-list/train-booking-list';
 import { HotelBookingListComponent } from './hotel-booking/hotel-booking-list/hotel-booking-list';
 import { FrequentExpenseSettingsComponent } from './frequent-expense/frequent-expense-settings/frequent-expense-settings';
+import { FiscalRuleSettingsComponent } from './fiscal-rule/fiscal-rule-settings/fiscal-rule-settings';
 
 export const routes: Routes = [
   {
@@ -48,6 +49,10 @@ export const routes: Routes = [
   {
     path: 'frequent-expenses',
     component: FrequentExpenseSettingsComponent,
+  },
+  {
+    path: 'fiscal-rules',
+    component: FiscalRuleSettingsComponent,
   },
   {
     path: 'personal-leaves',
