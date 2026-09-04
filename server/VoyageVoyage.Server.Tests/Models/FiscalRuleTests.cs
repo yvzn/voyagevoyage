@@ -57,4 +57,52 @@ public class FiscalRuleTests
         // Assert
         Assert.Equal(0m, result);
     }
+
+    [Fact]
+    public void CountRemoteWorkEligibleDays_ExcludesWeekendsTripsLeaveAndPublicHolidays()
+    {
+        // Arrange
+        var fiscalRule = new FiscalRule { RemoteWorkAllowance = 6m };
+        var startDate = new DateOnly(2026, 3, 2);
+        var endDate = new DateOnly(2026, 3, 8);
+
+        var tripDates = new[]
+        {
+            new DateOnly(2026, 3, 3),
+        };
+        var leaveDates = new[]
+        {
+            new DateOnly(2026, 3, 4),
+        };
+        var publicHolidayDates = new[]
+        {
+            new DateOnly(2026, 3, 6),
+        };
+
+        // Act
+        var result = fiscalRule.CountRemoteWorkEligibleDays(startDate, endDate, tripDates, leaveDates, publicHolidayDates);
+
+        // Assert
+        Assert.Equal(2, result);
+    }
+
+    [Fact]
+    public void CalculateRemoteWorkAllowance_ComputesAllowanceFromEligibleDays()
+    {
+        // Arrange
+        var fiscalRule = new FiscalRule { RemoteWorkAllowance = 12m };
+        var startDate = new DateOnly(2026, 3, 2);
+        var endDate = new DateOnly(2026, 3, 8);
+
+        // Act
+        var result = fiscalRule.CalculateRemoteWorkAllowance(
+            startDate,
+            endDate,
+            tripDates: [new DateOnly(2026, 3, 3)],
+            leaveDates: [new DateOnly(2026, 3, 4)],
+            publicHolidayDates: [new DateOnly(2026, 3, 6)]);
+
+        // Assert
+        Assert.Equal(24m, result);
+    }
 }
