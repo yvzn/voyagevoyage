@@ -1,0 +1,156 @@
+<section aria-labelledby="monthly-expense-summary-heading" class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h2 id="monthly-expense-summary-heading" class="text-xl font-semibold text-gray-900 dark:text-white">
+        {{ 'expenseSummary.heading' | translate }}
+      </h2>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ monthLabel() }}</p>
+    </div>
+
+    <div class="flex items-center gap-2" aria-label="{{ 'expenseSummary.monthNavigationLabel' | translate }}">
+      <button
+        type="button"
+        (click)="previousMonth()"
+        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+        [attr.aria-label]="'expenseSummary.previousMonth' | translate"
+      >
+        ←
+      </button>
+      <button
+        type="button"
+        (click)="nextMonth()"
+        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+        [attr.aria-label]="'expenseSummary.nextMonth' | translate"
+      >
+        →
+      </button>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="min-w-full border-separate border-spacing-0 border border-gray-200 text-left text-sm dark:border-gray-700">
+      <thead class="bg-gray-50 dark:bg-gray-700">
+        <tr>
+          <th class="border-b border-r border-gray-200 px-3 py-2 font-semibold text-gray-700 dark:border-gray-600 dark:text-gray-100">
+            {{ 'expenseSummary.dayLabel' | translate }}
+          </th>
+          @for (category of summaryCategories; track category) {
+            <th class="border-b border-r border-gray-200 px-3 py-2 font-semibold text-gray-700 dark:border-gray-600 dark:text-gray-100">
+              {{ ('expenseCategory.' + category) | translate }}
+            </th>
+          }
+          <th class="border-b border-gray-200 px-3 py-2 font-semibold text-gray-700 dark:border-gray-600 dark:text-gray-100">
+            {{ 'expenseSummary.dayTotal' | translate }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (day of summary().days; track day.date) {
+          <tr class="align-top">
+            <th class="border-b border-r border-gray-200 bg-gray-50 px-3 py-2 text-left font-medium text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
+              {{ day.day }}
+            </th>
+            @for (category of summaryCategories; track category) {
+              @let cell = day.cells[category];
+              @if (cell) {
+                <td class="border-b border-r border-gray-200 px-2 py-2 dark:border-gray-600">
+                  <button
+                    type="button"
+                    (click)="openCellDetails(cell)"
+                    class="w-full rounded-md px-2 py-1 text-right font-medium text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-blue-400 dark:hover:bg-blue-950/30"
+                    [attr.aria-label]="('expenseSummary.detailsButton' | translate) + ' ' + ('expenseCategory.' + category) + ' ' + day.date"
+                  >
+                    {{ getCellValue(cell) }}
+                  </button>
+                </td>
+              } @else {
+                <td class="border-b border-r border-gray-200 px-2 py-2 text-center text-gray-300 dark:border-gray-600 dark:text-gray-500">&nbsp;</td>
+              }
+            }
+            <td class="border-b border-gray-200 px-3 py-2 text-right font-semibold text-gray-900 dark:border-gray-600 dark:text-white">
+              @if (day.dayTotal > 0) {
+                {{ formatCurrency(day.dayTotal) }}
+              } @else {
+                &nbsp;
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+      <tfoot class="bg-gray-50 dark:bg-gray-700">
+        <tr>
+          <th class="border-t border-r border-gray-200 px-3 py-2 text-left font-semibold text-gray-800 dark:border-gray-600 dark:text-gray-100">
+            {{ 'expenseSummary.categoryTotal' | translate }}
+          </th>
+          @for (category of summaryCategories; track category) {
+            <td class="border-t border-r border-gray-200 px-3 py-2 text-right font-semibold text-gray-900 dark:border-gray-600 dark:text-white">
+              {{ formatCurrency(categoryTotals()[category]) }}
+            </td>
+          }
+          <td class="border-t border-gray-200 px-3 py-2 text-right font-bold text-gray-900 dark:border-gray-600 dark:text-white">
+            {{ formatCurrency(grandTotal()) }}
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  @if (selectedCell()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
+      <div class="max-h-[80vh] w-full max-w-lg overflow-auto rounded-lg bg-white p-5 shadow-xl dark:bg-gray-800">
+        <div class="mb-4 flex items-start justify-between gap-4">
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              {{ ('expenseSummary.detailsTitle' | translate) + ' ' + ('expenseCategory.' + selectedCell()!.category) }}
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ selectedCell()!.sourceExpenses[0]?.date || '' }}</p>
+          </div>
+          <button
+            type="button"
+            (click)="closeCellDetails()"
+            class="rounded-md border border-gray-300 px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
+            [attr.aria-label]="'expenseSummary.closeDialog' | translate"
+          >
+            ×
+          </button>
+        </div>
+
+        <dl class="space-y-3 text-sm">
+          <div class="flex items-center justify-between">
+            <dt class="text-gray-600 dark:text-gray-400">{{ 'expenseSummary.gross' | translate }}</dt>
+            <dd class="font-medium text-gray-900 dark:text-white">{{ formatCurrency(selectedCell()!.gross) }}</dd>
+          </div>
+          <div class="flex items-center justify-between">
+            <dt class="text-gray-600 dark:text-gray-400">{{ 'expenseSummary.abatement' | translate }}</dt>
+            <dd class="font-medium text-gray-900 dark:text-white">{{ formatCurrency(selectedCell()!.abatement) }}</dd>
+          </div>
+          <div class="flex items-center justify-between">
+            <dt class="text-gray-600 dark:text-gray-400">{{ 'expenseSummary.net' | translate }}</dt>
+            <dd class="font-medium text-gray-900 dark:text-white">{{ formatCurrency(selectedCell()!.net) }}</dd>
+          </div>
+        </dl>
+
+        <div class="mt-5">
+          <h4 class="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-300">
+            {{ 'expenseSummary.sourceExpenses' | translate }}
+          </h4>
+          <ul class="space-y-2">
+            @for (expense of selectedCell()!.sourceExpenses; track expense.id) {
+              <li class="rounded-md border border-gray-200 p-2 dark:border-gray-700">
+                <div class="flex items-center justify-between gap-3">
+                  <span class="text-sm text-gray-900 dark:text-white">{{ getSourceExpenseLabel(expense) }}</span>
+                  <a
+                    [routerLink]="['/trip', expense.tripId]"
+                    class="text-xs font-medium text-blue-700 hover:underline dark:text-blue-400"
+                  >
+                    {{ 'expenseSummary.viewTrip' | translate }}
+                  </a>
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+  }
+</section>
