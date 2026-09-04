@@ -51,4 +51,29 @@ public class FiscalRule
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+
+    /// <summary>
+    /// Employer subsidy for the meal voucher, computed as the face value multiplied by the employer contribution percentage.
+    /// </summary>
+    public decimal EmployerMealVoucherSubsidy => MealVoucherFaceValue * MealVoucherEmployerContributionPercentage / 100m;
+
+    /// <summary>
+    /// Net deductible amount for a meal expense, calculated as:
+    /// meal amount - fiscal meal allowance - employer meal voucher subsidy.
+    /// </summary>
+    public decimal CalculateMealNetDeductible(decimal mealAmount)
+    {
+        var netDeductible = mealAmount - MealAllowance - EmployerMealVoucherSubsidy;
+        return Math.Max(0m, netDeductible);
+    }
+
+    /// <summary>
+    /// Backward-compatible alias for the net deductible calculation.
+    /// </summary>
+    public decimal GetNetDeductible(decimal mealAmount) => CalculateMealNetDeductible(mealAmount);
+
+    /// <summary>
+    /// Backward-compatible alias for the employer subsidy calculation.
+    /// </summary>
+    public decimal GetEmployerMealVoucherSubsidy() => EmployerMealVoucherSubsidy;
 }
