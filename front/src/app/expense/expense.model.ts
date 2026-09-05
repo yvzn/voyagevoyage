@@ -3,6 +3,7 @@ export enum ExpenseCategory {
   Hotel = 'hotel',
   Meal = 'meal',
   MetroBus = 'metroBus',
+  RemoteWork = 'remoteWork',
   Other = 'other',
 }
 
