@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Expense, ExpenseCategory } from './expense.model';
 import { FiscalRule } from '../fiscal-rule/fiscal-rule.model';
+import { Trip, TripStatus } from '../trip/trip.model';
 import { buildMonthlyExpenseSummary } from './monthly-expense-summary.util';
 
 function makeExpense(
@@ -68,6 +69,22 @@ describe('buildMonthlyExpenseSummary', () => {
     expect(summary.days[6].cells[ExpenseCategory.Meal]).toBeUndefined();
   });
 
+  it('adds the remote work allowance for eligible workdays outside trips', () => {
+    const trip: Trip = {
+      id: 'trip-remote-work',
+      startDate: '2026-02-03',
+      endDate: '2026-02-03',
+      destination: 'Paris',
+      status: TripStatus.Planned,
+    };
+
+    const summary = buildMonthlyExpenseSummary([], 2026, 1, [rule], [trip]);
+
+    expect(summary.days[1].cells[ExpenseCategory.RemoteWork]?.net).toBe(12);
+    expect(summary.days[2].cells[ExpenseCategory.RemoteWork]).toBeUndefined();
+    expect(summary.categoryTotals[ExpenseCategory.RemoteWork]).toBe(228);
+  });
+
   it('sums the grand total across all categories', () => {
     const expenses = [
       makeExpense('2026-02-01', ExpenseCategory.Meal, 50),
@@ -77,6 +94,6 @@ describe('buildMonthlyExpenseSummary', () => {
 
     const summary = buildMonthlyExpenseSummary(expenses, 2026, 1, [rule]);
 
-    expect(summary.grandTotal).toBe(50 - 20 - 6 + 20 + 90);
+    expect(summary.grandTotal).toBe(50 - 20 - 6 + 20 + 90 + 12 * 20);
   });
 });

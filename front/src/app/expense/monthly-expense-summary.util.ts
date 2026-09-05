@@ -1,5 +1,6 @@
 import { Expense, ExpenseCategory } from './expense.model';
 import { FiscalRule } from '../fiscal-rule/fiscal-rule.model';
+import { Trip } from '../trip/trip.model';
 
 export const MONTHLY_SUMMARY_CATEGORIES = [
   ExpenseCategory.Meal,
@@ -63,6 +64,54 @@ function getExpenseNetAmount(expense: Expense, fiscalRule?: FiscalRule): number 
   return expense.amount;
 }
 
+function dateToIso(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getTripDaySet(trips: Trip[] = []): Set<string> {
+  const tripDays = new Set<string>();
+
+  for (const trip of trips) {
+    const startDate = new Date(`${trip.startDate}T00:00:00`);
+    const endDate = new Date(`${trip.endDate}T00:00:00`);
+    const current = new Date(startDate);
+
+    while (current <= endDate) {
+      tripDays.add(dateToIso(current));
+      current.setDate(current.getDate() + 1);
+    }
+  }
+
+  return tripDays;
+}
+
+function getRemoteWorkAllowanceCell(
+  isoDate: string,
+  fiscalRule?: FiscalRule,
+  tripDays: Set<string> = new Set(),
+): MonthlySummaryCell | undefined {
+  if (!fiscalRule || fiscalRule.remoteWorkAllowance <= 0) {
+    return undefined;
+  }
+
+  const date = new Date(`${isoDate}T00:00:00`);
+  const isWorkingDay = date.getDay() >= 1 && date.getDay() <= 5;
+  if (!isWorkingDay || tripDays.has(isoDate)) {
+    return undefined;
+  }
+
+  return {
+    category: ExpenseCategory.RemoteWork,
+    gross: fiscalRule.remoteWorkAllowance,
+    abatement: 0,
+    net: fiscalRule.remoteWorkAllowance,
+    sourceExpenses: [],
+  };
+}
+
 function calculateTotals(
   expenses: Expense[],
   fiscalRule?: FiscalRule,
@@ -86,6 +135,7 @@ export function buildMonthlyExpenseSummary(
   year: number,
   monthIndex: number,
   fiscalRules: FiscalRule[] = [],
+  trips: Trip[] = [],
 ): MonthlyExpenseSummary {
   const totalDaysInMonth = new Date(year, monthIndex + 1, 0).getDate();
   const categoryTotals: Record<MonthlySummaryCategory, number> = {
@@ -97,16 +147,29 @@ export function buildMonthlyExpenseSummary(
   };
 
   const days: MonthlySummaryDay[] = [];
+  const tripDays = getTripDaySet(trips);
 
   for (let day = 1; day <= totalDaysInMonth; day++) {
     const date = new Date(year, monthIndex, day);
-    const isoDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const isoDate = dateToIso(date);
     const dayExpenses = expenses.filter((expense) => expense.date === isoDate);
     const cells: Partial<Record<MonthlySummaryCategory, MonthlySummaryCell>> = {};
     let dayTotal = 0;
 
     for (const category of MONTHLY_SUMMARY_CATEGORIES) {
       const categoryExpenses = dayExpenses.filter((expense) => expense.category === category);
+
+      if (category === ExpenseCategory.RemoteWork && categoryExpenses.length === 0) {
+        const fiscalRule = getApplicableFiscalRule(isoDate, fiscalRules);
+        const remoteWorkCell = getRemoteWorkAllowanceCell(isoDate, fiscalRule, tripDays);
+        if (remoteWorkCell) {
+          cells[category] = remoteWorkCell;
+          categoryTotals[category] += remoteWorkCell.net;
+          dayTotal += remoteWorkCell.net;
+        }
+        continue;
+      }
+
       if (categoryExpenses.length === 0) {
         continue;
       }

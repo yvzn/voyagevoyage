@@ -1,29 +1,63 @@
 <section aria-labelledby="monthly-expense-summary-heading" class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
-  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h2 id="monthly-expense-summary-heading" class="text-xl font-semibold text-gray-900 dark:text-white">
-        {{ 'expenseSummary.heading' | translate }}
-      </h2>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ monthLabel() }}</p>
-    </div>
+  <div class="mb-4 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h2 id="monthly-expense-summary-heading" class="text-xl font-semibold text-gray-900 dark:text-white">
+          {{ 'expenseSummary.heading' | translate }}
+        </h2>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ monthLabel() }}</p>
+      </div>
 
-    <div class="flex items-center gap-2" aria-label="{{ 'expenseSummary.monthNavigationLabel' | translate }}">
-      <button
-        type="button"
-        (click)="previousMonth()"
-        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-        [attr.aria-label]="'expenseSummary.previousMonth' | translate"
-      >
-        ←
-      </button>
-      <button
-        type="button"
-        (click)="nextMonth()"
-        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-        [attr.aria-label]="'expenseSummary.nextMonth' | translate"
-      >
-        →
-      </button>
+      <div class="flex items-center gap-1">
+        <button
+          type="button"
+          (click)="previousMonth()"
+          class="inline-flex items-center justify-center rounded-lg p-2.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+          [attr.aria-label]="'expenseSummary.previousMonth' | translate"
+        >
+          <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          (click)="nextMonth()"
+          class="inline-flex items-center justify-center rounded-lg p-2.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+          [attr.aria-label]="'expenseSummary.nextMonth' | translate"
+        >
+          <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <div>
+          <label for="expense-summary-month-select" class="sr-only">{{ 'monthSelectLabel' | translate }}</label>
+          <select
+            id="expense-summary-month-select"
+            [value]="selectedMonth().getMonth()"
+            (change)="onMonthChange($event)"
+            class="block rounded-lg border border-gray-300 bg-gray-50 py-2 pl-3 pr-8 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          >
+            @for (name of monthNames; track $index) {
+              <option [value]="$index" [selected]="$index === selectedMonth().getMonth()">{{ name }}</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label for="expense-summary-year-input" class="sr-only">{{ 'yearInputLabel' | translate }}</label>
+          <input
+            id="expense-summary-year-input"
+            type="number"
+            [value]="selectedMonth().getFullYear()"
+            (change)="onYearChange($event)"
+            class="block w-20 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          />
+        </div>
+      </div>
     </div>
   </div>
 

@@ -7,6 +7,7 @@ import { filter, map } from 'rxjs';
 import { LocaleService } from './locale.service';
 
 const TRAVEL_ROUTES = ['/calendar', '/planning-dashboard', '/train-bookings', '/hotel-bookings'];
+const FISCAL_SUMMARY_ROUTES = ['/expense-summary'];
 const SETTINGS_ROUTES = ['/constraints', '/personal-leaves', '/frequent-expenses'];
 
 @Component({
@@ -29,10 +30,14 @@ export class App implements OnInit {
   );
 
   protected readonly travelMenuOpen = signal(false);
+  protected readonly fiscalSummaryMenuOpen = signal(false);
   protected readonly settingsMenuOpen = signal(false);
 
   protected readonly travelSectionOpen = computed(
     () => this.travelMenuOpen() || TRAVEL_ROUTES.some(route => this.currentUrl().startsWith(route)),
+  );
+  protected readonly fiscalSummarySectionOpen = computed(
+    () => this.fiscalSummaryMenuOpen() || FISCAL_SUMMARY_ROUTES.some(route => this.currentUrl().startsWith(route)),
   );
   protected readonly settingsSectionOpen = computed(
     () => this.settingsMenuOpen() || SETTINGS_ROUTES.some(route => this.currentUrl().startsWith(route)),
@@ -55,6 +60,10 @@ export class App implements OnInit {
 
   toggleTravelMenu(): void {
     this.travelMenuOpen.update(v => !v);
+  }
+
+  toggleFiscalSummaryMenu(): void {
+    this.fiscalSummaryMenuOpen.update(v => !v);
   }
 
   toggleSettingsMenu(): void {

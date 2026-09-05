@@ -34,6 +34,11 @@ export class MonthlyExpenseSummaryComponent {
   protected readonly selectedCell = signal<MonthlySummaryCell | null>(null);
   protected readonly ExpenseCategory = ExpenseCategory;
   protected readonly summaryCategories = MONTHLY_SUMMARY_CATEGORIES;
+  protected readonly monthNames = Array.from({ length: 12 }, (_, monthIndex) =>
+    new Intl.DateTimeFormat(this.localeService.currentLocale(), { month: 'long' }).format(
+      new Date(2024, monthIndex, 1),
+    ),
+  );
 
   protected readonly trips = this.store.selectSignal(selectAllTrips);
   protected readonly expenses = this.store.selectSignal(selectAllExpenses);
@@ -57,6 +62,7 @@ export class MonthlyExpenseSummaryComponent {
       this.selectedMonth().getFullYear(),
       this.selectedMonth().getMonth(),
       this.fiscalRules(),
+      this.trips(),
     ),
   );
 
@@ -93,6 +99,22 @@ export class MonthlyExpenseSummaryComponent {
   protected nextMonth(): void {
     const date = new Date(this.selectedMonth());
     date.setMonth(date.getMonth() + 1);
+    this.selectedMonth.set(date);
+    this.selectedCell.set(null);
+  }
+
+  protected onMonthChange(event: Event): void {
+    const value = Number((event.target as HTMLSelectElement).value);
+    const date = new Date(this.selectedMonth());
+    date.setMonth(value);
+    this.selectedMonth.set(date);
+    this.selectedCell.set(null);
+  }
+
+  protected onYearChange(event: Event): void {
+    const value = Number((event.target as HTMLInputElement).value || this.selectedMonth().getFullYear());
+    const date = new Date(this.selectedMonth());
+    date.setFullYear(value);
     this.selectedMonth.set(date);
     this.selectedCell.set(null);
   }
