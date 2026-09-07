@@ -1,6 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, signal, inject } from '@angular/core';
-import { effect } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
@@ -29,6 +37,7 @@ import { selectAllTrips } from '../trip/store/trip.selectors';
 export class MonthlyExpenseSummaryComponent {
   private readonly store = inject(Store);
   protected readonly localeService = inject(LocaleService);
+  private readonly dialogEl = viewChild.required<ElementRef<HTMLDialogElement>>('dialogEl');
 
   protected readonly selectedMonth = signal(new Date());
   protected readonly selectedCell = signal<MonthlySummaryCell | null>(null);
@@ -52,6 +61,23 @@ export class MonthlyExpenseSummaryComponent {
       const trips = this.trips();
       if (trips.length > 0) {
         this.store.dispatch(ExpenseActions.loadExpensesForTrips({ tripIds: trips.map((trip) => trip.id) }));
+      }
+    });
+
+    effect(() => {
+      const dialog = this.dialogEl();
+      const cell = this.selectedCell();
+
+      if (!dialog) return;
+      if (cell) {
+        if (!dialog.nativeElement.open) {
+          dialog.nativeElement.showModal();
+        }
+        return;
+      }
+
+      if (dialog.nativeElement.open) {
+        dialog.nativeElement.close();
       }
     });
   }
@@ -89,6 +115,17 @@ export class MonthlyExpenseSummaryComponent {
     this.selectedCell.set(null);
   }
 
+  protected onDialogCancel(event: Event): void {
+    event.preventDefault();
+    this.closeCellDetails();
+  }
+
+  protected onBackdropClick(event: MouseEvent): void {
+    if (event.target === this.dialogEl().nativeElement) {
+      this.closeCellDetails();
+    }
+  }
+
   protected previousMonth(): void {
     const date = new Date(this.selectedMonth());
     date.setMonth(date.getMonth() - 1);
@@ -100,6 +137,11 @@ export class MonthlyExpenseSummaryComponent {
     const date = new Date(this.selectedMonth());
     date.setMonth(date.getMonth() + 1);
     this.selectedMonth.set(date);
+    this.selectedCell.set(null);
+  }
+
+  protected goToToday(): void {
+    this.selectedMonth.set(new Date());
     this.selectedCell.set(null);
   }
 
@@ -121,6 +163,21 @@ export class MonthlyExpenseSummaryComponent {
 
   protected getCellValue(cell: MonthlySummaryCell | undefined): string {
     return cell ? this.formatCurrency(cell.net) : '';
+  }
+
+  protected getCellButtonClasses(cell: MonthlySummaryCell | undefined): string {
+    const isExpenseCell = !!cell && cell.sourceExpenses.length > 0;
+
+    return [
+      'w-full cursor-pointer rounded-md px-2 py-1 text-right transition-colors hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-blue-400 dark:hover:bg-blue-950/30',
+      isExpenseCell ? 'text-base font-semibold text-blue-700' : 'text-sm font-medium text-blue-700/80',
+    ].join(' ');
+  }
+
+  protected getDayOfWeekShort(date: string): string {
+    return new Intl.DateTimeFormat(this.localeService.currentLocale(), {
+      weekday: 'short',
+    }).format(new Date(`${date}T00:00:00`));
   }
 
   protected getCategoryTranslationKey(category: ExpenseCategory): string {
