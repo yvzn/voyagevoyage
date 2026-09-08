@@ -18,8 +18,10 @@ import { selectAllExpenses } from '../expense/store/expense.selectors';
 import {
   MONTHLY_SUMMARY_CATEGORIES,
   MonthlySummaryCell,
+  buildMonthlyExpenseExportCsv,
   buildMonthlyExpenseSummary,
   formatCurrency,
+  utf16leEncode,
 } from '../expense/monthly-expense-summary.util';
 import { FiscalRuleActions } from '../fiscal-rule/store/fiscal-rule.actions';
 import { selectAllFiscalRules } from '../fiscal-rule/store/fiscal-rule.selectors';
@@ -129,6 +131,22 @@ export class MonthlyExpenseSummaryComponent {
 
   protected formatCurrency(amount: number): string {
     return formatCurrency(amount);
+  }
+
+  protected exportCurrentSummary(): void {
+    const year = this.selectedMonth().getFullYear();
+    const monthIndex = this.selectedMonth().getMonth();
+    const csv = buildMonthlyExpenseExportCsv(this.expenses(), this.fiscalRules(), this.trips(), year, monthIndex);
+    const bytes = utf16leEncode(csv);
+    const array = new Uint8Array(bytes.length);
+    array.set(bytes);
+    const blob = new Blob([array.buffer], { type: 'text/csv;charset=utf-16le' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `summary-${year}-${String(monthIndex + 1).padStart(2, '0')}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   protected openCellDetails(cell: MonthlySummaryCell | undefined): void {

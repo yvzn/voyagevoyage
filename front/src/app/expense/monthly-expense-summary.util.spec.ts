@@ -2,7 +2,15 @@ import { describe, expect, it } from 'vitest';
 import { Expense, ExpenseCategory } from './expense.model';
 import { FiscalRule } from '../fiscal-rule/fiscal-rule.model';
 import { Trip, TripStatus } from '../trip/trip.model';
-import { ANNUAL_SUMMARY_CATEGORIES, buildAnnualExpenseSummary, buildMonthlyExpenseSummary } from './monthly-expense-summary.util';
+import {
+  ANNUAL_SUMMARY_CATEGORIES,
+  buildAnnualExpenseExportCsv,
+  buildAnnualExpenseSummary,
+  buildMonthlyExpenseExportCsv,
+  buildMonthlyExpenseSummary,
+  serializeCsvForExcel,
+  utf16leEncode,
+} from './monthly-expense-summary.util';
 
 function makeExpense(
   date: string,
@@ -134,5 +142,40 @@ describe('buildMonthlyExpenseSummary', () => {
       'travel',
       ExpenseCategory.Hotel,
     ]);
+  });
+
+  it('exports monthly summaries in an Excel-compatible CSV format', () => {
+    const expenses = [
+      makeExpense('2026-02-03', ExpenseCategory.Meal, 100, 'trip-1', '=SUM(A1:A2)'),
+      makeExpense('2026-02-05', ExpenseCategory.Train, 90),
+    ];
+
+    const csv = buildMonthlyExpenseExportCsv(expenses, [rule], [], 2026, 1);
+
+    expect(csv.startsWith('sep=,\r\n')).toBe(true);
+    expect(csv).toContain('"Date","Trip","Category","Description","Gross","Reduction","Net"');
+    expect(csv).toContain("'=SUM(A1:A2)");
+    expect(csv).toContain('"2026-02-05","","train","Expense","90","0","90"');
+  });
+
+  it('exports annual summaries and keeps CSV BOM/encoding requirements', () => {
+    const expenses = [
+      makeExpense('2026-01-04', ExpenseCategory.Meal, 60),
+      makeExpense('2026-06-15', ExpenseCategory.RemoteWork, 50),
+    ];
+
+    const csv = buildAnnualExpenseExportCsv(expenses, [rule], [], 2026);
+    const encoded = utf16leEncode(csv);
+
+    expect(csv).toContain('"Report","Annual expense summary"');
+    expect(csv).toContain('"Fiscal rule scope","Start date","End date","Meal allowance"');
+    expect(Array.from(encoded.slice(0, 2))).toEqual([0xff, 0xfe]);
+  });
+
+  it('sanitizes formula-like values before CSV serialization', () => {
+    const csv = serializeCsvForExcel([['Description'], ['=CMD|whoami']]);
+
+    expect(csv).toContain("'=CMD|whoami");
+    expect(csv).toContain('\r\n');
   });
 });

@@ -165,7 +165,8 @@
     "detailsButton": "Show details for",
     "detailsTitle": "Details for",
     "viewTrip": "View trip",
-    "closeDialog": "Close details"
+    "closeDialog": "Close details",
+    "exportExcel": "Export Excel"
   },
   "annualExpenseSummary": {
     "heading": "Annual expense summary",
@@ -175,7 +176,8 @@
     "monthLabel": "Month",
     "monthTotal": "Monthly total",
     "categoryTotal": "Totals by category",
-    "annualTotal": "Annual total"
+    "annualTotal": "Annual total",
+    "exportExcel": "Export Excel"
   },
   "monthlyExpenseSummaryNavItem": "Monthly expense summary",
   "annualExpenseSummaryNavItem": "Annual expense summary",

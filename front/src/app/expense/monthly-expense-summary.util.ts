@@ -275,3 +275,218 @@ export function formatCurrency(amount: number): string {
     maximumFractionDigits: 2,
   }).format(amount);
 }
+
+function escapeCsvFormulaValue(value: string): string {
+  const trimmed = value.trimStart();
+  if (/^[=+\-@]/.test(trimmed)) {
+    return `'${value}`;
+  }
+
+  return value;
+}
+
+function formatCsvCell(value: string | number | null | undefined): string {
+  const normalized = value == null ? '' : String(value);
+  const sanitized = escapeCsvFormulaValue(normalized).replace(/"/g, '""');
+  return `"${sanitized}"`;
+}
+
+export function serializeCsvForExcel(rows: Array<Array<string | number | null | undefined>>): string {
+  const csvRows = rows.map((row) => row.map(formatCsvCell).join(','));
+  return `sep=,\r\n${csvRows.join('\r\n')}\r\n`;
+}
+
+export function utf16leEncode(text: string): Uint8Array {
+  const bytes = new Uint8Array((text.length + 1) * 2);
+  const view = new DataView(bytes.buffer);
+  view.setUint16(0, 0xfeff, true);
+
+  for (let index = 0; index < text.length; index += 1) {
+    view.setUint16(2 + index * 2, text.charCodeAt(index), true);
+  }
+
+  return bytes;
+}
+
+function toMoney(value: number): string {
+  return Number(value.toFixed(2)).toString();
+}
+
+function getApplicableFiscalRulesForMonth(
+  year: number,
+  monthIndex: number,
+  fiscalRules: FiscalRule[] = [],
+): FiscalRule[] {
+  const monthStart = new Date(year, monthIndex, 1);
+  const monthEnd = new Date(year, monthIndex + 1, 0, 23, 59, 59, 999);
+
+  return fiscalRules
+    .filter((rule) => {
+      const start = new Date(`${rule.startDate}T00:00:00`);
+      const end = new Date(`${rule.endDate}T23:59:59`);
+      return end >= monthStart && start <= monthEnd;
+    })
+    .sort((a, b) => new Date(`${b.startDate}T00:00:00`).getTime() - new Date(`${a.startDate}T00:00:00`).getTime());
+}
+
+function getApplicableFiscalRulesForYear(year: number, fiscalRules: FiscalRule[] = []): FiscalRule[] {
+  const yearStart = new Date(year, 0, 1);
+  const yearEnd = new Date(year, 11, 31, 23, 59, 59, 999);
+
+  return fiscalRules
+    .filter((rule) => {
+      const start = new Date(`${rule.startDate}T00:00:00`);
+      const end = new Date(`${rule.endDate}T23:59:59`);
+      return end >= yearStart && start <= yearEnd;
+    })
+    .sort((a, b) => new Date(`${b.startDate}T00:00:00`).getTime() - new Date(`${a.startDate}T00:00:00`).getTime());
+}
+
+function createExpenseExportRows(
+  expenses: Expense[],
+  fiscalRules: FiscalRule[] = [],
+  trips: Trip[] = [],
+  year?: number,
+  monthIndex?: number,
+): Array<Array<string | number>> {
+  const tripMap = new Map(trips.map((trip) => [trip.id, trip]));
+  const rows: Array<Array<string | number>> = [];
+
+  const relevantExpenses = expenses.filter((expense) => {
+    const date = new Date(`${expense.date}T00:00:00`);
+    const matchesYear = year === undefined || date.getFullYear() === year;
+    const matchesMonth = monthIndex === undefined || date.getMonth() === monthIndex;
+    return matchesYear && matchesMonth;
+  });
+
+  for (const expense of relevantExpenses.sort((a, b) => a.date.localeCompare(b.date))) {
+    const fiscalRule = getApplicableFiscalRule(expense.date, fiscalRules);
+    const gross = expense.amount;
+    const net = getExpenseNetAmount(expense, fiscalRule);
+    const abatement = gross - net;
+    const trip = tripMap.get(expense.tripId);
+
+    rows.push([
+      expense.date,
+      trip?.destination ?? '',
+      expense.category,
+      expense.description,
+      toMoney(gross),
+      toMoney(abatement),
+      toMoney(net),
+    ]);
+  }
+
+  return rows;
+}
+
+function createRemoteWorkAllowanceRows(
+  summary: MonthlyExpenseSummary,
+  _year: number,
+  _monthIndex: number,
+): Array<Array<string | number>> {
+  const rows: Array<Array<string | number>> = [];
+
+  for (const day of summary.days) {
+    const remoteWorkCell = day.cells[ExpenseCategory.RemoteWork];
+    if (!remoteWorkCell || remoteWorkCell.sourceExpenses.length > 0) {
+      continue;
+    }
+
+    rows.push([
+      day.date,
+      '',
+      ExpenseCategory.RemoteWork,
+      'Remote work allowance',
+      toMoney(remoteWorkCell.gross),
+      toMoney(remoteWorkCell.abatement),
+      toMoney(remoteWorkCell.net),
+    ]);
+  }
+
+  return rows;
+}
+
+export function buildMonthlyExpenseExportCsv(
+  expenses: Expense[],
+  fiscalRules: FiscalRule[] = [],
+  trips: Trip[] = [],
+  year: number,
+  monthIndex: number,
+): string {
+  const summary = buildMonthlyExpenseSummary(expenses, year, monthIndex, fiscalRules, trips);
+  const fiscalRuleRows = getApplicableFiscalRulesForMonth(year, monthIndex, fiscalRules);
+  const detailRows = createExpenseExportRows(expenses, fiscalRules, trips, year, monthIndex);
+  const remoteWorkRows = createRemoteWorkAllowanceRows(summary, year, monthIndex);
+
+  const rows: Array<Array<string | number | null | undefined>> = [
+    ['Report', 'Monthly expense summary'],
+    ['Period', `${year}-${String(monthIndex + 1).padStart(2, '0')}`],
+    ['Grand total', toMoney(summary.grandTotal)],
+    [],
+    ['Date', 'Trip', 'Category', 'Description', 'Gross', 'Reduction', 'Net'],
+    ...detailRows,
+    ...remoteWorkRows,
+    [],
+    ['Category', 'Total'],
+    ...MONTHLY_SUMMARY_CATEGORIES.map((category) => [category, toMoney(summary.categoryTotals[category])]),
+    [],
+    ['Fiscal rule scope', 'Start date', 'End date', 'Meal allowance', 'Meal voucher face value', 'Employer contribution %', 'Remote work allowance'],
+    ...fiscalRuleRows.map((rule) => [
+      rule.id,
+      rule.startDate,
+      rule.endDate,
+      toMoney(rule.mealAllowance),
+      toMoney(rule.mealVoucherFaceValue),
+      toMoney(rule.mealVoucherEmployerContributionPercentage),
+      toMoney(rule.remoteWorkAllowance),
+    ]),
+  ];
+
+  return serializeCsvForExcel(rows);
+}
+
+export function buildAnnualExpenseExportCsv(
+  expenses: Expense[],
+  fiscalRules: FiscalRule[] = [],
+  trips: Trip[] = [],
+  year: number,
+): string {
+  const summary = buildAnnualExpenseSummary(expenses, year, fiscalRules, trips);
+  const fiscalRuleRows = getApplicableFiscalRulesForYear(year, fiscalRules);
+  const detailRows = createExpenseExportRows(expenses, fiscalRules, trips, year);
+
+  const rows: Array<Array<string | number | null | undefined>> = [
+    ['Report', 'Annual expense summary'],
+    ['Year', year],
+    ['Grand total', toMoney(summary.grandTotal)],
+    [],
+    ['Date', 'Trip', 'Category', 'Description', 'Gross', 'Reduction', 'Net'],
+    ...detailRows,
+    [],
+    ['Month', 'Total'],
+    ...summary.months.map((month) => [
+      new Intl.DateTimeFormat('fr-FR', { month: 'long' }).format(new Date(year, month.index, 1)),
+      toMoney(month.total),
+    ]),
+    [],
+    ['Category', 'Total'],
+    ...ANNUAL_SUMMARY_CATEGORIES.map((category) => [
+      category === 'travel' ? 'travel' : category,
+      toMoney(summary.categoryTotals[category]),
+    ]),
+    [],
+    ['Fiscal rule scope', 'Start date', 'End date', 'Meal allowance', 'Meal voucher face value', 'Employer contribution %', 'Remote work allowance'],
+    ...fiscalRuleRows.map((rule) => [
+      rule.id,
+      rule.startDate,
+      rule.endDate,
+      toMoney(rule.mealAllowance),
+      toMoney(rule.mealVoucherFaceValue),
+      toMoney(rule.mealVoucherEmployerContributionPercentage),
+      toMoney(rule.remoteWorkAllowance),
+    ]),
+  ];
+
+  return serializeCsvForExcel(rows);
+}

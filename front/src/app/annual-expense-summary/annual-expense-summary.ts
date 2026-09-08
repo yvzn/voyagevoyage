@@ -13,8 +13,10 @@ import { Store } from '@ngrx/store';
 import {
   ANNUAL_SUMMARY_CATEGORIES,
   AnnualSummaryCategory,
+  buildAnnualExpenseExportCsv,
   buildAnnualExpenseSummary,
   formatCurrency,
+  utf16leEncode,
 } from '../expense/monthly-expense-summary.util';
 import { ExpenseActions } from '../expense/store/expense.actions';
 import { selectAllExpenses } from '../expense/store/expense.selectors';
@@ -87,6 +89,20 @@ export class AnnualExpenseSummaryComponent {
 
   protected formatCurrency(amount: number): string {
     return formatCurrency(amount);
+  }
+
+  protected exportCurrentSummary(): void {
+    const csv = buildAnnualExpenseExportCsv(this.expenses(), this.fiscalRules(), this.trips(), this.selectedYear());
+    const bytes = utf16leEncode(csv);
+    const array = new Uint8Array(bytes.length);
+    array.set(bytes);
+    const blob = new Blob([array.buffer], { type: 'text/csv;charset=utf-16le' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `annual-summary-${this.selectedYear()}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   protected getCategoryTranslationKey(category: AnnualSummaryCategory): string {

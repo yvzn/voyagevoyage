@@ -165,7 +165,8 @@
     "detailsButton": "Afficher les détails pour",
     "detailsTitle": "Détails pour",
     "viewTrip": "Voir le déplacement",
-    "closeDialog": "Fermer les détails"
+    "closeDialog": "Fermer les détails",
+    "exportExcel": "Exporter Excel"
   },
   "annualExpenseSummary": {
     "heading": "Récapitulatif annuel des frais",
@@ -175,7 +176,8 @@
     "monthLabel": "Mois",
     "monthTotal": "Total mensuel",
     "categoryTotal": "Totaux par catégorie",
-    "annualTotal": "Total annuel"
+    "annualTotal": "Total annuel",
+    "exportExcel": "Exporter Excel"
   },
   "monthlyExpenseSummaryNavItem": "Récapitulatif mensuel des frais",
   "annualExpenseSummaryNavItem": "Récapitulatif annuel des frais",
