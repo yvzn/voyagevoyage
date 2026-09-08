@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Expense, ExpenseCategory } from './expense.model';
 import { FiscalRule } from '../fiscal-rule/fiscal-rule.model';
 import { Trip, TripStatus } from '../trip/trip.model';
-import { buildMonthlyExpenseSummary } from './monthly-expense-summary.util';
+import { ANNUAL_SUMMARY_CATEGORIES, buildAnnualExpenseSummary, buildMonthlyExpenseSummary } from './monthly-expense-summary.util';
 
 function makeExpense(
   date: string,
@@ -95,5 +95,44 @@ describe('buildMonthlyExpenseSummary', () => {
     const summary = buildMonthlyExpenseSummary(expenses, 2026, 1, [rule]);
 
     expect(summary.grandTotal).toBe(50 - 20 - 6 + 20 + 90 + 12 * 20);
+  });
+
+  it('builds an annual summary with 12 months and aggregated travel totals', () => {
+    const annualRule: FiscalRule = {
+      ...rule,
+      startDate: '2026-01-01',
+      endDate: '2026-12-31',
+    };
+
+    const expenses = [
+      makeExpense('2026-01-04', ExpenseCategory.Meal, 60),
+      makeExpense('2026-01-07', ExpenseCategory.Train, 30),
+      makeExpense('2026-01-11', ExpenseCategory.MetroBus, 15),
+      makeExpense('2026-02-05', ExpenseCategory.Meal, 100),
+      makeExpense('2026-02-12', ExpenseCategory.Hotel, 180),
+      makeExpense('2026-06-15', ExpenseCategory.RemoteWork, 50),
+    ];
+
+    const summary = buildAnnualExpenseSummary(expenses, 2026, [annualRule]);
+    const juneMonthlySummary = buildMonthlyExpenseSummary(expenses, 2026, 5, [annualRule]);
+
+    expect(summary.months).toHaveLength(12);
+    expect(summary.months[0].cells[ExpenseCategory.Meal]).toBe(60 - 20 - 6);
+    expect(summary.months[0].cells.travel).toBe(45);
+    expect(summary.months[0].cells[ExpenseCategory.Hotel]).toBeUndefined();
+    expect(summary.months[1].cells[ExpenseCategory.Meal]).toBe(100 - 20 - 6);
+    expect(summary.months[1].cells[ExpenseCategory.Hotel]).toBe(180);
+    expect(summary.months[5].cells[ExpenseCategory.RemoteWork]).toBe(
+      juneMonthlySummary.categoryTotals[ExpenseCategory.RemoteWork],
+    );
+    expect(summary.categoryTotals[ExpenseCategory.Meal]).toBe((60 - 20 - 6) + (100 - 20 - 6));
+    expect(summary.categoryTotals.travel).toBe(45);
+    expect(summary.categoryTotals[ExpenseCategory.Hotel]).toBe(180);
+    expect(ANNUAL_SUMMARY_CATEGORIES).toEqual([
+      ExpenseCategory.Meal,
+      ExpenseCategory.RemoteWork,
+      'travel',
+      ExpenseCategory.Hotel,
+    ]);
   });
 });

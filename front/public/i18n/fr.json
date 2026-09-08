@@ -147,6 +147,7 @@
     "meal": "Repas",
     "metroBus": "Métro / Bus",
     "remoteWork": "Télétravail",
+    "travel": "Déplacement",
     "other": "Autre"
   },
   "expenseSummary": {
@@ -166,7 +167,18 @@
     "viewTrip": "Voir le déplacement",
     "closeDialog": "Fermer les détails"
   },
+  "annualExpenseSummary": {
+    "heading": "Récapitulatif annuel des frais",
+    "previousYear": "Année précédente",
+    "nextYear": "Année suivante",
+    "yearInputLabel": "Année",
+    "monthLabel": "Mois",
+    "monthTotal": "Total mensuel",
+    "categoryTotal": "Totaux par catégorie",
+    "annualTotal": "Total annuel"
+  },
   "monthlyExpenseSummaryNavItem": "Récapitulatif mensuel des frais",
+  "annualExpenseSummaryNavItem": "Récapitulatif annuel des frais",
   "planningDashboardNavItem": "Planification des voyages",
   "dashboardNavItem": "Tableau de bord",
   "personalLeaveNavItem": "Congés personnels",

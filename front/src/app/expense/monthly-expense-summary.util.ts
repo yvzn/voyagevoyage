@@ -10,7 +10,15 @@ export const MONTHLY_SUMMARY_CATEGORIES = [
   ExpenseCategory.Hotel,
 ] as const;
 
+export const ANNUAL_SUMMARY_CATEGORIES = [
+  ExpenseCategory.Meal,
+  ExpenseCategory.RemoteWork,
+  'travel',
+  ExpenseCategory.Hotel,
+] as const;
+
 export type MonthlySummaryCategory = (typeof MONTHLY_SUMMARY_CATEGORIES)[number];
+export type AnnualSummaryCategory = (typeof ANNUAL_SUMMARY_CATEGORIES)[number];
 
 export interface MonthlySummaryCell {
   category: MonthlySummaryCategory;
@@ -32,6 +40,19 @@ export interface MonthlyExpenseSummary {
   month: number;
   days: MonthlySummaryDay[];
   categoryTotals: Record<MonthlySummaryCategory, number>;
+  grandTotal: number;
+}
+
+export interface AnnualSummaryMonth {
+  index: number;
+  cells: Partial<Record<AnnualSummaryCategory, number>>;
+  total: number;
+}
+
+export interface AnnualExpenseSummary {
+  year: number;
+  months: AnnualSummaryMonth[];
+  categoryTotals: Record<AnnualSummaryCategory, number>;
   grandTotal: number;
 }
 
@@ -192,6 +213,58 @@ export function buildMonthlyExpenseSummary(
   const grandTotal = Object.values(categoryTotals).reduce((sum, value) => sum + value, 0);
 
   return { year, month: monthIndex, days, categoryTotals, grandTotal };
+}
+
+export function buildAnnualExpenseSummary(
+  expenses: Expense[],
+  year: number,
+  fiscalRules: FiscalRule[] = [],
+  trips: Trip[] = [],
+): AnnualExpenseSummary {
+  const categoryTotals: Record<AnnualSummaryCategory, number> = {
+    [ExpenseCategory.Meal]: 0,
+    [ExpenseCategory.RemoteWork]: 0,
+    travel: 0,
+    [ExpenseCategory.Hotel]: 0,
+  };
+
+  const months = Array.from({ length: 12 }, (_, monthIndex) => {
+    const monthlySummary = buildMonthlyExpenseSummary(expenses, year, monthIndex, fiscalRules, trips);
+    const cells: Partial<Record<AnnualSummaryCategory, number>> = {};
+
+    for (const category of ANNUAL_SUMMARY_CATEGORIES) {
+      if (category === 'travel') {
+        const travelAmount =
+          monthlySummary.categoryTotals[ExpenseCategory.Train] + monthlySummary.categoryTotals[ExpenseCategory.MetroBus];
+        if (travelAmount > 0) {
+          cells[category] = travelAmount;
+        }
+        categoryTotals[category] += travelAmount;
+        continue;
+      }
+
+      const categoryAmount = monthlySummary.categoryTotals[category];
+      if (categoryAmount > 0) {
+        cells[category] = categoryAmount;
+      }
+      categoryTotals[category] += categoryAmount;
+    }
+
+    return {
+      index: monthIndex,
+      cells,
+      total: monthlySummary.grandTotal,
+    };
+  });
+
+  const grandTotal = Object.values(categoryTotals).reduce((sum, value) => sum + value, 0);
+
+  return {
+    year,
+    months,
+    categoryTotals,
+    grandTotal,
+  };
 }
 
 export function formatCurrency(amount: number): string {

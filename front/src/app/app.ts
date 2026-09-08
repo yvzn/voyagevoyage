@@ -7,7 +7,7 @@ import { filter, map } from 'rxjs';
 import { LocaleService } from './locale.service';
 
 const TRAVEL_ROUTES = ['/calendar', '/planning-dashboard', '/train-bookings', '/hotel-bookings'];
-const FISCAL_SUMMARY_ROUTES = ['/expense-summary'];
+const FISCAL_SUMMARY_ROUTES = ['/expense-summary', '/annual-expense-summary'];
 const SETTINGS_ROUTES = ['/constraints', '/personal-leaves', '/frequent-expenses'];
 
 @Component({

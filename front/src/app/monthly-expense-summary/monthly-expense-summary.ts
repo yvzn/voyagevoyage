@@ -9,7 +9,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { Expense, ExpenseCategory } from '../expense/expense.model';
@@ -36,6 +36,8 @@ import { selectAllTrips } from '../trip/store/trip.selectors';
 })
 export class MonthlyExpenseSummaryComponent {
   private readonly store = inject(Store);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   protected readonly localeService = inject(LocaleService);
   private readonly dialogEl = viewChild.required<ElementRef<HTMLDialogElement>>('dialogEl');
 
@@ -54,6 +56,14 @@ export class MonthlyExpenseSummaryComponent {
   protected readonly fiscalRules = this.store.selectSignal(selectAllFiscalRules);
 
   constructor() {
+    const params = this.route.snapshot.queryParamMap;
+    const yearFromQuery = Number(params.get('year') ?? new Date().getFullYear());
+    const monthFromQuery = Number(params.get('month') ?? new Date().getMonth());
+    const monthDate = new Date(yearFromQuery, monthFromQuery, 1);
+    if (Number.isFinite(yearFromQuery) && Number.isFinite(monthFromQuery)) {
+      this.selectedMonth.set(monthDate);
+    }
+
     this.store.dispatch(TripActions.loadTrips());
     this.store.dispatch(FiscalRuleActions.loadFiscalRules());
 
@@ -61,6 +71,20 @@ export class MonthlyExpenseSummaryComponent {
       const trips = this.trips();
       if (trips.length > 0) {
         this.store.dispatch(ExpenseActions.loadExpensesForTrips({ tripIds: trips.map((trip) => trip.id) }));
+      }
+    });
+
+    this.route.queryParamMap.subscribe((params) => {
+      const year = Number(params.get('year') ?? this.selectedMonth().getFullYear());
+      const month = Number(params.get('month') ?? this.selectedMonth().getMonth());
+      if (!Number.isFinite(year) || !Number.isFinite(month)) {
+        return;
+      }
+
+      const nextMonth = new Date(year, month, 1);
+      const current = this.selectedMonth();
+      if (nextMonth.getFullYear() !== current.getFullYear() || nextMonth.getMonth() !== current.getMonth()) {
+        this.selectedMonth.set(nextMonth);
       }
     });
 
@@ -131,6 +155,11 @@ export class MonthlyExpenseSummaryComponent {
     date.setMonth(date.getMonth() - 1);
     this.selectedMonth.set(date);
     this.selectedCell.set(null);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { year: date.getFullYear(), month: date.getMonth() },
+      queryParamsHandling: 'merge',
+    });
   }
 
   protected nextMonth(): void {
@@ -138,11 +167,22 @@ export class MonthlyExpenseSummaryComponent {
     date.setMonth(date.getMonth() + 1);
     this.selectedMonth.set(date);
     this.selectedCell.set(null);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { year: date.getFullYear(), month: date.getMonth() },
+      queryParamsHandling: 'merge',
+    });
   }
 
   protected goToToday(): void {
-    this.selectedMonth.set(new Date());
+    const date = new Date();
+    this.selectedMonth.set(date);
     this.selectedCell.set(null);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { year: date.getFullYear(), month: date.getMonth() },
+      queryParamsHandling: 'merge',
+    });
   }
 
   protected onMonthChange(event: Event): void {
@@ -151,6 +191,11 @@ export class MonthlyExpenseSummaryComponent {
     date.setMonth(value);
     this.selectedMonth.set(date);
     this.selectedCell.set(null);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { year: date.getFullYear(), month: date.getMonth() },
+      queryParamsHandling: 'merge',
+    });
   }
 
   protected onYearChange(event: Event): void {
@@ -159,6 +204,11 @@ export class MonthlyExpenseSummaryComponent {
     date.setFullYear(value);
     this.selectedMonth.set(date);
     this.selectedCell.set(null);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { year: date.getFullYear(), month: date.getMonth() },
+      queryParamsHandling: 'merge',
+    });
   }
 
   protected getCellValue(cell: MonthlySummaryCell | undefined): string {
