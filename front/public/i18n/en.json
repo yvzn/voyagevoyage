@@ -147,6 +147,7 @@
     "meal": "Meal",
     "metroBus": "Metro / Bus",
     "remoteWork": "Telework",
+    "travel": "Travel",
     "other": "Other"
   },
   "expenseSummary": {
@@ -166,7 +167,18 @@
     "viewTrip": "View trip",
     "closeDialog": "Close details"
   },
+  "annualExpenseSummary": {
+    "heading": "Annual expense summary",
+    "previousYear": "Previous year",
+    "nextYear": "Next year",
+    "yearInputLabel": "Year",
+    "monthLabel": "Month",
+    "monthTotal": "Monthly total",
+    "categoryTotal": "Totals by category",
+    "annualTotal": "Annual total"
+  },
   "monthlyExpenseSummaryNavItem": "Monthly expense summary",
+  "annualExpenseSummaryNavItem": "Annual expense summary",
   "planningDashboardNavItem": "Trip Planning",
   "dashboardNavItem": "Dashboard",
   "personalLeaveNavItem": "Personal leave",

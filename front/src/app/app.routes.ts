@@ -12,6 +12,7 @@ import { HotelBookingListComponent } from './hotel-booking/hotel-booking-list/ho
 import { FrequentExpenseSettingsComponent } from './frequent-expense/frequent-expense-settings/frequent-expense-settings';
 import { FiscalRuleSettingsComponent } from './fiscal-rule/fiscal-rule-settings/fiscal-rule-settings';
 import { MonthlyExpenseSummaryComponent } from './monthly-expense-summary/monthly-expense-summary';
+import { AnnualExpenseSummaryComponent } from './annual-expense-summary/annual-expense-summary';
 
 export const routes: Routes = [
   {
@@ -54,6 +55,10 @@ export const routes: Routes = [
   {
     path: 'expense-summary',
     component: MonthlyExpenseSummaryComponent,
+  },
+  {
+    path: 'annual-expense-summary',
+    component: AnnualExpenseSummaryComponent,
   },
   {
     path: 'fiscal-rules',
