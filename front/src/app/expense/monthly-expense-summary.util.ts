@@ -418,6 +418,11 @@ export function buildMonthlyExpenseExportCsv(
   const fiscalRuleRows = getApplicableFiscalRulesForMonth(year, monthIndex, fiscalRules);
   const detailRows = createExpenseExportRows(expenses, fiscalRules, trips, year, monthIndex);
   const remoteWorkRows = createRemoteWorkAllowanceRows(summary, year, monthIndex);
+  const mergedDetailRows = [...detailRows, ...remoteWorkRows].sort((left, right) => {
+    const leftDate = new Date(`${left[0]}T00:00:00`).getTime();
+    const rightDate = new Date(`${right[0]}T00:00:00`).getTime();
+    return leftDate - rightDate;
+  });
 
   const rows: Array<Array<string | number | null | undefined>> = [
     ['Report', 'Monthly expense summary'],
@@ -425,8 +430,7 @@ export function buildMonthlyExpenseExportCsv(
     ['Grand total', toMoney(summary.grandTotal)],
     [],
     ['Date', 'Trip', 'Category', 'Description', 'Gross', 'Reduction', 'Net'],
-    ...detailRows,
-    ...remoteWorkRows,
+    ...mergedDetailRows,
     [],
     ['Category', 'Total'],
     ...MONTHLY_SUMMARY_CATEGORIES.map((category) => [category, toMoney(summary.categoryTotals[category])]),

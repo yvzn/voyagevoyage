@@ -156,6 +156,7 @@ describe('buildMonthlyExpenseSummary', () => {
     expect(csv).toContain('"Date","Trip","Category","Description","Gross","Reduction","Net"');
     expect(csv).toContain("'=SUM(A1:A2)");
     expect(csv).toContain('"2026-02-05","","train","Expense","90","0","90"');
+    expect(csv.indexOf('"2026-02-03"')).toBeLessThan(csv.indexOf('"2026-02-05"'));
   });
 
   it('exports annual summaries and keeps CSV BOM/encoding requirements', () => {
