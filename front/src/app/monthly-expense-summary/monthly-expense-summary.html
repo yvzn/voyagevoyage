@@ -1,140 +1,144 @@
-<section aria-labelledby="monthly-expense-summary-heading"
-  class="space-y-4 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
-  <div class="flex flex-col gap-3">
-    <h2 id="monthly-expense-summary-heading" class="text-2xl font-semibold text-gray-900 dark:text-white">
-      {{ 'expenseSummary.heading' | translate }}
-    </h2>
+<section aria-labelledby="monthly-expense-summary-heading" class="space-y-4">
+  <h2 id="monthly-expense-summary-heading" class="text-2xl font-semibold text-gray-900 dark:text-white">
+    {{ 'expenseSummary.heading' | translate }}
+  </h2>
 
+  <div class="flex flex-col gap-3 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center gap-1">
-          <button type="button" (click)="previousMonth()"
-            class="inline-flex cursor-pointer items-center justify-center rounded-lg p-2.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-            [attr.aria-label]="'expenseSummary.previousMonth' | translate">
-            <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"
-              viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-            </svg>
-          </button>
+      <!-- Previous / Next month buttons -->
+      <div class="flex items-center gap-1">
+        <button type="button" (click)="previousMonth()"
+          class="inline-flex cursor-pointer items-center justify-center rounded-lg p-2.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+          [attr.aria-label]="'expenseSummary.previousMonth' | translate">
+          <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+          </svg>
+        </button>
 
-          <button type="button" (click)="nextMonth()"
-            class="inline-flex cursor-pointer items-center justify-center rounded-lg p-2.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-            [attr.aria-label]="'expenseSummary.nextMonth' | translate">
-            <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"
-              viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-            </svg>
-          </button>
+        <button type="button" (click)="nextMonth()"
+          class="inline-flex cursor-pointer items-center justify-center rounded-lg p-2.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+          [attr.aria-label]="'expenseSummary.nextMonth' | translate">
+          <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Month and year selectors -->
+      <div class="flex items-center gap-2">
+        <div>
+          <label for="expense-summary-month-select" class="sr-only">{{ 'monthSelectLabel' | translate }}</label>
+          <select id="expense-summary-month-select" [value]="selectedMonth().getMonth()"
+            (change)="onMonthChange($event)"
+            class="block cursor-pointer rounded-lg border border-gray-300 bg-gray-50 py-2 pl-3 pr-8 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500">
+            @for (name of monthNames; track $index) {
+            <option [value]="$index" [selected]="$index === selectedMonth().getMonth()">{{ name }}</option>
+            }
+          </select>
         </div>
 
+        <div>
+          <label for="expense-summary-year-input" class="sr-only">{{ 'yearInputLabel' | translate }}</label>
+          <input id="expense-summary-year-input" type="number" [value]="selectedMonth().getFullYear()"
+            (change)="onYearChange($event)"
+            class="block w-20 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500" />
+        </div>
+      </div>
+
+      <!-- Today button and Export button -->
+      <div class="flex items-center gap-2">
         <button type="button" (click)="goToToday()"
           class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
           {{ 'todayButton' | translate }}
         </button>
 
-        <div class="flex items-center gap-2">
-          <div>
-            <label for="expense-summary-month-select" class="sr-only">{{ 'monthSelectLabel' | translate }}</label>
-            <select id="expense-summary-month-select" [value]="selectedMonth().getMonth()"
-              (change)="onMonthChange($event)"
-              class="block cursor-pointer rounded-lg border border-gray-300 bg-gray-50 py-2 pl-3 pr-8 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500">
-              @for (name of monthNames; track $index) {
-              <option [value]="$index" [selected]="$index === selectedMonth().getMonth()">{{ name }}</option>
-              }
-            </select>
-          </div>
-
-          <div>
-            <label for="expense-summary-year-input" class="sr-only">{{ 'yearInputLabel' | translate }}</label>
-            <input id="expense-summary-year-input" type="number" [value]="selectedMonth().getFullYear()"
-              (change)="onYearChange($event)"
-              class="block w-20 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500" />
-          </div>
-        </div>
+        <button type="button" (click)="exportCurrentSummary()"
+          class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600">
+          {{ 'expenseSummary.exportExcel' | translate }}
+        </button>
       </div>
-
-      <button type="button" (click)="exportCurrentSummary()"
-        class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600">
-        {{ 'expenseSummary.exportExcel' | translate }}
-      </button>
     </div>
   </div>
 
-  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-    <table class="min-w-full table-auto border-collapse text-left text-sm text-gray-700 dark:text-gray-200">
-      <thead class="bg-gray-50 dark:bg-gray-700">
-        <tr>
-          <th
-            class="border-b border-r border-gray-200 px-3 py-2 font-semibold text-gray-700 dark:border-gray-600 dark:text-gray-100">
-            {{ 'expenseSummary.dayLabel' | translate }}
-          </th>
-          @for (category of summaryCategories; track category) {
-          <th
-            class="border-b border-r border-gray-200 px-3 py-2 text-center font-semibold text-gray-700 dark:border-gray-600 dark:text-gray-100">
-            {{ ('expenseCategory.' + category) | translate }}
-          </th>
-          }
-          <th
-            class="border-b border-gray-200 px-3 py-2 text-right font-semibold text-gray-700 dark:border-gray-600 dark:text-gray-100">
-            {{ 'expenseSummary.dayTotal' | translate }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (day of summary().days; track day.date) {
-        <tr class="align-top">
-          <th
-            class="border-b border-r border-gray-200 bg-gray-50 px-3 py-2 text-left font-medium text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
-            <span class="block text-lg leading-none">{{ day.day }}</span>
-            <span class="mt-1 block text-[10px] uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400">
-              {{ getDayOfWeekShort(day.date) }}
-            </span>
-          </th>
-          @for (category of summaryCategories; track category) {
-          @let cell = day.cells[category];
-          @if (cell) {
-          <td class="border-b border-r border-gray-200 px-2 py-2 dark:border-gray-600">
-            <button type="button" [class]="getCellButtonClasses(cell)" (click)="openCellDetails(cell)"
-              [attr.aria-label]="('expenseSummary.detailsButton' | translate) + ' ' + ('expenseCategory.' + category) + ' ' + day.date">
-              {{ getCellValue(cell) }}
-            </button>
-          </td>
-          } @else {
-          <td
-            class="border-b border-r border-gray-200 px-2 py-2 text-center text-gray-300 dark:border-gray-600 dark:text-gray-500">
-            &nbsp;</td>
-          }
-          }
-          <td
-            class="border-b border-gray-200 px-3 py-2 text-right font-semibold text-gray-900 dark:border-gray-600 dark:text-white">
-            @if (day.dayTotal > 0) {
-            {{ formatCurrency(day.dayTotal) }}
-            } @else {
-            &nbsp;
+  <div class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+    <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+      <table class="min-w-full table-auto border-collapse text-left text-sm text-gray-700 dark:text-gray-200">
+        <thead class="bg-gray-50 dark:bg-gray-700">
+          <tr>
+            <th
+              class="border-b border-r border-gray-200 px-3 py-2 font-semibold text-gray-700 dark:border-gray-600 dark:text-gray-100">
+              {{ 'expenseSummary.dayLabel' | translate }}
+            </th>
+            @for (category of summaryCategories; track category) {
+            <th
+              class="border-b border-r border-gray-200 px-3 py-2 text-center font-semibold text-gray-700 dark:border-gray-600 dark:text-gray-100">
+              {{ ('expenseCategory.' + category) | translate }}
+            </th>
             }
-          </td>
-        </tr>
-        }
-      </tbody>
-      <tfoot class="bg-gray-50 dark:bg-gray-700">
-        <tr>
-          <th
-            class="border-t border-r border-gray-200 px-3 py-2 text-left font-semibold text-gray-800 dark:border-gray-600 dark:text-gray-100">
-            {{ 'expenseSummary.categoryTotal' | translate }}
-          </th>
-          @for (category of summaryCategories; track category) {
-          <td
-            class="border-t border-r border-gray-200 px-3 py-2 text-right font-semibold text-gray-900 dark:border-gray-600 dark:text-white">
-            {{ formatCurrency(categoryTotals()[category]) }}
-          </td>
+            <th
+              class="border-b border-gray-200 px-3 py-2 text-right font-semibold text-gray-700 dark:border-gray-600 dark:text-gray-100">
+              {{ 'expenseSummary.dayTotal' | translate }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (day of summary().days; track day.date) {
+          <tr class="align-top">
+            <th
+              class="border-b border-r border-gray-200 bg-gray-50 px-3 py-2 text-left font-medium text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
+              <span class="block text-lg leading-none">{{ day.day }}</span>
+              <span class="mt-1 block text-[10px] uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400">
+                {{ getDayOfWeekShort(day.date) }}
+              </span>
+            </th>
+            @for (category of summaryCategories; track category) {
+            @let cell = day.cells[category];
+            @if (cell) {
+            <td class="border-b border-r border-gray-200 px-2 py-2 dark:border-gray-600">
+              <button type="button" [class]="getCellButtonClasses(cell)" (click)="openCellDetails(cell)"
+                [attr.aria-label]="('expenseSummary.detailsButton' | translate) + ' ' + ('expenseCategory.' + category) + ' ' + day.date">
+                {{ getCellValue(cell) }}
+              </button>
+            </td>
+            } @else {
+            <td
+              class="border-b border-r border-gray-200 px-2 py-2 text-center text-gray-300 dark:border-gray-600 dark:text-gray-500">
+              &nbsp;</td>
+            }
+            }
+            <td
+              class="border-b border-gray-200 px-3 py-2 text-right font-semibold text-gray-900 dark:border-gray-600 dark:text-white">
+              @if (day.dayTotal > 0) {
+              {{ formatCurrency(day.dayTotal) }}
+              } @else {
+              &nbsp;
+              }
+            </td>
+          </tr>
           }
-          <td
-            class="border-t border-gray-200 px-3 py-2 text-right text-lg font-bold text-gray-900 dark:border-gray-600 dark:text-white">
-            {{ formatCurrency(grandTotal()) }}
-          </td>
-        </tr>
-      </tfoot>
-    </table>
+        </tbody>
+        <tfoot class="bg-gray-50 dark:bg-gray-700">
+          <tr>
+            <th
+              class="border-t border-r border-gray-200 px-3 py-2 text-left font-semibold text-gray-800 dark:border-gray-600 dark:text-gray-100">
+              {{ 'expenseSummary.categoryTotal' | translate }}
+            </th>
+            @for (category of summaryCategories; track category) {
+            <td
+              class="border-t border-r border-gray-200 px-3 py-2 text-right font-semibold text-gray-900 dark:border-gray-600 dark:text-white">
+              {{ formatCurrency(categoryTotals()[category]) }}
+            </td>
+            }
+            <td
+              class="border-t border-gray-200 px-3 py-2 text-right text-lg font-bold text-gray-900 dark:border-gray-600 dark:text-white">
+              {{ formatCurrency(grandTotal()) }}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
   </div>
 
   <dialog #dialogEl (cancel)="onDialogCancel($event)" (close)="closeCellDetails()" (click)="onBackdropClick($event)"
@@ -145,7 +149,8 @@
       <div class="mb-4 flex items-start justify-between gap-4">
         <div>
           <h3 id="expense-summary-details-title" class="text-lg font-semibold text-gray-900 dark:text-white">
-            {{ 'expenseSummary.detailsTitle' | translate }} {{ 'expenseCategory.' + selectedCell()!.category | translate }}
+            {{ 'expenseSummary.detailsTitle' | translate }} {{ 'expenseCategory.' + selectedCell()!.category | translate
+            }}
           </h3>
           <p class="text-sm text-gray-500 dark:text-gray-400">{{ selectedCell()!.sourceExpenses[0]?.date || '' }}</p>
         </div>

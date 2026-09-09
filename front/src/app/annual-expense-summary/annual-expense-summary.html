@@ -1,40 +1,41 @@
-<section aria-labelledby="annual-expense-summary-heading"
-  class="space-y-4 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
-  <div class="flex flex-col gap-3">
-    <h2 id="annual-expense-summary-heading" class="text-2xl font-semibold text-gray-900 dark:text-white">
-      {{ 'annualExpenseSummary.heading' | translate }}
-    </h2>
+<section aria-labelledby="annual-expense-summary-heading" class="space-y-4">
+  <h2 id="annual-expense-summary-heading" class="text-2xl font-semibold text-gray-900 dark:text-white">
+    {{ 'annualExpenseSummary.heading' | translate }}
+  </h2>
 
+  <div class="flex flex-col gap-3 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <div class="flex items-center gap-1">
-          <button type="button" (click)="previousYear()"
-            class="inline-flex cursor-pointer items-center justify-center rounded-lg p-2.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-            [attr.aria-label]="'annualExpenseSummary.previousYear' | translate">
-            <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"
-              viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-            </svg>
-          </button>
+      <!-- Previous / Next year buttons -->
+      <div class="flex items-center gap-1">
+        <button type="button" (click)="previousYear()"
+          class="inline-flex cursor-pointer items-center justify-center rounded-lg p-2.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+          [attr.aria-label]="'annualExpenseSummary.previousYear' | translate">
+          <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+          </svg>
+        </button>
 
-          <button type="button" (click)="nextYear()"
-            class="inline-flex cursor-pointer items-center justify-center rounded-lg p-2.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-            [attr.aria-label]="'annualExpenseSummary.nextYear' | translate">
-            <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"
-              viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-            </svg>
-          </button>
-        </div>
-
-        <div>
-          <label for="annual-expense-summary-year-input" class="sr-only">{{ 'annualExpenseSummary.yearInputLabel' | translate }}</label>
-          <input id="annual-expense-summary-year-input" type="number" [value]="selectedYear()"
-            (change)="onYearChange($event)"
-            class="block w-24 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500" />
-        </div>
+        <button type="button" (click)="nextYear()"
+          class="inline-flex cursor-pointer items-center justify-center rounded-lg p-2.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+          [attr.aria-label]="'annualExpenseSummary.nextYear' | translate">
+          <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+          </svg>
+        </button>
       </div>
 
+      <!-- year selector -->
+      <div>
+        <label for="annual-expense-summary-year-input" class="sr-only">{{ 'annualExpenseSummary.yearInputLabel' |
+          translate }}</label>
+        <input id="annual-expense-summary-year-input" type="number" [value]="selectedYear()"
+          (change)="onYearChange($event)"
+          class="block w-24 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500" />
+      </div>
+
+      <!-- Export button -->
       <button type="button" (click)="exportCurrentSummary()"
         class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600">
         {{ 'annualExpenseSummary.exportExcel' | translate }}
@@ -42,65 +43,76 @@
     </div>
   </div>
 
-  <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-    <table class="min-w-full table-auto border-collapse text-left text-sm text-gray-700 dark:text-gray-200">
-      <thead class="bg-gray-50 dark:bg-gray-700">
-        <tr>
-          <th class="border-b border-r border-gray-200 px-3 py-2 font-semibold text-gray-700 dark:border-gray-600 dark:text-gray-100">
-            {{ 'annualExpenseSummary.monthLabel' | translate }}
-          </th>
-          @for (category of summaryCategories; track category) {
-            <th class="border-b border-r border-gray-200 px-3 py-2 text-center font-semibold text-gray-700 dark:border-gray-600 dark:text-gray-100">
+  <div class="rounded-lg bg-white p-4 shadow-sm dark:bg-gray-800">
+    <div class="overflow-x-auto rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+      <table class="min-w-full table-auto border-collapse text-left text-sm text-gray-700 dark:text-gray-200">
+        <thead class="bg-gray-50 dark:bg-gray-700">
+          <tr>
+            <th
+              class="border-b border-r border-gray-200 px-3 py-2 font-semibold text-gray-700 dark:border-gray-600 dark:text-gray-100">
+              {{ 'annualExpenseSummary.monthLabel' | translate }}
+            </th>
+            @for (category of summaryCategories; track category) {
+            <th
+              class="border-b border-r border-gray-200 px-3 py-2 text-center font-semibold text-gray-700 dark:border-gray-600 dark:text-gray-100">
               {{ getCategoryTranslationKey(category) | translate }}
             </th>
-          }
-          <th class="border-b border-gray-200 px-3 py-2 text-right font-semibold text-gray-700 dark:border-gray-600 dark:text-gray-100">
-            {{ 'annualExpenseSummary.monthTotal' | translate }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (month of summary().months; track month.index) {
+            }
+            <th
+              class="border-b border-gray-200 px-3 py-2 text-right font-semibold text-gray-700 dark:border-gray-600 dark:text-gray-100">
+              {{ 'annualExpenseSummary.monthTotal' | translate }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (month of summary().months; track month.index) {
           <tr class="align-top">
-            <th class="border-b border-r border-gray-200 bg-gray-50 px-3 py-2 text-left font-medium text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
+            <th
+              class="border-b border-r border-gray-200 bg-gray-50 px-3 py-2 text-left font-medium text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
               {{ monthNames[month.index] }}
             </th>
             @for (category of summaryCategories; track category) {
-              @let cell = month.cells[category];
-              @if (cell !== undefined) {
-                <td class="border-b border-r border-gray-200 px-2 py-2 text-right dark:border-gray-600">
-                  <a [routerLink]="['/expense-summary']" [queryParams]="{ year: selectedYear(), month: month.index }"
-                    class="block rounded-md px-2 py-1 text-right font-medium text-blue-700 hover:bg-blue-50 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-blue-400 dark:hover:bg-blue-950/30">
-                    {{ formatCurrency(cell) }}
-                  </a>
-                </td>
-              } @else {
-                <td class="border-b border-r border-gray-200 px-2 py-2 text-center text-gray-300 dark:border-gray-600 dark:text-gray-500">
-                  &nbsp;
-                </td>
-              }
+            @let cell = month.cells[category];
+            @if (cell !== undefined) {
+            <td class="border-b border-r border-gray-200 px-2 py-2 text-right dark:border-gray-600">
+              <a [routerLink]="['/expense-summary']" [queryParams]="{ year: selectedYear(), month: month.index }"
+                class="block rounded-md px-2 py-1 text-right font-medium text-blue-700 hover:bg-blue-50 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-blue-400 dark:hover:bg-blue-950/30">
+                {{ formatCurrency(cell) }}
+              </a>
+            </td>
+            } @else {
+            <td
+              class="border-b border-r border-gray-200 px-2 py-2 text-center text-gray-300 dark:border-gray-600 dark:text-gray-500">
+              &nbsp;
+            </td>
             }
-            <td class="border-b border-gray-200 px-3 py-2 text-right font-semibold text-gray-900 dark:border-gray-600 dark:text-white">
+            }
+            <td
+              class="border-b border-gray-200 px-3 py-2 text-right font-semibold text-gray-900 dark:border-gray-600 dark:text-white">
               {{ formatCurrency(month.total) }}
             </td>
           </tr>
-        }
-      </tbody>
-      <tfoot class="bg-gray-50 dark:bg-gray-700">
-        <tr>
-          <th class="border-t border-r border-gray-200 px-3 py-2 text-left font-semibold text-gray-800 dark:border-gray-600 dark:text-gray-100">
-            {{ 'annualExpenseSummary.categoryTotal' | translate }}
-          </th>
-          @for (category of summaryCategories; track category) {
-            <td class="border-t border-r border-gray-200 px-3 py-2 text-right font-semibold text-gray-900 dark:border-gray-600 dark:text-white">
+          }
+        </tbody>
+        <tfoot class="bg-gray-50 dark:bg-gray-700">
+          <tr>
+            <th
+              class="border-t border-r border-gray-200 px-3 py-2 text-left font-semibold text-gray-800 dark:border-gray-600 dark:text-gray-100">
+              {{ 'annualExpenseSummary.categoryTotal' | translate }}
+            </th>
+            @for (category of summaryCategories; track category) {
+            <td
+              class="border-t border-r border-gray-200 px-3 py-2 text-right font-semibold text-gray-900 dark:border-gray-600 dark:text-white">
               {{ formatCurrency(categoryTotals()[category]) }}
             </td>
-          }
-          <td class="border-t border-gray-200 px-3 py-2 text-right text-lg font-bold text-gray-900 dark:border-gray-600 dark:text-white">
-            {{ formatCurrency(grandTotal()) }}
-          </td>
-        </tr>
-      </tfoot>
-    </table>
+            }
+            <td
+              class="border-t border-gray-200 px-3 py-2 text-right text-lg font-bold text-gray-900 dark:border-gray-600 dark:text-white">
+              {{ formatCurrency(grandTotal()) }}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
   </div>
 </section>
