@@ -136,7 +136,14 @@ export class MonthlyExpenseSummaryComponent {
   protected exportCurrentSummary(): void {
     const year = this.selectedMonth().getFullYear();
     const monthIndex = this.selectedMonth().getMonth();
-    const csv = buildMonthlyExpenseExportCsv(this.expenses(), this.fiscalRules(), this.trips(), year, monthIndex);
+    const csv = buildMonthlyExpenseExportCsv(
+      this.expenses(),
+      this.fiscalRules(),
+      this.trips(),
+      year,
+      monthIndex,
+      this.localeService.currentLocale(),
+    );
     const bytes = utf16leEncode(csv);
     const array = new Uint8Array(bytes.length);
     array.set(bytes);

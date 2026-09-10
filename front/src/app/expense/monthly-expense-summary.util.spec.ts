@@ -150,13 +150,13 @@ describe('buildMonthlyExpenseSummary', () => {
       makeExpense('2026-02-05', ExpenseCategory.Train, 90),
     ];
 
-    const csv = buildMonthlyExpenseExportCsv(expenses, [rule], [], 2026, 1);
+    const csv = buildMonthlyExpenseExportCsv(expenses, [rule], [], 2026, 1, 'en-US');
 
     expect(csv.startsWith('sep=,\r\n')).toBe(true);
     expect(csv).toContain('"Date","Trip","Category","Description","Gross","Reduction","Net"');
     expect(csv).toContain("'=SUM(A1:A2)");
-    expect(csv).toContain('"2026-02-05","","train","Expense","90","0","90"');
-    expect(csv.indexOf('"2026-02-03"')).toBeLessThan(csv.indexOf('"2026-02-05"'));
+    expect(csv).toContain('"02/05/2026","","train","Expense","90.00","0.00","90.00"');
+    expect(csv.indexOf('"03/02/2026"')).toBeLessThan(csv.indexOf('"02/05/2026"'));
   });
 
   it('exports annual summaries and keeps CSV BOM/encoding requirements', () => {
@@ -165,7 +165,7 @@ describe('buildMonthlyExpenseSummary', () => {
       makeExpense('2026-06-15', ExpenseCategory.RemoteWork, 50),
     ];
 
-    const csv = buildAnnualExpenseExportCsv(expenses, [rule], [], 2026);
+    const csv = buildAnnualExpenseExportCsv(expenses, [rule], [], 2026, 'en-US');
     const encoded = utf16leEncode(csv);
 
     expect(csv).toContain('"Report","Annual expense summary"');

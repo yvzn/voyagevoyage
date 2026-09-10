@@ -308,8 +308,62 @@ export function utf16leEncode(text: string): Uint8Array {
   return bytes;
 }
 
-function toMoney(value: number): string {
-  return Number(value.toFixed(2)).toString();
+function getExportLocale(locale: string): string {
+  return locale?.startsWith('fr') ? 'fr-FR' : 'en-US';
+}
+
+function getExportLabels(locale: string): Record<string, string> {
+  const useFrench = getExportLocale(locale) === 'fr-FR';
+
+  return {
+    report: useFrench ? 'Rapport' : 'Report',
+    monthlyReport: useFrench ? 'Récapitulatif mensuel des frais' : 'Monthly expense summary',
+    annualReport: useFrench ? 'Récapitulatif annuel des frais' : 'Annual expense summary',
+    period: useFrench ? 'Période' : 'Period',
+    year: useFrench ? 'Année' : 'Year',
+    month: useFrench ? 'Mois' : 'Month',
+    grandTotal: useFrench ? 'Total général' : 'Grand total',
+    date: useFrench ? 'Date' : 'Date',
+    trip: useFrench ? 'Déplacement' : 'Trip',
+    category: useFrench ? 'Catégorie' : 'Category',
+    description: useFrench ? 'Description' : 'Description',
+    gross: useFrench ? 'Brut' : 'Gross',
+    reduction: useFrench ? 'Réduction' : 'Reduction',
+    net: useFrench ? 'Net' : 'Net',
+    categoryTotal: useFrench ? 'Total par catégorie' : 'Category total',
+    total: useFrench ? 'Total' : 'Total',
+    fiscalRuleScope: useFrench ? 'Champ de règle fiscale' : 'Fiscal rule scope',
+    startDate: useFrench ? 'Date de début' : 'Start date',
+    endDate: useFrench ? 'Date de fin' : 'End date',
+    mealAllowance: useFrench ? 'Indemnité repas' : 'Meal allowance',
+    mealVoucherFaceValue: useFrench ? 'Valeur du titre-restaurant' : 'Meal voucher face value',
+    employerContribution: useFrench ? 'Contribution employeur %' : 'Employer contribution %',
+    remoteWorkAllowance: useFrench ? 'Indemnité télétravail' : 'Remote work allowance',
+    remoteWorkLabel: useFrench ? 'Indemnité de télétravail' : 'Remote work allowance',
+  };
+}
+
+function formatExportNumber(value: number, locale: string): string {
+  return new Intl.NumberFormat(getExportLocale(locale), {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+function formatExportDate(date: string, locale: string): string {
+  if (!date) {
+    return '';
+  }
+
+  return new Intl.DateTimeFormat(getExportLocale(locale), {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date(`${date}T00:00:00`));
+}
+
+function toMoney(value: number, locale: string = 'fr-FR'): string {
+  return formatExportNumber(value, locale);
 }
 
 function getApplicableFiscalRulesForMonth(
@@ -348,6 +402,7 @@ function createExpenseExportRows(
   trips: Trip[] = [],
   year?: number,
   monthIndex?: number,
+  locale: string = 'fr-FR',
 ): Array<Array<string | number>> {
   const tripMap = new Map(trips.map((trip) => [trip.id, trip]));
   const rows: Array<Array<string | number>> = [];
@@ -371,9 +426,9 @@ function createExpenseExportRows(
       trip?.destination ?? '',
       expense.category,
       expense.description,
-      toMoney(gross),
-      toMoney(abatement),
-      toMoney(net),
+      toMoney(gross, locale),
+      toMoney(abatement, locale),
+      toMoney(net, locale),
     ]);
   }
 
@@ -382,8 +437,7 @@ function createExpenseExportRows(
 
 function createRemoteWorkAllowanceRows(
   summary: MonthlyExpenseSummary,
-  _year: number,
-  _monthIndex: number,
+  locale: string = 'fr-FR',
 ): Array<Array<string | number>> {
   const rows: Array<Array<string | number>> = [];
 
@@ -397,10 +451,10 @@ function createRemoteWorkAllowanceRows(
       day.date,
       '',
       ExpenseCategory.RemoteWork,
-      'Remote work allowance',
-      toMoney(remoteWorkCell.gross),
-      toMoney(remoteWorkCell.abatement),
-      toMoney(remoteWorkCell.net),
+      getExportLabels(locale)['remoteWorkLabel'],
+      toMoney(remoteWorkCell.gross, locale),
+      toMoney(remoteWorkCell.abatement, locale),
+      toMoney(remoteWorkCell.net, locale),
     ]);
   }
 
@@ -413,37 +467,44 @@ export function buildMonthlyExpenseExportCsv(
   trips: Trip[] = [],
   year: number,
   monthIndex: number,
+  locale: string = 'fr-FR',
 ): string {
+  const labels = getExportLabels(locale) as Record<string, string>;
   const summary = buildMonthlyExpenseSummary(expenses, year, monthIndex, fiscalRules, trips);
   const fiscalRuleRows = getApplicableFiscalRulesForMonth(year, monthIndex, fiscalRules);
-  const detailRows = createExpenseExportRows(expenses, fiscalRules, trips, year, monthIndex);
-  const remoteWorkRows = createRemoteWorkAllowanceRows(summary, year, monthIndex);
+  const detailRows = createExpenseExportRows(expenses, fiscalRules, trips, year, monthIndex, locale);
+  const remoteWorkRows = createRemoteWorkAllowanceRows(summary, locale);
   const mergedDetailRows = [...detailRows, ...remoteWorkRows].sort((left, right) => {
     const leftDate = new Date(`${left[0]}T00:00:00`).getTime();
     const rightDate = new Date(`${right[0]}T00:00:00`).getTime();
     return leftDate - rightDate;
   });
 
+  const localizedDetailRows = mergedDetailRows.map((row) => [
+    formatExportDate(String(row[0]), locale),
+    ...(row.slice(1) as Array<string | number | null | undefined>),
+  ]);
+
   const rows: Array<Array<string | number | null | undefined>> = [
-    ['Report', 'Monthly expense summary'],
-    ['Period', `${year}-${String(monthIndex + 1).padStart(2, '0')}`],
-    ['Grand total', toMoney(summary.grandTotal)],
+    [labels['report'], labels['monthlyReport']],
+    [labels['period'], `${year}-${String(monthIndex + 1).padStart(2, '0')}`],
+    [labels['grandTotal'], toMoney(summary.grandTotal, locale)],
     [],
-    ['Date', 'Trip', 'Category', 'Description', 'Gross', 'Reduction', 'Net'],
-    ...mergedDetailRows,
+    [labels['date'], labels['trip'], labels['category'], labels['description'], labels['gross'], labels['reduction'], labels['net']],
+    ...localizedDetailRows,
     [],
-    ['Category', 'Total'],
-    ...MONTHLY_SUMMARY_CATEGORIES.map((category) => [category, toMoney(summary.categoryTotals[category])]),
+    [labels['category'], labels['total']],
+    ...MONTHLY_SUMMARY_CATEGORIES.map((category) => [category, toMoney(summary.categoryTotals[category], locale)]),
     [],
-    ['Fiscal rule scope', 'Start date', 'End date', 'Meal allowance', 'Meal voucher face value', 'Employer contribution %', 'Remote work allowance'],
+    [labels['fiscalRuleScope'], labels['startDate'], labels['endDate'], labels['mealAllowance'], labels['mealVoucherFaceValue'], labels['employerContribution'], labels['remoteWorkAllowance']],
     ...fiscalRuleRows.map((rule) => [
       rule.id,
-      rule.startDate,
-      rule.endDate,
-      toMoney(rule.mealAllowance),
-      toMoney(rule.mealVoucherFaceValue),
-      toMoney(rule.mealVoucherEmployerContributionPercentage),
-      toMoney(rule.remoteWorkAllowance),
+      formatExportDate(rule.startDate, locale),
+      formatExportDate(rule.endDate, locale),
+      toMoney(rule.mealAllowance, locale),
+      toMoney(rule.mealVoucherFaceValue, locale),
+      toMoney(rule.mealVoucherEmployerContributionPercentage, locale),
+      toMoney(rule.remoteWorkAllowance, locale),
     ]),
   ];
 
@@ -455,40 +516,47 @@ export function buildAnnualExpenseExportCsv(
   fiscalRules: FiscalRule[] = [],
   trips: Trip[] = [],
   year: number,
+  locale: string = 'fr-FR',
 ): string {
+  const labels = getExportLabels(locale) as Record<string, string>;
   const summary = buildAnnualExpenseSummary(expenses, year, fiscalRules, trips);
   const fiscalRuleRows = getApplicableFiscalRulesForYear(year, fiscalRules);
-  const detailRows = createExpenseExportRows(expenses, fiscalRules, trips, year);
+  const detailRows = createExpenseExportRows(expenses, fiscalRules, trips, year, undefined, locale);
+
+  const localizedDetailRows = detailRows.map((row) => [
+    formatExportDate(String(row[0]), locale),
+    ...(row.slice(1) as Array<string | number | null | undefined>),
+  ]);
 
   const rows: Array<Array<string | number | null | undefined>> = [
-    ['Report', 'Annual expense summary'],
-    ['Year', year],
-    ['Grand total', toMoney(summary.grandTotal)],
+    [labels['report'], labels['annualReport']],
+    [labels['year'], year],
+    [labels['grandTotal'], toMoney(summary.grandTotal, locale)],
     [],
-    ['Date', 'Trip', 'Category', 'Description', 'Gross', 'Reduction', 'Net'],
-    ...detailRows,
+    [labels['date'], labels['trip'], labels['category'], labels['description'], labels['gross'], labels['reduction'], labels['net']],
+    ...localizedDetailRows,
     [],
-    ['Month', 'Total'],
+    [labels['month'], labels['total']],
     ...summary.months.map((month) => [
-      new Intl.DateTimeFormat('fr-FR', { month: 'long' }).format(new Date(year, month.index, 1)),
-      toMoney(month.total),
+      new Intl.DateTimeFormat(getExportLocale(locale), { month: 'long' }).format(new Date(year, month.index, 1)),
+      toMoney(month.total, locale),
     ]),
     [],
-    ['Category', 'Total'],
+    [labels['category'], labels['total']],
     ...ANNUAL_SUMMARY_CATEGORIES.map((category) => [
       category === 'travel' ? 'travel' : category,
-      toMoney(summary.categoryTotals[category]),
+      toMoney(summary.categoryTotals[category], locale),
     ]),
     [],
-    ['Fiscal rule scope', 'Start date', 'End date', 'Meal allowance', 'Meal voucher face value', 'Employer contribution %', 'Remote work allowance'],
+    [labels['fiscalRuleScope'], labels['startDate'], labels['endDate'], labels['mealAllowance'], labels['mealVoucherFaceValue'], labels['employerContribution'], labels['remoteWorkAllowance']],
     ...fiscalRuleRows.map((rule) => [
       rule.id,
-      rule.startDate,
-      rule.endDate,
-      toMoney(rule.mealAllowance),
-      toMoney(rule.mealVoucherFaceValue),
-      toMoney(rule.mealVoucherEmployerContributionPercentage),
-      toMoney(rule.remoteWorkAllowance),
+      formatExportDate(rule.startDate, locale),
+      formatExportDate(rule.endDate, locale),
+      toMoney(rule.mealAllowance, locale),
+      toMoney(rule.mealVoucherFaceValue, locale),
+      toMoney(rule.mealVoucherEmployerContributionPercentage, locale),
+      toMoney(rule.remoteWorkAllowance, locale),
     ]),
   ];
 

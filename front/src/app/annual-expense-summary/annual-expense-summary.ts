@@ -92,7 +92,13 @@ export class AnnualExpenseSummaryComponent {
   }
 
   protected exportCurrentSummary(): void {
-    const csv = buildAnnualExpenseExportCsv(this.expenses(), this.fiscalRules(), this.trips(), this.selectedYear());
+    const csv = buildAnnualExpenseExportCsv(
+      this.expenses(),
+      this.fiscalRules(),
+      this.trips(),
+      this.selectedYear(),
+      this.localeService.currentLocale(),
+    );
     const bytes = utf16leEncode(csv);
     const array = new Uint8Array(bytes.length);
     array.set(bytes);
