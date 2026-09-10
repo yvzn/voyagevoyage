@@ -1,3 +1,4 @@
+import { TranslateService } from '@ngx-translate/core';
 import { describe, expect, it } from 'vitest';
 import { Expense, ExpenseCategory } from './expense.model';
 import { FiscalRule } from '../fiscal-rule/fiscal-rule.model';
@@ -11,6 +12,33 @@ import {
   serializeCsvForExcel,
   utf16leEncode,
 } from './monthly-expense-summary.util';
+
+const fakeTranslateService = {
+  instant: (key: string) => ({
+    'exportCsv.report': 'Report',
+    'exportCsv.monthlyReport': 'Monthly expense summary',
+    'exportCsv.annualReport': 'Annual expense summary',
+    'exportCsv.period': 'Period',
+    'exportCsv.year': 'Year',
+    'exportCsv.month': 'Month',
+    'exportCsv.grandTotal': 'Grand total',
+    'exportCsv.date': 'Date',
+    'exportCsv.trip': 'Trip',
+    'exportCsv.category': 'Category',
+    'exportCsv.description': 'Description',
+    'exportCsv.gross': 'Gross',
+    'exportCsv.reduction': 'Reduction',
+    'exportCsv.net': 'Net',
+    'exportCsv.total': 'Total',
+    'exportCsv.fiscalRuleScope': 'Fiscal rule scope',
+    'exportCsv.startDate': 'Start date',
+    'exportCsv.endDate': 'End date',
+    'exportCsv.mealAllowance': 'Meal allowance',
+    'exportCsv.mealVoucherFaceValue': 'Meal voucher face value',
+    'exportCsv.employerContribution': 'Employer contribution %',
+    'exportCsv.remoteWorkAllowance': 'Remote work allowance',
+  })[key] ?? key,
+} as Pick<TranslateService, 'instant'>;
 
 function makeExpense(
   date: string,
@@ -150,7 +178,7 @@ describe('buildMonthlyExpenseSummary', () => {
       makeExpense('2026-02-05', ExpenseCategory.Train, 90),
     ];
 
-    const csv = buildMonthlyExpenseExportCsv(expenses, [rule], [], 2026, 1, 'en-US');
+    const csv = buildMonthlyExpenseExportCsv(expenses, [rule], [], 2026, 1, 'en-US', fakeTranslateService as TranslateService);
 
     expect(csv.startsWith('sep=,\r\n')).toBe(true);
     expect(csv).toContain('"Date","Trip","Category","Description","Gross","Reduction","Net"');
@@ -165,7 +193,7 @@ describe('buildMonthlyExpenseSummary', () => {
       makeExpense('2026-06-15', ExpenseCategory.RemoteWork, 50),
     ];
 
-    const csv = buildAnnualExpenseExportCsv(expenses, [rule], [], 2026, 'en-US');
+    const csv = buildAnnualExpenseExportCsv(expenses, [rule], [], 2026, 'en-US', fakeTranslateService as TranslateService);
     const encoded = utf16leEncode(csv);
 
     expect(csv).toContain('"Report","Annual expense summary"');

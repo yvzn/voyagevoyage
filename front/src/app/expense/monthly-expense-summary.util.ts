@@ -1,3 +1,4 @@
+import { TranslateService } from '@ngx-translate/core';
 import { Expense, ExpenseCategory } from './expense.model';
 import { FiscalRule } from '../fiscal-rule/fiscal-rule.model';
 import { Trip } from '../trip/trip.model';
@@ -312,34 +313,31 @@ function getExportLocale(locale: string): string {
   return locale?.startsWith('fr') ? 'fr-FR' : 'en-US';
 }
 
-function getExportLabels(locale: string): Record<string, string> {
-  const useFrench = getExportLocale(locale) === 'fr-FR';
-
+function getExportLabels(translateService: TranslateService): Record<string, string> {
   return {
-    report: useFrench ? 'Rapport' : 'Report',
-    monthlyReport: useFrench ? 'Récapitulatif mensuel des frais' : 'Monthly expense summary',
-    annualReport: useFrench ? 'Récapitulatif annuel des frais' : 'Annual expense summary',
-    period: useFrench ? 'Période' : 'Period',
-    year: useFrench ? 'Année' : 'Year',
-    month: useFrench ? 'Mois' : 'Month',
-    grandTotal: useFrench ? 'Total général' : 'Grand total',
-    date: useFrench ? 'Date' : 'Date',
-    trip: useFrench ? 'Déplacement' : 'Trip',
-    category: useFrench ? 'Catégorie' : 'Category',
-    description: useFrench ? 'Description' : 'Description',
-    gross: useFrench ? 'Brut' : 'Gross',
-    reduction: useFrench ? 'Réduction' : 'Reduction',
-    net: useFrench ? 'Net' : 'Net',
-    categoryTotal: useFrench ? 'Total par catégorie' : 'Category total',
-    total: useFrench ? 'Total' : 'Total',
-    fiscalRuleScope: useFrench ? 'Champ de règle fiscale' : 'Fiscal rule scope',
-    startDate: useFrench ? 'Date de début' : 'Start date',
-    endDate: useFrench ? 'Date de fin' : 'End date',
-    mealAllowance: useFrench ? 'Indemnité repas' : 'Meal allowance',
-    mealVoucherFaceValue: useFrench ? 'Valeur du titre-restaurant' : 'Meal voucher face value',
-    employerContribution: useFrench ? 'Contribution employeur %' : 'Employer contribution %',
-    remoteWorkAllowance: useFrench ? 'Indemnité télétravail' : 'Remote work allowance',
-    remoteWorkLabel: useFrench ? 'Indemnité de télétravail' : 'Remote work allowance',
+    report: translateService.instant('exportCsv.report'),
+    monthlyReport: translateService.instant('exportCsv.monthlyReport'),
+    annualReport: translateService.instant('exportCsv.annualReport'),
+    period: translateService.instant('exportCsv.period'),
+    year: translateService.instant('exportCsv.year'),
+    month: translateService.instant('exportCsv.month'),
+    grandTotal: translateService.instant('exportCsv.grandTotal'),
+    date: translateService.instant('exportCsv.date'),
+    trip: translateService.instant('exportCsv.trip'),
+    category: translateService.instant('exportCsv.category'),
+    description: translateService.instant('exportCsv.description'),
+    gross: translateService.instant('exportCsv.gross'),
+    reduction: translateService.instant('exportCsv.reduction'),
+    net: translateService.instant('exportCsv.net'),
+    total: translateService.instant('exportCsv.total'),
+    fiscalRuleScope: translateService.instant('exportCsv.fiscalRuleScope'),
+    startDate: translateService.instant('exportCsv.startDate'),
+    endDate: translateService.instant('exportCsv.endDate'),
+    mealAllowance: translateService.instant('exportCsv.mealAllowance'),
+    mealVoucherFaceValue: translateService.instant('exportCsv.mealVoucherFaceValue'),
+    employerContribution: translateService.instant('exportCsv.employerContribution'),
+    remoteWorkAllowance: translateService.instant('exportCsv.remoteWorkAllowance'),
+    remoteWorkLabel: translateService.instant('exportCsv.remoteWorkAllowance'),
   };
 }
 
@@ -438,8 +436,10 @@ function createExpenseExportRows(
 function createRemoteWorkAllowanceRows(
   summary: MonthlyExpenseSummary,
   locale: string = 'fr-FR',
+  translateService?: TranslateService,
 ): Array<Array<string | number>> {
   const rows: Array<Array<string | number>> = [];
+  const labels = getExportLabels(translateService ?? ({ instant: (key: string) => key } as TranslateService));
 
   for (const day of summary.days) {
     const remoteWorkCell = day.cells[ExpenseCategory.RemoteWork];
@@ -451,7 +451,7 @@ function createRemoteWorkAllowanceRows(
       day.date,
       '',
       ExpenseCategory.RemoteWork,
-      getExportLabels(locale)['remoteWorkLabel'],
+      labels['remoteWorkLabel'],
       toMoney(remoteWorkCell.gross, locale),
       toMoney(remoteWorkCell.abatement, locale),
       toMoney(remoteWorkCell.net, locale),
@@ -468,12 +468,13 @@ export function buildMonthlyExpenseExportCsv(
   year: number,
   monthIndex: number,
   locale: string = 'fr-FR',
+  translateService?: TranslateService,
 ): string {
-  const labels = getExportLabels(locale) as Record<string, string>;
+  const labels = getExportLabels(translateService ?? ({ instant: (key: string) => key } as TranslateService));
   const summary = buildMonthlyExpenseSummary(expenses, year, monthIndex, fiscalRules, trips);
   const fiscalRuleRows = getApplicableFiscalRulesForMonth(year, monthIndex, fiscalRules);
   const detailRows = createExpenseExportRows(expenses, fiscalRules, trips, year, monthIndex, locale);
-  const remoteWorkRows = createRemoteWorkAllowanceRows(summary, locale);
+  const remoteWorkRows = createRemoteWorkAllowanceRows(summary, locale, translateService);
   const mergedDetailRows = [...detailRows, ...remoteWorkRows].sort((left, right) => {
     const leftDate = new Date(`${left[0]}T00:00:00`).getTime();
     const rightDate = new Date(`${right[0]}T00:00:00`).getTime();
@@ -517,8 +518,9 @@ export function buildAnnualExpenseExportCsv(
   trips: Trip[] = [],
   year: number,
   locale: string = 'fr-FR',
+  translateService?: TranslateService,
 ): string {
-  const labels = getExportLabels(locale) as Record<string, string>;
+  const labels = getExportLabels(translateService ?? ({ instant: (key: string) => key } as TranslateService));
   const summary = buildAnnualExpenseSummary(expenses, year, fiscalRules, trips);
   const fiscalRuleRows = getApplicableFiscalRulesForYear(year, fiscalRules);
   const detailRows = createExpenseExportRows(expenses, fiscalRules, trips, year, undefined, locale);

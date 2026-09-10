@@ -10,7 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { Expense, ExpenseCategory } from '../expense/expense.model';
 import { ExpenseActions } from '../expense/store/expense.actions';
@@ -41,6 +41,7 @@ export class MonthlyExpenseSummaryComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   protected readonly localeService = inject(LocaleService);
+  protected readonly translateService = inject(TranslateService);
   private readonly dialogEl = viewChild.required<ElementRef<HTMLDialogElement>>('dialogEl');
 
   protected readonly selectedMonth = signal(new Date());
@@ -143,6 +144,7 @@ export class MonthlyExpenseSummaryComponent {
       year,
       monthIndex,
       this.localeService.currentLocale(),
+      this.translateService,
     );
     const bytes = utf16leEncode(csv);
     const array = new Uint8Array(bytes.length);

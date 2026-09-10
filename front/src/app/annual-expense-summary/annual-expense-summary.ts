@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import {
   ANNUAL_SUMMARY_CATEGORIES,
@@ -36,6 +36,7 @@ import { selectAllTrips } from '../trip/store/trip.selectors';
 export class AnnualExpenseSummaryComponent {
   private readonly store = inject(Store);
   protected readonly localeService = inject(LocaleService);
+  protected readonly translateService = inject(TranslateService);
 
   protected readonly selectedYear = signal(new Date().getFullYear());
   protected readonly summaryCategories = ANNUAL_SUMMARY_CATEGORIES;
@@ -98,6 +99,7 @@ export class AnnualExpenseSummaryComponent {
       this.trips(),
       this.selectedYear(),
       this.localeService.currentLocale(),
+      this.translateService,
     );
     const bytes = utf16leEncode(csv);
     const array = new Uint8Array(bytes.length);
