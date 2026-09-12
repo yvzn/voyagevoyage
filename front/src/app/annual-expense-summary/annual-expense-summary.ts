@@ -22,7 +22,9 @@ import { ExpenseActions } from '../expense/store/expense.actions';
 import { selectAllExpenses } from '../expense/store/expense.selectors';
 import { FiscalRuleActions } from '../fiscal-rule/store/fiscal-rule.actions';
 import { selectAllFiscalRules } from '../fiscal-rule/store/fiscal-rule.selectors';
+import { selectPublicHolidays } from '../constraints/store/settings.selectors';
 import { LocaleService } from '../locale.service';
+import { selectAllPersonalLeaves } from '../personal-leave/store/personal-leave.selectors';
 import { TripActions } from '../trip/store/trip.actions';
 import { selectAllTrips } from '../trip/store/trip.selectors';
 
@@ -43,6 +45,8 @@ export class AnnualExpenseSummaryComponent {
   protected readonly trips = this.store.selectSignal(selectAllTrips);
   protected readonly expenses = this.store.selectSignal(selectAllExpenses);
   protected readonly fiscalRules = this.store.selectSignal(selectAllFiscalRules);
+  protected readonly publicHolidays = this.store.selectSignal(selectPublicHolidays);
+  protected readonly personalLeaves = this.store.selectSignal(selectAllPersonalLeaves);
   protected readonly monthNames = Array.from({ length: 12 }, (_, monthIndex) =>
     new Intl.DateTimeFormat(this.localeService.currentLocale(), { month: 'long' }).format(
       new Date(2024, monthIndex, 1),
@@ -67,6 +71,8 @@ export class AnnualExpenseSummaryComponent {
       this.selectedYear(),
       this.fiscalRules(),
       this.trips(),
+      this.publicHolidays(),
+      this.personalLeaves(),
     ),
   );
 
@@ -100,6 +106,8 @@ export class AnnualExpenseSummaryComponent {
       this.selectedYear(),
       this.localeService.currentLocale(),
       this.translateService,
+      this.publicHolidays(),
+      this.personalLeaves(),
     );
     const bytes = utf16leEncode(csv);
     const array = new Uint8Array(bytes.length);

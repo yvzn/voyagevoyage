@@ -1,6 +1,8 @@
 import { TranslateService } from '@ngx-translate/core';
 import { Expense, ExpenseCategory } from './expense.model';
 import { FiscalRule } from '../fiscal-rule/fiscal-rule.model';
+import { PublicHoliday } from '../constraints/constraints.model';
+import { PersonalLeave } from '../personal-leave/personal-leave.model';
 import { Trip } from '../trip/trip.model';
 
 export const MONTHLY_SUMMARY_CATEGORIES = [
@@ -110,10 +112,25 @@ function getTripDaySet(trips: Trip[] = []): Set<string> {
   return tripDays;
 }
 
+function getDateRangeSet(startDate: string, endDate: string): Set<string> {
+  const dates = new Set<string>();
+  const current = new Date(`${startDate}T00:00:00`);
+  const lastDate = new Date(`${endDate}T00:00:00`);
+
+  while (current <= lastDate) {
+    dates.add(dateToIso(current));
+    current.setDate(current.getDate() + 1);
+  }
+
+  return dates;
+}
+
 function getRemoteWorkAllowanceCell(
   isoDate: string,
   fiscalRule?: FiscalRule,
   tripDays: Set<string> = new Set(),
+  publicHolidayDays: Set<string> = new Set(),
+  personalLeaveDays: Set<string> = new Set(),
 ): MonthlySummaryCell | undefined {
   if (!fiscalRule || fiscalRule.remoteWorkAllowance <= 0) {
     return undefined;
@@ -121,7 +138,7 @@ function getRemoteWorkAllowanceCell(
 
   const date = new Date(`${isoDate}T00:00:00`);
   const isWorkingDay = date.getDay() >= 1 && date.getDay() <= 5;
-  if (!isWorkingDay || tripDays.has(isoDate)) {
+  if (!isWorkingDay || tripDays.has(isoDate) || publicHolidayDays.has(isoDate) || personalLeaveDays.has(isoDate)) {
     return undefined;
   }
 
@@ -158,6 +175,8 @@ export function buildMonthlyExpenseSummary(
   monthIndex: number,
   fiscalRules: FiscalRule[] = [],
   trips: Trip[] = [],
+  publicHolidays: PublicHoliday[] = [],
+  personalLeaves: PersonalLeave[] = [],
 ): MonthlyExpenseSummary {
   const totalDaysInMonth = new Date(year, monthIndex + 1, 0).getDate();
   const categoryTotals: Record<MonthlySummaryCategory, number> = {
@@ -170,6 +189,13 @@ export function buildMonthlyExpenseSummary(
 
   const days: MonthlySummaryDay[] = [];
   const tripDays = getTripDaySet(trips);
+  const publicHolidayDays = new Set(publicHolidays.map((holiday) => holiday.date));
+  const personalLeaveDays = new Set<string>();
+  for (const leave of personalLeaves) {
+    for (const date of getDateRangeSet(leave.startDate, leave.endDate)) {
+      personalLeaveDays.add(date);
+    }
+  }
 
   for (let day = 1; day <= totalDaysInMonth; day++) {
     const date = new Date(year, monthIndex, day);
@@ -183,7 +209,13 @@ export function buildMonthlyExpenseSummary(
 
       if (category === ExpenseCategory.RemoteWork && categoryExpenses.length === 0) {
         const fiscalRule = getApplicableFiscalRule(isoDate, fiscalRules);
-        const remoteWorkCell = getRemoteWorkAllowanceCell(isoDate, fiscalRule, tripDays);
+        const remoteWorkCell = getRemoteWorkAllowanceCell(
+          isoDate,
+          fiscalRule,
+          tripDays,
+          publicHolidayDays,
+          personalLeaveDays,
+        );
         if (remoteWorkCell) {
           cells[category] = remoteWorkCell;
           categoryTotals[category] += remoteWorkCell.net;
@@ -221,6 +253,8 @@ export function buildAnnualExpenseSummary(
   year: number,
   fiscalRules: FiscalRule[] = [],
   trips: Trip[] = [],
+  publicHolidays: PublicHoliday[] = [],
+  personalLeaves: PersonalLeave[] = [],
 ): AnnualExpenseSummary {
   const categoryTotals: Record<AnnualSummaryCategory, number> = {
     [ExpenseCategory.Meal]: 0,
@@ -230,7 +264,15 @@ export function buildAnnualExpenseSummary(
   };
 
   const months = Array.from({ length: 12 }, (_, monthIndex) => {
-    const monthlySummary = buildMonthlyExpenseSummary(expenses, year, monthIndex, fiscalRules, trips);
+    const monthlySummary = buildMonthlyExpenseSummary(
+      expenses,
+      year,
+      monthIndex,
+      fiscalRules,
+      trips,
+      publicHolidays,
+      personalLeaves,
+    );
     const cells: Partial<Record<AnnualSummaryCategory, number>> = {};
 
     for (const category of ANNUAL_SUMMARY_CATEGORIES) {
@@ -475,9 +517,19 @@ export function buildMonthlyExpenseExportCsv(
   monthIndex: number,
   locale: string = 'fr-FR',
   translateService?: TranslateService,
+  publicHolidays: PublicHoliday[] = [],
+  personalLeaves: PersonalLeave[] = [],
 ): string {
   const labels = getExportLabels(translateService ?? ({ instant: (key: string) => key } as TranslateService));
-  const summary = buildMonthlyExpenseSummary(expenses, year, monthIndex, fiscalRules, trips);
+  const summary = buildMonthlyExpenseSummary(
+    expenses,
+    year,
+    monthIndex,
+    fiscalRules,
+    trips,
+    publicHolidays,
+    personalLeaves,
+  );
   const fiscalRuleRows = getApplicableFiscalRulesForMonth(year, monthIndex, fiscalRules);
   const detailRows = createExpenseExportRows(expenses, fiscalRules, trips, year, monthIndex, locale, labels);
   const remoteWorkRows = createRemoteWorkAllowanceRows(summary, locale, translateService);
@@ -525,24 +577,17 @@ export function buildAnnualExpenseExportCsv(
   year: number,
   locale: string = 'fr-FR',
   translateService?: TranslateService,
+  publicHolidays: PublicHoliday[] = [],
+  personalLeaves: PersonalLeave[] = [],
 ): string {
   const labels = getExportLabels(translateService ?? ({ instant: (key: string) => key } as TranslateService));
-  const summary = buildAnnualExpenseSummary(expenses, year, fiscalRules, trips);
+  const summary = buildAnnualExpenseSummary(expenses, year, fiscalRules, trips, publicHolidays, personalLeaves);
   const fiscalRuleRows = getApplicableFiscalRulesForYear(year, fiscalRules);
-  const detailRows = createExpenseExportRows(expenses, fiscalRules, trips, year, undefined, locale, labels);
-
-  const localizedDetailRows = detailRows.map((row) => [
-    formatExportDate(String(row[0]), locale),
-    ...(row.slice(1) as Array<string | number | null | undefined>),
-  ]);
 
   const rows: Array<Array<string | number | null | undefined>> = [
     [labels['report'], labels['annualReport']],
     [labels['year'], year],
     [labels['grandTotal'], toMoney(summary.grandTotal, locale)],
-    [],
-    [labels['date'], labels['trip'], labels['category'], labels['description'], labels['gross'], labels['reduction'], labels['net']],
-    ...localizedDetailRows,
     [],
     [labels['month'], labels['total']],
     ...summary.months.map((month) => [

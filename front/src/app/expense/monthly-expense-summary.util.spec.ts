@@ -2,6 +2,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { describe, expect, it } from 'vitest';
 import { Expense, ExpenseCategory } from './expense.model';
 import { FiscalRule } from '../fiscal-rule/fiscal-rule.model';
+import { LeaveType } from '../personal-leave/personal-leave.model';
 import { Trip, TripStatus } from '../trip/trip.model';
 import {
   ANNUAL_SUMMARY_CATEGORIES,
@@ -127,6 +128,17 @@ describe('buildMonthlyExpenseSummary', () => {
     expect(summary.categoryTotals[ExpenseCategory.RemoteWork]).toBe(228);
   });
 
+  it('does not add remote work allowance on public holidays or personal leaves', () => {
+    const holiday = { id: 'holiday-1', date: '2026-02-02', name: 'Holiday', region: 'france-metropole' };
+    const leave = { id: 'leave-1', startDate: '2026-02-06', endDate: '2026-02-06', type: LeaveType.Annual, label: 'Leave' };
+
+    const summary = buildMonthlyExpenseSummary([], 2026, 1, [rule], [], [holiday], [leave]);
+
+    expect(summary.days[1].cells[ExpenseCategory.RemoteWork]).toBeUndefined();
+    expect(summary.days[5].cells[ExpenseCategory.RemoteWork]).toBeUndefined();
+    expect(summary.days[2].cells[ExpenseCategory.RemoteWork]?.net).toBe(12);
+  });
+
   it('sums the grand total across all categories', () => {
     const expenses = [
       makeExpense('2026-02-01', ExpenseCategory.Meal, 50),
@@ -210,6 +222,7 @@ describe('buildMonthlyExpenseSummary', () => {
 
     expect(csv).toContain('"Report","Annual expense summary"');
     expect(csv).toContain('"Fiscal rule scope","Start date","End date","Meal allowance"');
+    expect(csv).not.toContain('"01/04/2026"');
     expect(Array.from(encoded.slice(0, 2))).toEqual([0xff, 0xfe]);
   });
 

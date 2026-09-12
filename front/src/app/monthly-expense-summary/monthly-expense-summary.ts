@@ -25,7 +25,9 @@ import {
 } from '../expense/monthly-expense-summary.util';
 import { FiscalRuleActions } from '../fiscal-rule/store/fiscal-rule.actions';
 import { selectAllFiscalRules } from '../fiscal-rule/store/fiscal-rule.selectors';
+import { selectPublicHolidays } from '../constraints/store/settings.selectors';
 import { LocaleService } from '../locale.service';
+import { selectAllPersonalLeaves } from '../personal-leave/store/personal-leave.selectors';
 import { TripActions } from '../trip/store/trip.actions';
 import { selectAllTrips } from '../trip/store/trip.selectors';
 
@@ -57,6 +59,8 @@ export class MonthlyExpenseSummaryComponent {
   protected readonly trips = this.store.selectSignal(selectAllTrips);
   protected readonly expenses = this.store.selectSignal(selectAllExpenses);
   protected readonly fiscalRules = this.store.selectSignal(selectAllFiscalRules);
+  protected readonly publicHolidays = this.store.selectSignal(selectPublicHolidays);
+  protected readonly personalLeaves = this.store.selectSignal(selectAllPersonalLeaves);
 
   constructor() {
     const params = this.route.snapshot.queryParamMap;
@@ -116,6 +120,8 @@ export class MonthlyExpenseSummaryComponent {
       this.selectedMonth().getMonth(),
       this.fiscalRules(),
       this.trips(),
+      this.publicHolidays(),
+      this.personalLeaves(),
     ),
   );
 
@@ -145,6 +151,8 @@ export class MonthlyExpenseSummaryComponent {
       monthIndex,
       this.localeService.currentLocale(),
       this.translateService,
+      this.publicHolidays(),
+      this.personalLeaves(),
     );
     const bytes = utf16leEncode(csv);
     const array = new Uint8Array(bytes.length);
