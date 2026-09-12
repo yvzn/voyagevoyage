@@ -8,19 +8,23 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import {
   ANNUAL_SUMMARY_CATEGORIES,
   AnnualSummaryCategory,
+  buildAnnualExpenseExportCsv,
   buildAnnualExpenseSummary,
   formatCurrency,
+  utf16leEncode,
 } from '../expense/monthly-expense-summary.util';
 import { ExpenseActions } from '../expense/store/expense.actions';
 import { selectAllExpenses } from '../expense/store/expense.selectors';
 import { FiscalRuleActions } from '../fiscal-rule/store/fiscal-rule.actions';
 import { selectAllFiscalRules } from '../fiscal-rule/store/fiscal-rule.selectors';
+import { selectPublicHolidays } from '../constraints/store/settings.selectors';
 import { LocaleService } from '../locale.service';
+import { selectAllPersonalLeaves } from '../personal-leave/store/personal-leave.selectors';
 import { TripActions } from '../trip/store/trip.actions';
 import { selectAllTrips } from '../trip/store/trip.selectors';
 
@@ -34,12 +38,15 @@ import { selectAllTrips } from '../trip/store/trip.selectors';
 export class AnnualExpenseSummaryComponent {
   private readonly store = inject(Store);
   protected readonly localeService = inject(LocaleService);
+  protected readonly translateService = inject(TranslateService);
 
   protected readonly selectedYear = signal(new Date().getFullYear());
   protected readonly summaryCategories = ANNUAL_SUMMARY_CATEGORIES;
   protected readonly trips = this.store.selectSignal(selectAllTrips);
   protected readonly expenses = this.store.selectSignal(selectAllExpenses);
   protected readonly fiscalRules = this.store.selectSignal(selectAllFiscalRules);
+  protected readonly publicHolidays = this.store.selectSignal(selectPublicHolidays);
+  protected readonly personalLeaves = this.store.selectSignal(selectAllPersonalLeaves);
   protected readonly monthNames = Array.from({ length: 12 }, (_, monthIndex) =>
     new Intl.DateTimeFormat(this.localeService.currentLocale(), { month: 'long' }).format(
       new Date(2024, monthIndex, 1),
@@ -64,6 +71,8 @@ export class AnnualExpenseSummaryComponent {
       this.selectedYear(),
       this.fiscalRules(),
       this.trips(),
+      this.publicHolidays(),
+      this.personalLeaves(),
     ),
   );
 
@@ -87,6 +96,29 @@ export class AnnualExpenseSummaryComponent {
 
   protected formatCurrency(amount: number): string {
     return formatCurrency(amount);
+  }
+
+  protected exportCurrentSummary(): void {
+    const csv = buildAnnualExpenseExportCsv(
+      this.expenses(),
+      this.fiscalRules(),
+      this.trips(),
+      this.selectedYear(),
+      this.localeService.currentLocale(),
+      this.translateService,
+      this.publicHolidays(),
+      this.personalLeaves(),
+    );
+    const bytes = utf16leEncode(csv);
+    const array = new Uint8Array(bytes.length);
+    array.set(bytes);
+    const blob = new Blob([array.buffer], { type: 'text/csv;charset=utf-16le' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `annual-summary-${this.selectedYear()}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   protected getCategoryTranslationKey(category: AnnualSummaryCategory): string {

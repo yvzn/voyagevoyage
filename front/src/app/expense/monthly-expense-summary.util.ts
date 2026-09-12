@@ -1,5 +1,8 @@
+import { TranslateService } from '@ngx-translate/core';
 import { Expense, ExpenseCategory } from './expense.model';
 import { FiscalRule } from '../fiscal-rule/fiscal-rule.model';
+import { PublicHoliday } from '../constraints/constraints.model';
+import { PersonalLeave } from '../personal-leave/personal-leave.model';
 import { Trip } from '../trip/trip.model';
 
 export const MONTHLY_SUMMARY_CATEGORIES = [
@@ -109,10 +112,25 @@ function getTripDaySet(trips: Trip[] = []): Set<string> {
   return tripDays;
 }
 
+function getDateRangeSet(startDate: string, endDate: string): Set<string> {
+  const dates = new Set<string>();
+  const current = new Date(`${startDate}T00:00:00`);
+  const lastDate = new Date(`${endDate}T00:00:00`);
+
+  while (current <= lastDate) {
+    dates.add(dateToIso(current));
+    current.setDate(current.getDate() + 1);
+  }
+
+  return dates;
+}
+
 function getRemoteWorkAllowanceCell(
   isoDate: string,
   fiscalRule?: FiscalRule,
   tripDays: Set<string> = new Set(),
+  publicHolidayDays: Set<string> = new Set(),
+  personalLeaveDays: Set<string> = new Set(),
 ): MonthlySummaryCell | undefined {
   if (!fiscalRule || fiscalRule.remoteWorkAllowance <= 0) {
     return undefined;
@@ -120,7 +138,7 @@ function getRemoteWorkAllowanceCell(
 
   const date = new Date(`${isoDate}T00:00:00`);
   const isWorkingDay = date.getDay() >= 1 && date.getDay() <= 5;
-  if (!isWorkingDay || tripDays.has(isoDate)) {
+  if (!isWorkingDay || tripDays.has(isoDate) || publicHolidayDays.has(isoDate) || personalLeaveDays.has(isoDate)) {
     return undefined;
   }
 
@@ -157,6 +175,8 @@ export function buildMonthlyExpenseSummary(
   monthIndex: number,
   fiscalRules: FiscalRule[] = [],
   trips: Trip[] = [],
+  publicHolidays: PublicHoliday[] = [],
+  personalLeaves: PersonalLeave[] = [],
 ): MonthlyExpenseSummary {
   const totalDaysInMonth = new Date(year, monthIndex + 1, 0).getDate();
   const categoryTotals: Record<MonthlySummaryCategory, number> = {
@@ -169,6 +189,13 @@ export function buildMonthlyExpenseSummary(
 
   const days: MonthlySummaryDay[] = [];
   const tripDays = getTripDaySet(trips);
+  const publicHolidayDays = new Set(publicHolidays.map((holiday) => holiday.date));
+  const personalLeaveDays = new Set<string>();
+  for (const leave of personalLeaves) {
+    for (const date of getDateRangeSet(leave.startDate, leave.endDate)) {
+      personalLeaveDays.add(date);
+    }
+  }
 
   for (let day = 1; day <= totalDaysInMonth; day++) {
     const date = new Date(year, monthIndex, day);
@@ -182,7 +209,13 @@ export function buildMonthlyExpenseSummary(
 
       if (category === ExpenseCategory.RemoteWork && categoryExpenses.length === 0) {
         const fiscalRule = getApplicableFiscalRule(isoDate, fiscalRules);
-        const remoteWorkCell = getRemoteWorkAllowanceCell(isoDate, fiscalRule, tripDays);
+        const remoteWorkCell = getRemoteWorkAllowanceCell(
+          isoDate,
+          fiscalRule,
+          tripDays,
+          publicHolidayDays,
+          personalLeaveDays,
+        );
         if (remoteWorkCell) {
           cells[category] = remoteWorkCell;
           categoryTotals[category] += remoteWorkCell.net;
@@ -220,6 +253,8 @@ export function buildAnnualExpenseSummary(
   year: number,
   fiscalRules: FiscalRule[] = [],
   trips: Trip[] = [],
+  publicHolidays: PublicHoliday[] = [],
+  personalLeaves: PersonalLeave[] = [],
 ): AnnualExpenseSummary {
   const categoryTotals: Record<AnnualSummaryCategory, number> = {
     [ExpenseCategory.Meal]: 0,
@@ -229,7 +264,15 @@ export function buildAnnualExpenseSummary(
   };
 
   const months = Array.from({ length: 12 }, (_, monthIndex) => {
-    const monthlySummary = buildMonthlyExpenseSummary(expenses, year, monthIndex, fiscalRules, trips);
+    const monthlySummary = buildMonthlyExpenseSummary(
+      expenses,
+      year,
+      monthIndex,
+      fiscalRules,
+      trips,
+      publicHolidays,
+      personalLeaves,
+    );
     const cells: Partial<Record<AnnualSummaryCategory, number>> = {};
 
     for (const category of ANNUAL_SUMMARY_CATEGORIES) {
@@ -274,4 +317,301 @@ export function formatCurrency(amount: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
+}
+
+function escapeCsvFormulaValue(value: string): string {
+  const trimmed = value.trimStart();
+  if (/^[=+\-@]/.test(trimmed)) {
+    return `'${value}`;
+  }
+
+  return value;
+}
+
+function formatCsvCell(value: string | number | null | undefined): string {
+  const normalized = value == null ? '' : String(value);
+  const sanitized = escapeCsvFormulaValue(normalized).replace(/"/g, '""');
+  return `"${sanitized}"`;
+}
+
+export function serializeCsvForExcel(rows: Array<Array<string | number | null | undefined>>): string {
+  const csvRows = rows.map((row) => row.map(formatCsvCell).join(','));
+  return `sep=,\r\n${csvRows.join('\r\n')}\r\n`;
+}
+
+export function utf16leEncode(text: string): Uint8Array {
+  const bytes = new Uint8Array((text.length + 1) * 2);
+  const view = new DataView(bytes.buffer);
+  view.setUint16(0, 0xfeff, true);
+
+  for (let index = 0; index < text.length; index += 1) {
+    view.setUint16(2 + index * 2, text.charCodeAt(index), true);
+  }
+
+  return bytes;
+}
+
+function getExportLocale(locale: string): string {
+  return locale?.startsWith('fr') ? 'fr-FR' : 'en-US';
+}
+
+function getExportLabels(translateService: TranslateService): Record<string, string> {
+  return {
+    report: translateService.instant('exportCsv.report'),
+    monthlyReport: translateService.instant('exportCsv.monthlyReport'),
+    annualReport: translateService.instant('exportCsv.annualReport'),
+    period: translateService.instant('exportCsv.period'),
+    year: translateService.instant('exportCsv.year'),
+    month: translateService.instant('exportCsv.month'),
+    grandTotal: translateService.instant('exportCsv.grandTotal'),
+    date: translateService.instant('exportCsv.date'),
+    trip: translateService.instant('exportCsv.trip'),
+    category: translateService.instant('exportCsv.category'),
+    description: translateService.instant('exportCsv.description'),
+    gross: translateService.instant('exportCsv.gross'),
+    reduction: translateService.instant('exportCsv.reduction'),
+    net: translateService.instant('exportCsv.net'),
+    total: translateService.instant('exportCsv.total'),
+    fiscalRuleScope: translateService.instant('exportCsv.fiscalRuleScope'),
+    startDate: translateService.instant('exportCsv.startDate'),
+    endDate: translateService.instant('exportCsv.endDate'),
+    mealAllowance: translateService.instant('exportCsv.mealAllowance'),
+    mealVoucherFaceValue: translateService.instant('exportCsv.mealVoucherFaceValue'),
+    employerContribution: translateService.instant('exportCsv.employerContribution'),
+    remoteWorkAllowance: translateService.instant('exportCsv.remoteWorkAllowance'),
+    'expenseCategory.train': translateService.instant('expenseCategory.train'),
+    'expenseCategory.hotel': translateService.instant('expenseCategory.hotel'),
+    'expenseCategory.meal': translateService.instant('expenseCategory.meal'),
+    'expenseCategory.metroBus': translateService.instant('expenseCategory.metroBus'),
+    'expenseCategory.remoteWork': translateService.instant('expenseCategory.remoteWork'),
+    'expenseCategory.other': translateService.instant('expenseCategory.other'),
+  };
+}
+
+function formatExportNumber(value: number, locale: string): string {
+  return new Intl.NumberFormat(getExportLocale(locale), {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+function formatExportDate(date: string, locale: string): string {
+  if (!date) {
+    return '';
+  }
+
+  return new Intl.DateTimeFormat(getExportLocale(locale), {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date(`${date}T00:00:00`));
+}
+
+function toMoney(value: number, locale: string = 'fr-FR'): string {
+  return formatExportNumber(value, locale);
+}
+
+function getApplicableFiscalRulesForMonth(
+  year: number,
+  monthIndex: number,
+  fiscalRules: FiscalRule[] = [],
+): FiscalRule[] {
+  const monthStart = new Date(year, monthIndex, 1);
+  const monthEnd = new Date(year, monthIndex + 1, 0, 23, 59, 59, 999);
+
+  return fiscalRules
+    .filter((rule) => {
+      const start = new Date(`${rule.startDate}T00:00:00`);
+      const end = new Date(`${rule.endDate}T23:59:59`);
+      return end >= monthStart && start <= monthEnd;
+    })
+    .sort((a, b) => new Date(`${b.startDate}T00:00:00`).getTime() - new Date(`${a.startDate}T00:00:00`).getTime());
+}
+
+function getApplicableFiscalRulesForYear(year: number, fiscalRules: FiscalRule[] = []): FiscalRule[] {
+  const yearStart = new Date(year, 0, 1);
+  const yearEnd = new Date(year, 11, 31, 23, 59, 59, 999);
+
+  return fiscalRules
+    .filter((rule) => {
+      const start = new Date(`${rule.startDate}T00:00:00`);
+      const end = new Date(`${rule.endDate}T23:59:59`);
+      return end >= yearStart && start <= yearEnd;
+    })
+    .sort((a, b) => new Date(`${b.startDate}T00:00:00`).getTime() - new Date(`${a.startDate}T00:00:00`).getTime());
+}
+
+function createExpenseExportRows(
+  expenses: Expense[],
+  fiscalRules: FiscalRule[] = [],
+  trips: Trip[] = [],
+  year?: number,
+  monthIndex?: number,
+  locale: string = 'fr-FR',
+  labels: Record<string, string> = {},
+): Array<Array<string | number>> {
+  const tripMap = new Map(trips.map((trip) => [trip.id, trip]));
+  const rows: Array<Array<string | number>> = [];
+
+  const relevantExpenses = expenses.filter((expense) => {
+    const date = new Date(`${expense.date}T00:00:00`);
+    const matchesYear = year === undefined || date.getFullYear() === year;
+    const matchesMonth = monthIndex === undefined || date.getMonth() === monthIndex;
+    return matchesYear && matchesMonth;
+  });
+
+  for (const expense of relevantExpenses.sort((a, b) => a.date.localeCompare(b.date))) {
+    const fiscalRule = getApplicableFiscalRule(expense.date, fiscalRules);
+    const gross = expense.amount;
+    const net = getExpenseNetAmount(expense, fiscalRule);
+    const abatement = gross - net;
+    const trip = tripMap.get(expense.tripId);
+
+    rows.push([
+      expense.date,
+      trip?.destination ?? '',
+      labels[`expenseCategory.${expense.category}`],
+      expense.description,
+      toMoney(gross, locale),
+      toMoney(abatement, locale),
+      toMoney(net, locale),
+    ]);
+  }
+
+  return rows;
+}
+
+function createRemoteWorkAllowanceRows(
+  summary: MonthlyExpenseSummary,
+  locale: string = 'fr-FR',
+  translateService?: TranslateService,
+): Array<Array<string | number>> {
+  const rows: Array<Array<string | number>> = [];
+  const labels = getExportLabels(translateService ?? ({ instant: (key: string) => key } as TranslateService));
+
+  for (const day of summary.days) {
+    const remoteWorkCell = day.cells[ExpenseCategory.RemoteWork];
+    if (!remoteWorkCell || remoteWorkCell.sourceExpenses.length > 0) {
+      continue;
+    }
+
+    rows.push([
+      day.date,
+      '',
+      labels[`expenseCategory.${ExpenseCategory.RemoteWork}`],
+      labels['remoteWorkAllowance'],
+      toMoney(remoteWorkCell.gross, locale),
+      toMoney(remoteWorkCell.abatement, locale),
+      toMoney(remoteWorkCell.net, locale),
+    ]);
+  }
+
+  return rows;
+}
+
+export function buildMonthlyExpenseExportCsv(
+  expenses: Expense[],
+  fiscalRules: FiscalRule[] = [],
+  trips: Trip[] = [],
+  year: number,
+  monthIndex: number,
+  locale: string = 'fr-FR',
+  translateService?: TranslateService,
+  publicHolidays: PublicHoliday[] = [],
+  personalLeaves: PersonalLeave[] = [],
+): string {
+  const labels = getExportLabels(translateService ?? ({ instant: (key: string) => key } as TranslateService));
+  const summary = buildMonthlyExpenseSummary(
+    expenses,
+    year,
+    monthIndex,
+    fiscalRules,
+    trips,
+    publicHolidays,
+    personalLeaves,
+  );
+  const fiscalRuleRows = getApplicableFiscalRulesForMonth(year, monthIndex, fiscalRules);
+  const detailRows = createExpenseExportRows(expenses, fiscalRules, trips, year, monthIndex, locale, labels);
+  const remoteWorkRows = createRemoteWorkAllowanceRows(summary, locale, translateService);
+  const mergedDetailRows = [...detailRows, ...remoteWorkRows].sort((left, right) => {
+    const leftDate = new Date(`${left[0]}T00:00:00`).getTime();
+    const rightDate = new Date(`${right[0]}T00:00:00`).getTime();
+    return leftDate - rightDate;
+  });
+
+  const localizedDetailRows = mergedDetailRows.map((row) => [
+    formatExportDate(String(row[0]), locale),
+    ...(row.slice(1) as Array<string | number | null | undefined>),
+  ]);
+
+  const rows: Array<Array<string | number | null | undefined>> = [
+    [labels['report'], labels['monthlyReport']],
+    [labels['period'], `${year}-${String(monthIndex + 1).padStart(2, '0')}`],
+    [labels['grandTotal'], toMoney(summary.grandTotal, locale)],
+    [],
+    [labels['date'], labels['trip'], labels['category'], labels['description'], labels['gross'], labels['reduction'], labels['net']],
+    ...localizedDetailRows,
+    [],
+    [labels['category'], labels['total']],
+    ...MONTHLY_SUMMARY_CATEGORIES.map((category) => [category, toMoney(summary.categoryTotals[category], locale)]),
+    [],
+    [labels['fiscalRuleScope'], labels['startDate'], labels['endDate'], labels['mealAllowance'], labels['mealVoucherFaceValue'], labels['employerContribution'], labels['remoteWorkAllowance']],
+    ...fiscalRuleRows.map((rule) => [
+      rule.id,
+      formatExportDate(rule.startDate, locale),
+      formatExportDate(rule.endDate, locale),
+      toMoney(rule.mealAllowance, locale),
+      toMoney(rule.mealVoucherFaceValue, locale),
+      toMoney(rule.mealVoucherEmployerContributionPercentage, locale),
+      toMoney(rule.remoteWorkAllowance, locale),
+    ]),
+  ];
+
+  return serializeCsvForExcel(rows);
+}
+
+export function buildAnnualExpenseExportCsv(
+  expenses: Expense[],
+  fiscalRules: FiscalRule[] = [],
+  trips: Trip[] = [],
+  year: number,
+  locale: string = 'fr-FR',
+  translateService?: TranslateService,
+  publicHolidays: PublicHoliday[] = [],
+  personalLeaves: PersonalLeave[] = [],
+): string {
+  const labels = getExportLabels(translateService ?? ({ instant: (key: string) => key } as TranslateService));
+  const summary = buildAnnualExpenseSummary(expenses, year, fiscalRules, trips, publicHolidays, personalLeaves);
+  const fiscalRuleRows = getApplicableFiscalRulesForYear(year, fiscalRules);
+
+  const rows: Array<Array<string | number | null | undefined>> = [
+    [labels['report'], labels['annualReport']],
+    [labels['year'], year],
+    [labels['grandTotal'], toMoney(summary.grandTotal, locale)],
+    [],
+    [labels['month'], labels['total']],
+    ...summary.months.map((month) => [
+      new Intl.DateTimeFormat(getExportLocale(locale), { month: 'long' }).format(new Date(year, month.index, 1)),
+      toMoney(month.total, locale),
+    ]),
+    [],
+    [labels['category'], labels['total']],
+    ...ANNUAL_SUMMARY_CATEGORIES.map((category) => [
+      category === 'travel' ? 'travel' : category,
+      toMoney(summary.categoryTotals[category], locale),
+    ]),
+    [],
+    [labels['fiscalRuleScope'], labels['startDate'], labels['endDate'], labels['mealAllowance'], labels['mealVoucherFaceValue'], labels['employerContribution'], labels['remoteWorkAllowance']],
+    ...fiscalRuleRows.map((rule) => [
+      rule.id,
+      formatExportDate(rule.startDate, locale),
+      formatExportDate(rule.endDate, locale),
+      toMoney(rule.mealAllowance, locale),
+      toMoney(rule.mealVoucherFaceValue, locale),
+      toMoney(rule.mealVoucherEmployerContributionPercentage, locale),
+      toMoney(rule.remoteWorkAllowance, locale),
+    ]),
+  ];
+
+  return serializeCsvForExcel(rows);
 }

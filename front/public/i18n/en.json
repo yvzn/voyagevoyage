@@ -165,7 +165,8 @@
     "detailsButton": "Show details for",
     "detailsTitle": "Details for",
     "viewTrip": "View trip",
-    "closeDialog": "Close details"
+    "closeDialog": "Close details",
+    "exportExcel": "Export Excel"
   },
   "annualExpenseSummary": {
     "heading": "Annual expense summary",
@@ -175,7 +176,32 @@
     "monthLabel": "Month",
     "monthTotal": "Monthly total",
     "categoryTotal": "Totals by category",
-    "annualTotal": "Annual total"
+    "annualTotal": "Annual total",
+    "exportExcel": "Export Excel"
+  },
+  "exportCsv": {
+    "report": "Report",
+    "monthlyReport": "Monthly expense summary",
+    "annualReport": "Annual expense summary",
+    "period": "Period",
+    "year": "Year",
+    "month": "Month",
+    "grandTotal": "Grand total",
+    "date": "Date",
+    "trip": "Trip",
+    "category": "Category",
+    "description": "Description",
+    "gross": "Gross",
+    "reduction": "Reduction",
+    "net": "Net",
+    "total": "Total",
+    "fiscalRuleScope": "Fiscal rule scope",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "mealAllowance": "Meal allowance",
+    "mealVoucherFaceValue": "Meal voucher face value",
+    "employerContribution": "Employer contribution %",
+    "remoteWorkAllowance": "Remote work allowance"
   },
   "monthlyExpenseSummaryNavItem": "Monthly expense summary",
   "annualExpenseSummaryNavItem": "Annual expense summary",

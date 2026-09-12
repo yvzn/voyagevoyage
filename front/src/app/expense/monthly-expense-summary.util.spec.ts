@@ -1,8 +1,51 @@
+import { TranslateService } from '@ngx-translate/core';
 import { describe, expect, it } from 'vitest';
 import { Expense, ExpenseCategory } from './expense.model';
 import { FiscalRule } from '../fiscal-rule/fiscal-rule.model';
+import { LeaveType } from '../personal-leave/personal-leave.model';
 import { Trip, TripStatus } from '../trip/trip.model';
-import { ANNUAL_SUMMARY_CATEGORIES, buildAnnualExpenseSummary, buildMonthlyExpenseSummary } from './monthly-expense-summary.util';
+import {
+  ANNUAL_SUMMARY_CATEGORIES,
+  buildAnnualExpenseExportCsv,
+  buildAnnualExpenseSummary,
+  buildMonthlyExpenseExportCsv,
+  buildMonthlyExpenseSummary,
+  serializeCsvForExcel,
+  utf16leEncode,
+} from './monthly-expense-summary.util';
+
+const fakeTranslateService = {
+  instant: (key: string) => ({
+    'exportCsv.report': 'Report',
+    'exportCsv.monthlyReport': 'Monthly expense summary',
+    'exportCsv.annualReport': 'Annual expense summary',
+    'exportCsv.period': 'Period',
+    'exportCsv.year': 'Year',
+    'exportCsv.month': 'Month',
+    'exportCsv.grandTotal': 'Grand total',
+    'exportCsv.date': 'Date',
+    'exportCsv.trip': 'Trip',
+    'exportCsv.category': 'Category',
+    'exportCsv.description': 'Description',
+    'exportCsv.gross': 'Gross',
+    'exportCsv.reduction': 'Reduction',
+    'exportCsv.net': 'Net',
+    'exportCsv.total': 'Total',
+    'exportCsv.fiscalRuleScope': 'Fiscal rule scope',
+    'exportCsv.startDate': 'Start date',
+    'exportCsv.endDate': 'End date',
+    'exportCsv.mealAllowance': 'Meal allowance',
+    'exportCsv.mealVoucherFaceValue': 'Meal voucher face value',
+    'exportCsv.employerContribution': 'Employer contribution %',
+    'exportCsv.remoteWorkAllowance': 'Remote work allowance',
+    'expenseCategory.train': 'Train',
+    'expenseCategory.hotel': 'Hotel',
+    'expenseCategory.meal': 'Meal',
+    'expenseCategory.metroBus': 'Metro / Bus',
+    'expenseCategory.remoteWork': 'Remote work',
+    'expenseCategory.other': 'Other',
+  })[key] ?? key,
+} as Pick<TranslateService, 'instant'>;
 
 function makeExpense(
   date: string,
@@ -85,6 +128,17 @@ describe('buildMonthlyExpenseSummary', () => {
     expect(summary.categoryTotals[ExpenseCategory.RemoteWork]).toBe(228);
   });
 
+  it('does not add remote work allowance on public holidays or personal leaves', () => {
+    const holiday = { id: 'holiday-1', date: '2026-02-02', name: 'Holiday', region: 'france-metropole' };
+    const leave = { id: 'leave-1', startDate: '2026-02-06', endDate: '2026-02-06', type: LeaveType.Annual, label: 'Leave' };
+
+    const summary = buildMonthlyExpenseSummary([], 2026, 1, [rule], [], [holiday], [leave]);
+
+    expect(summary.days[1].cells[ExpenseCategory.RemoteWork]).toBeUndefined();
+    expect(summary.days[5].cells[ExpenseCategory.RemoteWork]).toBeUndefined();
+    expect(summary.days[2].cells[ExpenseCategory.RemoteWork]?.net).toBe(12);
+  });
+
   it('sums the grand total across all categories', () => {
     const expenses = [
       makeExpense('2026-02-01', ExpenseCategory.Meal, 50),
@@ -134,5 +188,48 @@ describe('buildMonthlyExpenseSummary', () => {
       'travel',
       ExpenseCategory.Hotel,
     ]);
+  });
+
+  it('exports monthly summaries in an Excel-compatible CSV format', () => {
+    const expenses = [
+      makeExpense('2026-02-03', ExpenseCategory.Meal, 100, 'trip-1', '=SUM(A1:A2)'),
+      makeExpense('2026-02-05', ExpenseCategory.Train, 90),
+    ];
+
+    const csv = buildMonthlyExpenseExportCsv(expenses, [rule], [], 2026, 1, 'en-US', fakeTranslateService as TranslateService);
+
+    expect(csv.startsWith('sep=,\r\n')).toBe(true);
+    expect(csv).toContain('"Date","Trip","Category","Description","Gross","Reduction","Net"');
+    expect(csv).toContain("'=SUM(A1:A2)");
+    expect(csv).toContain('"02/05/2026","","Train","Expense","90.00","0.00","90.00"');
+    expect(csv.indexOf('"03/02/2026"')).toBeLessThan(csv.indexOf('"02/05/2026"'));
+  });
+
+  it('translates automatically generated remote-work allowance categories', () => {
+    const csv = buildMonthlyExpenseExportCsv([], [rule], [], 2026, 1, 'en-US', fakeTranslateService as TranslateService);
+
+    expect(csv).toContain('"02/02/2026","","Remote work","Remote work allowance"');
+  });
+
+  it('exports annual summaries and keeps CSV BOM/encoding requirements', () => {
+    const expenses = [
+      makeExpense('2026-01-04', ExpenseCategory.Meal, 60),
+      makeExpense('2026-06-15', ExpenseCategory.RemoteWork, 50),
+    ];
+
+    const csv = buildAnnualExpenseExportCsv(expenses, [rule], [], 2026, 'en-US', fakeTranslateService as TranslateService);
+    const encoded = utf16leEncode(csv);
+
+    expect(csv).toContain('"Report","Annual expense summary"');
+    expect(csv).toContain('"Fiscal rule scope","Start date","End date","Meal allowance"');
+    expect(csv).not.toContain('"01/04/2026"');
+    expect(Array.from(encoded.slice(0, 2))).toEqual([0xff, 0xfe]);
+  });
+
+  it('sanitizes formula-like values before CSV serialization', () => {
+    const csv = serializeCsvForExcel([['Description'], ['=CMD|whoami']]);
+
+    expect(csv).toContain("'=CMD|whoami");
+    expect(csv).toContain('\r\n');
   });
 });
