@@ -337,7 +337,12 @@ function getExportLabels(translateService: TranslateService): Record<string, str
     mealVoucherFaceValue: translateService.instant('exportCsv.mealVoucherFaceValue'),
     employerContribution: translateService.instant('exportCsv.employerContribution'),
     remoteWorkAllowance: translateService.instant('exportCsv.remoteWorkAllowance'),
-    remoteWorkLabel: translateService.instant('exportCsv.remoteWorkAllowance'),
+    'expenseCategory.train': translateService.instant('expenseCategory.train'),
+    'expenseCategory.hotel': translateService.instant('expenseCategory.hotel'),
+    'expenseCategory.meal': translateService.instant('expenseCategory.meal'),
+    'expenseCategory.metroBus': translateService.instant('expenseCategory.metroBus'),
+    'expenseCategory.remoteWork': translateService.instant('expenseCategory.remoteWork'),
+    'expenseCategory.other': translateService.instant('expenseCategory.other'),
   };
 }
 
@@ -401,6 +406,7 @@ function createExpenseExportRows(
   year?: number,
   monthIndex?: number,
   locale: string = 'fr-FR',
+  labels: Record<string, string> = {},
 ): Array<Array<string | number>> {
   const tripMap = new Map(trips.map((trip) => [trip.id, trip]));
   const rows: Array<Array<string | number>> = [];
@@ -422,7 +428,7 @@ function createExpenseExportRows(
     rows.push([
       expense.date,
       trip?.destination ?? '',
-      expense.category,
+      labels[`expenseCategory.${expense.category}`],
       expense.description,
       toMoney(gross, locale),
       toMoney(abatement, locale),
@@ -450,8 +456,8 @@ function createRemoteWorkAllowanceRows(
     rows.push([
       day.date,
       '',
-      ExpenseCategory.RemoteWork,
-      labels['remoteWorkLabel'],
+      labels[`expenseCategory.${ExpenseCategory.RemoteWork}`],
+      labels['remoteWorkAllowance'],
       toMoney(remoteWorkCell.gross, locale),
       toMoney(remoteWorkCell.abatement, locale),
       toMoney(remoteWorkCell.net, locale),
@@ -473,7 +479,7 @@ export function buildMonthlyExpenseExportCsv(
   const labels = getExportLabels(translateService ?? ({ instant: (key: string) => key } as TranslateService));
   const summary = buildMonthlyExpenseSummary(expenses, year, monthIndex, fiscalRules, trips);
   const fiscalRuleRows = getApplicableFiscalRulesForMonth(year, monthIndex, fiscalRules);
-  const detailRows = createExpenseExportRows(expenses, fiscalRules, trips, year, monthIndex, locale);
+  const detailRows = createExpenseExportRows(expenses, fiscalRules, trips, year, monthIndex, locale, labels);
   const remoteWorkRows = createRemoteWorkAllowanceRows(summary, locale, translateService);
   const mergedDetailRows = [...detailRows, ...remoteWorkRows].sort((left, right) => {
     const leftDate = new Date(`${left[0]}T00:00:00`).getTime();
@@ -523,7 +529,7 @@ export function buildAnnualExpenseExportCsv(
   const labels = getExportLabels(translateService ?? ({ instant: (key: string) => key } as TranslateService));
   const summary = buildAnnualExpenseSummary(expenses, year, fiscalRules, trips);
   const fiscalRuleRows = getApplicableFiscalRulesForYear(year, fiscalRules);
-  const detailRows = createExpenseExportRows(expenses, fiscalRules, trips, year, undefined, locale);
+  const detailRows = createExpenseExportRows(expenses, fiscalRules, trips, year, undefined, locale, labels);
 
   const localizedDetailRows = detailRows.map((row) => [
     formatExportDate(String(row[0]), locale),

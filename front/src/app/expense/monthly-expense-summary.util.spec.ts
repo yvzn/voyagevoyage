@@ -37,6 +37,12 @@ const fakeTranslateService = {
     'exportCsv.mealVoucherFaceValue': 'Meal voucher face value',
     'exportCsv.employerContribution': 'Employer contribution %',
     'exportCsv.remoteWorkAllowance': 'Remote work allowance',
+    'expenseCategory.train': 'Train',
+    'expenseCategory.hotel': 'Hotel',
+    'expenseCategory.meal': 'Meal',
+    'expenseCategory.metroBus': 'Metro / Bus',
+    'expenseCategory.remoteWork': 'Remote work',
+    'expenseCategory.other': 'Other',
   })[key] ?? key,
 } as Pick<TranslateService, 'instant'>;
 
@@ -183,8 +189,14 @@ describe('buildMonthlyExpenseSummary', () => {
     expect(csv.startsWith('sep=,\r\n')).toBe(true);
     expect(csv).toContain('"Date","Trip","Category","Description","Gross","Reduction","Net"');
     expect(csv).toContain("'=SUM(A1:A2)");
-    expect(csv).toContain('"02/05/2026","","train","Expense","90.00","0.00","90.00"');
+    expect(csv).toContain('"02/05/2026","","Train","Expense","90.00","0.00","90.00"');
     expect(csv.indexOf('"03/02/2026"')).toBeLessThan(csv.indexOf('"02/05/2026"'));
+  });
+
+  it('translates automatically generated remote-work allowance categories', () => {
+    const csv = buildMonthlyExpenseExportCsv([], [rule], [], 2026, 1, 'en-US', fakeTranslateService as TranslateService);
+
+    expect(csv).toContain('"02/02/2026","","Remote work","Remote work allowance"');
   });
 
   it('exports annual summaries and keeps CSV BOM/encoding requirements', () => {
