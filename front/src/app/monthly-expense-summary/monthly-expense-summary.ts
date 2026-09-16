@@ -10,7 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { Expense, ExpenseCategory } from '../expense/expense.model';
 import { ExpenseActions } from '../expense/store/expense.actions';
@@ -18,12 +18,16 @@ import { selectAllExpenses } from '../expense/store/expense.selectors';
 import {
   MONTHLY_SUMMARY_CATEGORIES,
   MonthlySummaryCell,
+  buildMonthlyExpenseExportCsv,
   buildMonthlyExpenseSummary,
   formatCurrency,
+  utf16leEncode,
 } from '../expense/monthly-expense-summary.util';
 import { FiscalRuleActions } from '../fiscal-rule/store/fiscal-rule.actions';
 import { selectAllFiscalRules } from '../fiscal-rule/store/fiscal-rule.selectors';
+import { selectPublicHolidays } from '../constraints/store/settings.selectors';
 import { LocaleService } from '../locale.service';
+import { selectAllPersonalLeaves } from '../personal-leave/store/personal-leave.selectors';
 import { TripActions } from '../trip/store/trip.actions';
 import { selectAllTrips } from '../trip/store/trip.selectors';
 
@@ -39,6 +43,7 @@ export class MonthlyExpenseSummaryComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   protected readonly localeService = inject(LocaleService);
+  protected readonly translateService = inject(TranslateService);
   private readonly dialogEl = viewChild.required<ElementRef<HTMLDialogElement>>('dialogEl');
 
   protected readonly selectedMonth = signal(new Date());
@@ -54,6 +59,8 @@ export class MonthlyExpenseSummaryComponent {
   protected readonly trips = this.store.selectSignal(selectAllTrips);
   protected readonly expenses = this.store.selectSignal(selectAllExpenses);
   protected readonly fiscalRules = this.store.selectSignal(selectAllFiscalRules);
+  protected readonly publicHolidays = this.store.selectSignal(selectPublicHolidays);
+  protected readonly personalLeaves = this.store.selectSignal(selectAllPersonalLeaves);
 
   constructor() {
     const params = this.route.snapshot.queryParamMap;
@@ -113,6 +120,8 @@ export class MonthlyExpenseSummaryComponent {
       this.selectedMonth().getMonth(),
       this.fiscalRules(),
       this.trips(),
+      this.publicHolidays(),
+      this.personalLeaves(),
     ),
   );
 
@@ -129,6 +138,32 @@ export class MonthlyExpenseSummaryComponent {
 
   protected formatCurrency(amount: number): string {
     return formatCurrency(amount);
+  }
+
+  protected exportCurrentSummary(): void {
+    const year = this.selectedMonth().getFullYear();
+    const monthIndex = this.selectedMonth().getMonth();
+    const csv = buildMonthlyExpenseExportCsv(
+      this.expenses(),
+      this.fiscalRules(),
+      this.trips(),
+      year,
+      monthIndex,
+      this.localeService.currentLocale(),
+      this.translateService,
+      this.publicHolidays(),
+      this.personalLeaves(),
+    );
+    const bytes = utf16leEncode(csv);
+    const array = new Uint8Array(bytes.length);
+    array.set(bytes);
+    const blob = new Blob([array.buffer], { type: 'text/csv;charset=utf-16le' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `summary-${year}-${String(monthIndex + 1).padStart(2, '0')}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   protected openCellDetails(cell: MonthlySummaryCell | undefined): void {
