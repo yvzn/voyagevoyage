@@ -22,7 +22,12 @@ import { BookingConfirmationService } from '../../booking-confirmation/booking-c
 import { BookingConfirmationActions } from '../../booking-confirmation/store/booking-confirmation.actions';
 import { selectConfirmationsByTripId, selectDeleteStatus as selectConfirmationDeleteStatus, selectParseStatus } from '../../booking-confirmation/store/booking-confirmation.reducer';
 import { ExpenseActions } from '../../expense/store/expense.actions';
-import { selectAllExpenses, selectExpensesLoadStatus } from '../../expense/store/expense.selectors';
+import {
+  selectAllExpenses,
+  selectExpensesLastCreatedExpenseId,
+  selectExpensesLoadStatus,
+} from '../../expense/store/expense.selectors';
+import { selectReceiptsByExpenseId } from '../../receipt/store/receipt.reducer';
 import { ExpenseCategory } from '../../expense/expense.model';
 import { TrainBookingFormComponent } from '../../train-booking/train-booking-form/train-booking-form';
 import { HotelBookingFormComponent } from '../../hotel-booking/hotel-booking-form/hotel-booking-form';
@@ -96,6 +101,13 @@ export class TripDetailComponent {
   protected readonly clearBookingError = signal<string | null>(null);
 
   protected readonly expenses = this.store.selectSignal(selectAllExpenses);
+  protected readonly sortedExpenses = computed(() =>
+    [...this.expenses()].sort((a, b) => a.date.localeCompare(b.date)),
+  );
+  private readonly allReceiptsByExpenseId = this.store.selectSignal(selectReceiptsByExpenseId);
+  protected readonly hasReceiptForExpense = (expenseId: string): boolean =>
+    (this.allReceiptsByExpenseId()[expenseId]?.length ?? 0) > 0;
+  private readonly lastCreatedExpenseId = this.store.selectSignal(selectExpensesLastCreatedExpenseId);
 
   private readonly allConfirmations = this.store.selectSignal(selectConfirmationsByTripId);
   protected readonly tripConfirmations = computed(() => {
@@ -217,6 +229,14 @@ export class TripDetailComponent {
 
   protected closeExpenseForm(): void {
     this.isExpenseFormOpen.set(false);
+  }
+
+  protected onExpenseSaved(): void {
+    this.closeExpenseForm();
+    const createdExpenseId = this.lastCreatedExpenseId();
+    if (createdExpenseId) {
+      this.router.navigate(['/expense', createdExpenseId]);
+    }
   }
 
   protected openHotelBookingForm(): void {

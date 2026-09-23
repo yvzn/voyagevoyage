@@ -4,9 +4,11 @@ import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { provideRouter } from '@angular/router';
 import { Router } from '@angular/router';
 import { convertToParamMap, ActivatedRoute } from '@angular/router';
+import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { TripDetailComponent } from './trip-detail';
+import { ExpenseFormComponent } from '../../expense/expense-form/expense-form';
 import { Trip, TripStatus } from '../trip.model';
 import { ApiStatus } from '../store/trip.reducer';
 import { selectAllTrips, selectTripsDeleteStatus } from '../store/trip.selectors';
@@ -14,7 +16,14 @@ import { selectTripsCreateStatus, selectTripsUpdateStatus } from '../store/trip.
 import { selectTripsLoadByIdStatus } from '../store/trip.selectors';
 import { TripActions } from '../store/trip.actions';
 import { selectConstraints } from '../../constraints/store/settings.selectors';
-import { selectAllExpenses, selectExpensesCreateStatus, selectExpensesLoadStatus, selectExpensesUpdateStatus } from '../../expense/store/expense.selectors';
+import {
+  selectAllExpenses,
+  selectExpensesCreateStatus,
+  selectExpensesLastCreatedExpenseId,
+  selectExpensesLoadStatus,
+  selectExpensesUpdateStatus,
+} from '../../expense/store/expense.selectors';
+import { Expense, ExpenseCategory } from '../../expense/expense.model';
 import {
   selectReceiptsByExpenseId,
   selectUploadStatus,
@@ -35,6 +44,7 @@ const EN_TRANSLATIONS = {
     deleteError: 'An error occurred while deleting the trip. Please try again.',
     expensesHeading: 'Expenses',
     addExpenseButton: 'Add expense',
+    receiptIndicatorLabel: 'Expense has a receipt attached',
     noExpenses: 'No expenses recorded for this trip.',
     notFound: 'Trip not found.',
   },
@@ -121,7 +131,12 @@ beforeEach(() => {
   HTMLDialogElement.prototype.showModal = () => {};
 });
 
-async function setupModule(trips: Trip[] = [MOCK_TRIP], tripId = 'trip-1'): Promise<MockStore> {
+async function setupModule(
+  trips: Trip[] = [MOCK_TRIP],
+  tripId = 'trip-1',
+  expenses: Expense[] = [],
+  receiptsByExpenseId: Record<string, unknown[]> = {},
+): Promise<MockStore> {
   await TestBed.configureTestingModule({
     imports: [TripDetailComponent],
     providers: [
@@ -141,11 +156,12 @@ async function setupModule(trips: Trip[] = [MOCK_TRIP], tripId = 'trip-1'): Prom
           { selector: selectTripsUpdateStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsLoadByIdStatus, value: 'success' as ApiStatus },
           { selector: selectConstraints, value: null },
-          { selector: selectAllExpenses, value: [] },
+          { selector: selectAllExpenses, value: expenses },
           { selector: selectExpensesLoadStatus, value: 'idle' as ApiStatus },
           { selector: selectExpensesCreateStatus, value: 'idle' as ApiStatus },
           { selector: selectExpensesUpdateStatus, value: 'idle' as ApiStatus },
-          { selector: selectReceiptsByExpenseId, value: {} },
+          { selector: selectExpensesLastCreatedExpenseId, value: null },
+          { selector: selectReceiptsByExpenseId, value: receiptsByExpenseId },
           { selector: selectUploadStatus, value: 'idle' as ApiStatus },
           { selector: selectDeleteStatus, value: 'idle' as ApiStatus },
         ],
@@ -255,6 +271,98 @@ describe('TripDetailComponent — trip found', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     const text = compiled.textContent ?? '';
     expect(text).toContain('No expenses recorded for this trip.');
+  });
+
+  it('should sort expense items by date ascending', async () => {
+    const store = TestBed.inject(MockStore);
+    const expenses: Expense[] = [
+      {
+        id: 'expense-2',
+        tripId: 'trip-1',
+        date: '2026-06-12',
+        category: ExpenseCategory.Train,
+        amount: 25,
+        description: 'Later trip',
+      },
+      {
+        id: 'expense-1',
+        tripId: 'trip-1',
+        date: '2026-06-10',
+        category: ExpenseCategory.Hotel,
+        amount: 120,
+        description: 'Earlier trip',
+      },
+    ];
+
+    store.overrideSelector(selectAllExpenses, expenses);
+    store.refreshState();
+
+    const fixture = TestBed.createComponent(TripDetailComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const list = fixture.nativeElement.querySelector('ul[aria-label="Expenses"]');
+    const listItems = Array.from(list?.querySelectorAll('button') ?? []) as HTMLElement[];
+    expect(listItems[0]?.textContent).toContain('Earlier trip');
+    expect(listItems[1]?.textContent).toContain('Later trip');
+  });
+
+  it('should show a receipt indicator when an expense has an attached receipt', async () => {
+    const store = TestBed.inject(MockStore);
+    const expenses: Expense[] = [
+      {
+        id: 'expense-1',
+        tripId: 'trip-1',
+        date: '2026-06-10',
+        category: ExpenseCategory.Other,
+        amount: 15,
+        description: 'Luggage',
+      },
+    ];
+    const receiptsByExpenseId = {
+      'expense-1': [{ id: 'receipt-1', fileName: 'receipt.pdf', contentType: 'application/pdf' }],
+    } as any;
+
+    store.overrideSelector(selectAllExpenses, expenses);
+    store.overrideSelector(selectReceiptsByExpenseId, receiptsByExpenseId);
+    store.refreshState();
+
+    const fixture = TestBed.createComponent(TripDetailComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const receiptIndicator = fixture.nativeElement.querySelector('.sr-only');
+    expect(receiptIndicator?.textContent).toContain('Expense has a receipt attached');
+  });
+
+  it('should pass the trip start date to the expense form as defaultDate', async () => {
+    const fixture = TestBed.createComponent(TripDetailComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    (fixture.componentInstance as any)['openExpenseForm']();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const formDebugEl = fixture.debugElement.query(By.directive(ExpenseFormComponent));
+    const expenseForm = formDebugEl.componentInstance as any;
+    expect(expenseForm.defaultDate()).toBe('2026-06-10');
+  });
+
+  it('should navigate to the created expense after the expense form reports a save', async () => {
+    const store = TestBed.inject(MockStore);
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    store.overrideSelector(selectExpensesLastCreatedExpenseId, 'expense-42');
+    store.refreshState();
+
+    const fixture = TestBed.createComponent(TripDetailComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    fixture.componentInstance['onExpenseSaved']();
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/expense', 'expense-42']);
   });
 
   it('should open the edit form modal when edit button is clicked', async () => {

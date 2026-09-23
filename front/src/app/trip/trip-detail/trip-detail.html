@@ -389,7 +389,7 @@
           </p>
         } @else {
           <ul class="mt-4 divide-y divide-gray-100 dark:divide-gray-700" aria-label="{{ 'tripDetail.expensesHeading' | translate }}">
-            @for (expense of expenses(); track expense.id) {
+            @for (expense of sortedExpenses(); track expense.id) {
               <li>
                 <button
                   type="button"
@@ -397,8 +397,21 @@
                   class="flex w-full items-center justify-between py-3 text-left cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-300 dark:hover:bg-gray-750"
                 >
                   <span class="flex flex-col">
-                    <span class="text-sm font-medium text-gray-900 dark:text-white">
+                    <span class="inline-flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white">
                       {{ 'expenseCategory.' + expense.category | translate }}
+                      @if (hasReceiptForExpense(expense.id)) {
+                        <svg
+                          class="h-4 w-4 text-gray-500 dark:text-gray-300"
+                          aria-hidden="true"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                        >
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3.75h6.75c.69 0 1.25.56 1.25 1.25v14.5c0 .69-.56 1.25-1.25 1.25H8.25c-.69 0-1.25-.56-1.25-1.25V5c0-.69.56-1.25 1.25-1.25Zm2.25 6h2.5m-2.5 4h2.5M9 7.5h6" />
+                        </svg>
+                        <span class="sr-only">{{ 'tripDetail.receiptIndicatorLabel' | translate }}</span>
+                      }
                     </span>
                     <span class="text-xs text-gray-500 dark:text-gray-400">
                       {{ formatDate(expense.date) }}
@@ -581,7 +594,8 @@
 @if (isExpenseFormOpen()) {
   <app-expense-form
     [tripId]="tripId()"
-    (saved)="closeExpenseForm()"
+    [defaultDate]="trip()?.startDate ?? null"
+    (saved)="onExpenseSaved()"
     (cancelled)="closeExpenseForm()"
   />
 }
