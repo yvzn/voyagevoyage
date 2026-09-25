@@ -28,6 +28,7 @@ import {
   selectExpensesLoadStatus,
 } from '../../expense/store/expense.selectors';
 import { selectReceiptsByExpenseId } from '../../receipt/store/receipt.reducer';
+import { ReceiptActions } from '../../receipt/store/receipt.actions';
 import { ExpenseCategory } from '../../expense/expense.model';
 import { TrainBookingFormComponent } from '../../train-booking/train-booking-form/train-booking-form';
 import { HotelBookingFormComponent } from '../../hotel-booking/hotel-booking-form/hotel-booking-form';
@@ -170,6 +171,15 @@ export class TripDetailComponent {
         this.store.dispatch(TripActions.loadTripById({ id }));
         this.store.dispatch(ExpenseActions.loadExpenses({ tripId: id }));
         this.store.dispatch(BookingConfirmationActions.loadConfirmationsForTrip({ tripId: id }));
+      }
+    });
+
+    effect(() => {
+      const expenseIds = [...new Set(this.expenses().map((expense) => expense.id))];
+      if (expenseIds.length === 0) return;
+
+      for (const expenseId of expenseIds) {
+        this.store.dispatch(ReceiptActions.loadReceiptsForExpense({ expenseId }));
       }
     });
 

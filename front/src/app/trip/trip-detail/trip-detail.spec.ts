@@ -29,6 +29,7 @@ import {
   selectUploadStatus,
   selectDeleteStatus,
 } from '../../receipt/store/receipt.reducer';
+import { ReceiptActions } from '../../receipt/store/receipt.actions';
 
 const EN_TRANSLATIONS = {
   tripDetail: {
@@ -307,6 +308,43 @@ describe('TripDetailComponent — trip found', () => {
     expect(listItems[1]?.textContent).toContain('Later trip');
   });
 
+  it('should dispatch receipt loads for trip expenses when the trip is displayed', async () => {
+    const store = TestBed.inject(MockStore);
+    const dispatchSpy = vi.spyOn(store, 'dispatch');
+    const expenses: Expense[] = [
+      {
+        id: 'expense-1',
+        tripId: 'trip-1',
+        date: '2026-06-10',
+        category: ExpenseCategory.Other,
+        amount: 15,
+        description: 'Luggage',
+      },
+      {
+        id: 'expense-2',
+        tripId: 'trip-1',
+        date: '2026-06-11',
+        category: ExpenseCategory.Meal,
+        amount: 25,
+        description: 'Dinner',
+      },
+    ];
+
+    store.overrideSelector(selectAllExpenses, expenses);
+    store.refreshState();
+
+    const fixture = TestBed.createComponent(TripDetailComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      ReceiptActions.loadReceiptsForExpense({ expenseId: 'expense-1' }),
+    );
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      ReceiptActions.loadReceiptsForExpense({ expenseId: 'expense-2' }),
+    );
+  });
+
   it('should show a receipt indicator when an expense has an attached receipt', async () => {
     const store = TestBed.inject(MockStore);
     const expenses: Expense[] = [
@@ -331,8 +369,8 @@ describe('TripDetailComponent — trip found', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const receiptIndicator = fixture.nativeElement.querySelector('.sr-only');
-    expect(receiptIndicator?.textContent).toContain('Expense has a receipt attached');
+    const receiptIndicator = fixture.nativeElement.querySelector('[aria-label="Expense has a receipt attached"]');
+    expect(receiptIndicator).toBeTruthy();
   });
 
   it('should pass the trip start date to the expense form as defaultDate', async () => {
