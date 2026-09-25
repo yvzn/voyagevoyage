@@ -13,3 +13,8 @@ export const selectExpensesLastCreatedTripId = createSelector(
   selectExpensesState,
   (state) => state.lastCreatedTripId,
 );
+
+export const selectExpensesLastCreatedExpenseId = createSelector(
+  selectExpensesState,
+  (state) => state.lastCreatedExpenseId,
+);

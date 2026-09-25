@@ -15,6 +15,8 @@ export interface ExpenseState {
   error: string | null;
   /** TripId where the last expense was created (used for navigation after calendar flow). */
   lastCreatedTripId: string | null;
+  /** Expense id of the last created expense (used for post-create redirect flows). */
+  lastCreatedExpenseId: string | null;
 }
 
 const initialState: ExpenseState = {
@@ -27,6 +29,7 @@ const initialState: ExpenseState = {
   deleteStatus: 'idle',
   error: null,
   lastCreatedTripId: null,
+  lastCreatedExpenseId: null,
 };
 
 export const expensesFeature = createFeature({
@@ -74,6 +77,7 @@ export const expensesFeature = createFeature({
       ...state,
       createStatus: 'loading' as ApiStatus,
       lastCreatedTripId: null,
+      lastCreatedExpenseId: null,
       error: null,
     })),
     on(ExpenseActions.createExpenseSuccess, (state, { expense }) => ({
@@ -81,6 +85,7 @@ export const expensesFeature = createFeature({
       expenses: [...state.expenses, expense],
       createStatus: 'success' as ApiStatus,
       lastCreatedTripId: expense.tripId,
+      lastCreatedExpenseId: expense.id,
     })),
     on(ExpenseActions.createExpenseFailure, (state, { error }) => ({
       ...state,
@@ -93,6 +98,7 @@ export const expensesFeature = createFeature({
       ...state,
       createStatus: 'loading' as ApiStatus,
       lastCreatedTripId: null,
+      lastCreatedExpenseId: null,
       error: null,
     })),
     on(ExpenseActions.createExpenseForDateSuccess, (state, { expense, tripId }) => ({
@@ -100,6 +106,7 @@ export const expensesFeature = createFeature({
       expenses: [...state.expenses, expense],
       createStatus: 'success' as ApiStatus,
       lastCreatedTripId: tripId,
+      lastCreatedExpenseId: expense.id,
     })),
     on(ExpenseActions.createExpenseForDateFailure, (state, { error }) => ({
       ...state,
@@ -158,4 +165,5 @@ export const {
   selectDeleteStatus: selectExpensesDeleteStatus,
   selectError: selectExpensesError,
   selectLastCreatedTripId,
+  selectLastCreatedExpenseId,
 } = expensesFeature;

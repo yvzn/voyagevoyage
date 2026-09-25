@@ -81,6 +81,7 @@
     "expensesHeading": "Dépenses",
     "addExpenseButton": "Ajouter une dépense",
     "addFrequentExpensesButton": "Dépenses fréquentes",
+    "receiptIndicatorLabel": "La dépense comporte un justificatif",
     "noExpenses": "Aucune dépense enregistrée pour ce déplacement.",
     "loading": "Chargement…",
     "notFound": "Déplacement introuvable.",
