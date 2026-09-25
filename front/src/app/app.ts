@@ -61,6 +61,15 @@ export class App implements OnInit {
       return;
     }
 
+    const flowbiteDrawer = (window as Window & {
+      FlowbiteInstances?: { getInstance?: (component: string, id: string) => { hide: () => void } | undefined };
+    }).FlowbiteInstances?.getInstance?.('Drawer', this.drawerId);
+
+    if (flowbiteDrawer) {
+      flowbiteDrawer.hide();
+      return;
+    }
+
     const drawer = document.getElementById(this.drawerId);
     if (drawer) {
       drawer.classList.remove('translate-x-0');
@@ -68,7 +77,7 @@ export class App implements OnInit {
       drawer.setAttribute('aria-hidden', 'true');
     }
 
-    const backdrop = document.querySelector('[data-drawer-backdrop]');
+    const backdrop = document.querySelector('[drawer-backdrop]');
     if (backdrop) {
       backdrop.remove();
     }

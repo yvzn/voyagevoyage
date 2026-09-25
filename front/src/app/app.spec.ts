@@ -83,22 +83,28 @@ describe('App', () => {
   it('should close the mobile drawer and remove the backdrop when navigation changes', () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;
-    const drawer = document.getElementById('drawer-navigation') as HTMLElement | null;
+    const hideSpy = vi.fn();
+    const flowbiteDrawerInstance = { hide: hideSpy };
+    (window as Window & { FlowbiteInstances?: { getInstance: ReturnType<typeof vi.fn> } }).FlowbiteInstances = {
+      getInstance: vi.fn().mockReturnValue(flowbiteDrawerInstance),
+    } as any;
 
+    const drawer = document.getElementById('drawer-navigation') as HTMLElement | null;
     expect(drawer).not.toBeNull();
     drawer?.classList.add('translate-x-0');
 
     const backdrop = document.createElement('div');
-    backdrop.setAttribute('data-drawer-backdrop', 'static');
+    backdrop.setAttribute('drawer-backdrop', '');
     document.body.appendChild(backdrop);
     document.body.classList.add('overflow-hidden');
 
     (app as any).closeMobileDrawer();
 
-    expect(drawer?.classList.contains('translate-x-0')).toBeFalsy();
-    expect(drawer?.classList.contains('-translate-x-full')).toBeTruthy();
-    expect(document.querySelector('[data-drawer-backdrop]')).toBeNull();
-    expect(document.body.classList.contains('overflow-hidden')).toBeFalsy();
+    expect((window as any).FlowbiteInstances.getInstance).toHaveBeenCalledWith('Drawer', 'drawer-navigation');
+    expect(hideSpy).toHaveBeenCalledTimes(1);
+    expect(drawer?.classList.contains('translate-x-0')).toBeTruthy();
+    expect(document.querySelector('[drawer-backdrop]')?.isConnected).toBe(true);
+    expect(document.body.classList.contains('overflow-hidden')).toBeTruthy();
   });
 
   it('should keep the drawer open on desktop widths', () => {
