@@ -397,21 +397,8 @@
                   class="flex w-full items-center justify-between py-3 text-left cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-300 dark:hover:bg-gray-750"
                 >
                   <span class="flex flex-col">
-                    <span class="inline-flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white">
+                    <span class="text-sm font-medium text-gray-900 dark:text-white">
                       {{ 'expenseCategory.' + expense.category | translate }}
-                      @if (hasReceiptForExpense(expense.id)) {
-                        <svg
-                          class="h-4 w-4 text-gray-500 dark:text-gray-300"
-                          aria-hidden="true"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="1.8"
-                        >
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3.75h6.75c.69 0 1.25.56 1.25 1.25v14.5c0 .69-.56 1.25-1.25 1.25H8.25c-.69 0-1.25-.56-1.25-1.25V5c0-.69.56-1.25 1.25-1.25Zm2.25 6h2.5m-2.5 4h2.5M9 7.5h6" />
-                        </svg>
-                        <span class="sr-only">{{ 'tripDetail.receiptIndicatorLabel' | translate }}</span>
-                      }
                     </span>
                     <span class="text-xs text-gray-500 dark:text-gray-400">
                       {{ formatDate(expense.date) }}
@@ -420,8 +407,27 @@
                       }
                     </span>
                   </span>
-                  <span class="ml-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-white">
-                    {{ expense.amount | number: '1.2-2' }}
+                  <span class="ml-4 flex items-center gap-3">
+                    @if (hasReceiptForExpense(expense.id)) {
+                      <span
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                        aria-label="{{ 'tripDetail.receiptIndicatorLabel' | translate }}"
+                      >
+                        <svg
+                          class="h-4 w-4"
+                          aria-hidden="true"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                        >
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3.75h6.75c.69 0 1.25.56 1.25 1.25v14.5c0 .69-.56 1.25-1.25 1.25H8.25c-.69 0-1.25-.56-1.25-1.25V5c0-.69.56-1.25 1.25-1.25Zm2.25 6h2.5m-2.5 4h2.5M9 7.5h6" />
+                        </svg>
+                      </span>
+                    }
+                    <span class="min-w-[4.5rem] whitespace-nowrap text-right text-sm font-semibold text-gray-900 dark:text-white">
+                      {{ expense.amount | number: '1.2-2' }}
+                    </span>
                   </span>
                 </button>
               </li>
