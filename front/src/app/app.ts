@@ -19,6 +19,7 @@ const SETTINGS_ROUTES = ['/constraints', '/personal-leaves', '/frequent-expenses
 export class App implements OnInit {
   protected readonly localeService = inject(LocaleService);
   protected readonly languageDropdownOpen = signal(false);
+  protected readonly drawerId = 'drawer-navigation';
 
   private readonly router = inject(Router);
   private readonly currentUrl = toSignal(
@@ -46,6 +47,42 @@ export class App implements OnInit {
   ngOnInit(): void {
     this.localeService.syncDocumentLang();
     initFlowbite();
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(() => this.closeMobileDrawer());
+  }
+
+  protected closeMobileDrawer(): void {
+    if (typeof window === 'undefined' || !window.matchMedia) {
+      return;
+    }
+
+    if (!window.matchMedia('(max-width: 767px)').matches) {
+      return;
+    }
+
+    const flowbiteDrawer = (window as Window & {
+      FlowbiteInstances?: { getInstance?: (component: string, id: string) => { hide: () => void } | undefined };
+    }).FlowbiteInstances?.getInstance?.('Drawer', this.drawerId);
+
+    if (flowbiteDrawer) {
+      flowbiteDrawer.hide();
+      return;
+    }
+
+    const drawer = document.getElementById(this.drawerId);
+    if (drawer) {
+      drawer.classList.remove('translate-x-0');
+      drawer.classList.add('-translate-x-full');
+      drawer.setAttribute('aria-hidden', 'true');
+    }
+
+    const backdrop = document.querySelector('[drawer-backdrop]');
+    if (backdrop) {
+      backdrop.remove();
+    }
+
+    document.body.classList.remove('overflow-hidden');
   }
 
   toggleLanguageDropdown(event: Event): void {
