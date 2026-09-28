@@ -15,7 +15,8 @@ namespace VoyageVoyage.Server.Services;
 public class AzureBlobReceiptService(
     ApplicationDbContext db,
     BlobServiceClient blobServiceClient,
-    ICurrentUserService currentUserService) : IReceiptService
+    ICurrentUserService currentUserService,
+    IAnomalyDetectionService? anomalyDetectionService = null) : IReceiptService
 {
     private const string ContainerName = "receipts";
 
@@ -50,7 +51,10 @@ public class AzureBlobReceiptService(
         if (expense is null)
             return null;
 
-        return await UploadAsync(userId, ReceiptLinkedEntityType.Expense, expenseId, file);
+        var receipt = await UploadAsync(userId, ReceiptLinkedEntityType.Expense, expenseId, file);
+        if (anomalyDetectionService is not null)
+            await anomalyDetectionService.AnalyzeTripAsync(expense.TripId);
+        return receipt;
     }
 
     public async Task<IReadOnlyList<Receipt>> GetAllByExpenseAsync(string expenseId)
@@ -95,6 +99,16 @@ public class AzureBlobReceiptService(
 
         db.Receipts.Remove(receipt);
         await db.SaveChangesAsync();
+
+        if (anomalyDetectionService is not null)
+        {
+            var expense = await db.Expenses
+                .Where(e => e.Id == receipt.LinkedEntityId && e.UserId == userId)
+                .FirstOrDefaultAsync();
+            if (expense is not null)
+                await anomalyDetectionService.AnalyzeTripAsync(expense.TripId);
+        }
+
         return true;
     }
 

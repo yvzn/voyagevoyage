@@ -9,13 +9,22 @@ namespace VoyageVoyage.Server.Services;
 /// PostgreSQL implementation of <see cref="IExpenseService"/>, backed by EF Core.
 /// All operations are scoped to the authenticated user.
 /// </summary>
-public class ExpenseService(ApplicationDbContext db, ICurrentUserService currentUserService) : IExpenseService
+public class ExpenseService(
+    ApplicationDbContext db,
+    ICurrentUserService currentUserService,
+    IAnomalyDetectionService? anomalyDetectionService = null) : IExpenseService
 {
     private string GetCurrentUserId()
     {
         var user = currentUserService.GetCurrentUser()
             ?? throw new InvalidOperationException("No authenticated user is available.");
         return user.Id;
+    }
+
+    private async Task TriggerTripAnalysisAsync(string tripId)
+    {
+        if (anomalyDetectionService is not null)
+            await anomalyDetectionService.AnalyzeTripAsync(tripId);
     }
 
     public async Task<IReadOnlyList<Expense>> GetAllByTripAsync(string tripId)
@@ -66,6 +75,7 @@ public class ExpenseService(ApplicationDbContext db, ICurrentUserService current
         };
         db.Expenses.Add(expense);
         await db.SaveChangesAsync();
+        await TriggerTripAnalysisAsync(tripId);
         return expense;
     }
 
@@ -99,6 +109,7 @@ public class ExpenseService(ApplicationDbContext db, ICurrentUserService current
         expense.Amount = request.Amount;
         expense.Description = request.Description;
         await db.SaveChangesAsync();
+        await TriggerTripAnalysisAsync(expense.TripId);
         return expense;
     }
 
