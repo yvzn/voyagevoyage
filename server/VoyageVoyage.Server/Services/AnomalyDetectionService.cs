@@ -154,8 +154,8 @@ public class AnomalyDetectionService(
                 continue;
 
             var threshold = constraints.XAtypicalExpenseThresholdPercent;
-            var average = await GetCategoryAverageAsync(userId, expense.Category, trip.EndDate, cancellationToken);
-            var categoryReceiptCount = await GetCategoryReceiptCount(userId, expense.Category, trip.EndDate, cancellationToken);
+            var average = await GetCategoryAverageAsync(userId, expense.Category, evaluationDate, cancellationToken);
+            var categoryReceiptCount = await GetCategoryReceiptCount(userId, expense.Category, evaluationDate, cancellationToken);
             if (average > 0m && expense.Amount > average * (1m + threshold / 100m) && categoryReceiptCount >= DefaultMinimumReceiptsForCategory)
             {
                 alerts.Add(await UpsertAlertAsync(
@@ -258,20 +258,18 @@ public class AnomalyDetectionService(
         return trip.TrainBooking is not null || trip.HotelBooking is not null;
     }
 
-    private async Task<decimal> GetCategoryAverageAsync(string userId, ExpenseCategory category, DateOnly? tripEndDate, CancellationToken cancellationToken)
+    private async Task<decimal> GetCategoryAverageAsync(string userId, ExpenseCategory category, DateTime evaluationDate, CancellationToken cancellationToken)
     {
-        var now = DateTime.UtcNow;
-        var startDate = now.AddYears(-1).Date;
+        var startDate = evaluationDate.AddYears(-1).Date;
 
         return await db.Expenses
             .Where(e => e.UserId == userId && e.Category == category && e.Date >= DateOnly.FromDateTime(startDate))
             .AverageAsync(e => (decimal?)e.Amount, cancellationToken) ?? 0m;
     }
 
-    private async Task<int> GetCategoryReceiptCount(string userId, ExpenseCategory category, DateOnly? tripEndDate, CancellationToken cancellationToken)
+    private async Task<int> GetCategoryReceiptCount(string userId, ExpenseCategory category, DateTime evaluationDate, CancellationToken cancellationToken)
     {
-        var now = DateTime.UtcNow;
-        var startDate = now.AddYears(-1).Date;
+        var startDate = evaluationDate.AddYears(-1).Date;
 
         return await db.Expenses
             .Where(e => e.UserId == userId && e.Category == category && e.Date >= DateOnly.FromDateTime(startDate))

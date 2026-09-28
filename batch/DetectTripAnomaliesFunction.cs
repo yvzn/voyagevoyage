@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using VoyageVoyage.Server.Authentication;
 using VoyageVoyage.Server.Data;
 using VoyageVoyage.Server.Models;
 using VoyageVoyage.Server.Services;
