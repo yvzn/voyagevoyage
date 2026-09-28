@@ -48,6 +48,9 @@ public class TravelConstraintsService(
         existing.IsStrict = request.IsStrict;
         existing.PlanningHorizonDays = request.PlanningHorizonDays;
         existing.TrainBookingThresholdDays = request.TrainBookingThresholdDays;
+        existing.A1MaxPastTripAgeDays = request.A1MaxPastTripAgeDays;
+        existing.A2MinCompletionDelayDays = request.A2MinCompletionDelayDays;
+        existing.XAtypicalExpenseThresholdPercent = request.XAtypicalExpenseThresholdPercent;
         existing.PublicHolidayRegions = request.PublicHolidayRegions;
         existing.SchoolHolidayZones = request.SchoolHolidayZones;
 

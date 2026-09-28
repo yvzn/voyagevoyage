@@ -369,6 +369,100 @@
       </div>
     </fieldset>
 
+    <!-- Past-trip anomaly controls -->
+    <fieldset class="mb-6 rounded-lg border border-gray-200 p-4 dark:border-gray-600">
+      <legend class="px-2 text-sm font-semibold text-gray-900 dark:text-white">
+        {{ 'constraints.anomalySectionLabel' | translate }}
+      </legend>
+
+      <div class="mt-4 space-y-4">
+        <div>
+          <label for="a1-max-past-trip-age-days" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+            {{ 'constraints.a1MaxPastTripAgeDays' | translate }}
+          </label>
+          <div class="flex items-center gap-2">
+            <input
+              id="a1-max-past-trip-age-days"
+              type="number"
+              min="1"
+              max="3650"
+              formControlName="a1MaxPastTripAgeDays"
+              class="block w-28 rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('a1MaxPastTripAgeDays')?.invalid && form.get('a1MaxPastTripAgeDays')?.touched }"
+              [attr.aria-describedby]="form.get('a1MaxPastTripAgeDays')?.invalid && form.get('a1MaxPastTripAgeDays')?.touched ? 'a1-max-past-trip-age-error' : null"
+            />
+            <span class="text-sm text-gray-500 dark:text-gray-400">{{ 'constraints.daysUnit' | translate }}</span>
+          </div>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ 'constraints.a1Hint' | translate }}</p>
+          @if (form.get('a1MaxPastTripAgeDays')?.invalid && form.get('a1MaxPastTripAgeDays')?.touched) {
+            <p id="a1-max-past-trip-age-error" class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+              {{ 'constraints.a1Error' | translate }}
+            </p>
+          }
+        </div>
+
+        <div>
+          <label for="a2-min-completion-delay-days" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+            {{ 'constraints.a2MinCompletionDelayDays' | translate }}
+          </label>
+          <div class="flex items-center gap-2">
+            <input
+              id="a2-min-completion-delay-days"
+              type="number"
+              min="1"
+              max="3650"
+              formControlName="a2MinCompletionDelayDays"
+              class="block w-28 rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('a2MinCompletionDelayDays')?.invalid && form.get('a2MinCompletionDelayDays')?.touched }"
+              [attr.aria-describedby]="form.get('a2MinCompletionDelayDays')?.invalid && form.get('a2MinCompletionDelayDays')?.touched ? 'a2-min-completion-delay-error' : null"
+            />
+            <span class="text-sm text-gray-500 dark:text-gray-400">{{ 'constraints.daysUnit' | translate }}</span>
+          </div>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ 'constraints.a2Hint' | translate }}</p>
+          @if (form.get('a2MinCompletionDelayDays')?.invalid && form.get('a2MinCompletionDelayDays')?.touched) {
+            <p id="a2-min-completion-delay-error" class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+              {{ 'constraints.a2Error' | translate }}
+            </p>
+          }
+        </div>
+
+        <div>
+          <label for="x-atypical-expense-threshold-percent" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+            {{ 'constraints.xAtypicalExpenseThresholdPercent' | translate }}
+          </label>
+          <div class="flex items-center gap-2">
+            <input
+              id="x-atypical-expense-threshold-percent"
+              type="number"
+              min="0.1"
+              max="1000"
+              step="0.1"
+              formControlName="xAtypicalExpenseThresholdPercent"
+              class="block w-28 rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('xAtypicalExpenseThresholdPercent')?.invalid && form.get('xAtypicalExpenseThresholdPercent')?.touched }"
+              [attr.aria-describedby]="form.get('xAtypicalExpenseThresholdPercent')?.invalid && form.get('xAtypicalExpenseThresholdPercent')?.touched ? 'x-atypical-expense-threshold-error' : null"
+            />
+            <span class="text-sm text-gray-500 dark:text-gray-400">{{ 'constraints.percentUnit' | translate }}</span>
+          </div>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ 'constraints.xHint' | translate }}</p>
+          @if (form.get('xAtypicalExpenseThresholdPercent')?.invalid && form.get('xAtypicalExpenseThresholdPercent')?.touched) {
+            <p id="x-atypical-expense-threshold-error" class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+              {{ 'constraints.xError' | translate }}
+            </p>
+          }
+        </div>
+      </div>
+
+      <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">
+        {{ 'constraints.anomalyWindowHelp' | translate }}
+      </p>
+      @if (form.errors?.['anomalyWindowInvalid']) {
+        <p class="mt-2 text-xs text-red-600 dark:text-red-400" role="alert">
+          {{ 'constraints.anomalyWindowError' | translate }}
+        </p>
+      }
+    </fieldset>
+
     <!-- Success message -->
     @if (isSaved()) {
       <div
