@@ -16,5 +16,8 @@ public record UpdateTravelConstraintsRequest(
     int PlanningHorizonDays,
     List<string> PublicHolidayRegions,
     List<string> SchoolHolidayZones,
-    int TrainBookingThresholdDays = 90
+    int TrainBookingThresholdDays = 90,
+    int A1MaxPastTripAgeDays = TravelConstraints.DefaultA1MaxPastTripAgeDays,
+    int A2MinCompletionDelayDays = TravelConstraints.DefaultA2MinCompletionDelayDays,
+    decimal XAtypicalExpenseThresholdPercent = TravelConstraints.DefaultAtypicalExpenseThresholdPercent
 );

@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, effect, inject, ChangeDetectionStrategy } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, type AbstractControl, type ValidationErrors } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -76,6 +76,9 @@ export class ConstraintsSettingsComponent implements OnInit {
     maxDaysPerMonth: [null as number | null, [Validators.min(1), Validators.max(31)]],
     planningHorizonDays: [90, [Validators.required, Validators.min(1), Validators.max(365)]],
     trainBookingThresholdDays: [90, [Validators.required, Validators.min(1), Validators.max(365)]],
+    a1MaxPastTripAgeDays: [365, [Validators.required, Validators.min(1), Validators.max(3650)]],
+    a2MinCompletionDelayDays: [30, [Validators.required, Validators.min(1), Validators.max(3650)]],
+    xAtypicalExpenseThresholdPercent: [100, [Validators.required, Validators.min(0.1), Validators.max(1000)]],
     considerPublicHolidays: [false],
     considerVacationDays: [false],
     isStrict: [false],
@@ -85,7 +88,18 @@ export class ConstraintsSettingsComponent implements OnInit {
     'zone-Zone A': [false],
     'zone-Zone B': [false],
     'zone-Zone C': [false],
-  });
+  }, { validators: this.anomalyWindowValidator });
+
+  private readonly anomalyWindowValidator = (group: AbstractControl): ValidationErrors | null => {
+    const a1 = Number(group.get('a1MaxPastTripAgeDays')?.value ?? 0);
+    const a2 = Number(group.get('a2MinCompletionDelayDays')?.value ?? 0);
+
+    if (!Number.isFinite(a1) || !Number.isFinite(a2) || a1 <= 0 || a2 <= 0) {
+      return null;
+    }
+
+    return a1 > a2 ? null : { anomalyWindowInvalid: true };
+  };
 
   constructor() {
     // Populate the form whenever constraints arrive from a successful load.
@@ -95,6 +109,16 @@ export class ConstraintsSettingsComponent implements OnInit {
         if (c) {
           this.applyConstraints(c);
         }
+      }
+    });
+
+    this.form.statusChanges.subscribe(() => {
+      const a1 = this.form.get('a1MaxPastTripAgeDays');
+      const a2 = this.form.get('a2MinCompletionDelayDays');
+      if (a1 && a2) {
+        const isInvalid = a1.value && a2.value && Number(a1.value) <= Number(a2.value);
+        a1.setErrors(isInvalid ? { anomalyWindowInvalid: true } : a1.errors);
+        a2.setErrors(isInvalid ? { anomalyWindowInvalid: true } : a2.errors);
       }
     });
   }

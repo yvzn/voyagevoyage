@@ -34,6 +34,30 @@ public class TravelConstraintsController(ITravelConstraintsService constraintsSe
             return ValidationProblem(ModelState);
         }
 
+        if (request.A1MaxPastTripAgeDays is < 1 or > 3650)
+        {
+            ModelState.AddModelError(nameof(request.A1MaxPastTripAgeDays), "validation.a1MaxPastTripAgeDaysOutOfRange");
+            return ValidationProblem(ModelState);
+        }
+
+        if (request.A2MinCompletionDelayDays is < 1 or > 3650)
+        {
+            ModelState.AddModelError(nameof(request.A2MinCompletionDelayDays), "validation.a2MinCompletionDelayDaysOutOfRange");
+            return ValidationProblem(ModelState);
+        }
+
+        if (request.XAtypicalExpenseThresholdPercent is <= 0m or > 1000m)
+        {
+            ModelState.AddModelError(nameof(request.XAtypicalExpenseThresholdPercent), "validation.xAtypicalExpenseThresholdPercentOutOfRange");
+            return ValidationProblem(ModelState);
+        }
+
+        if (request.A1MaxPastTripAgeDays <= request.A2MinCompletionDelayDays)
+        {
+            ModelState.AddModelError(nameof(request.A1MaxPastTripAgeDays), "validation.a1MustBeGreaterThanA2");
+            return ValidationProblem(ModelState);
+        }
+
         var constraints = await constraintsService.UpsertAsync(request);
         return Ok(constraints);
     }

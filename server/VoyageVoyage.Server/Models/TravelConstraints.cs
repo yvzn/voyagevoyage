@@ -8,6 +8,10 @@ namespace VoyageVoyage.Server.Models;
 /// </summary>
 public class TravelConstraints
 {
+    public const int DefaultA1MaxPastTripAgeDays = 365;
+    public const int DefaultA2MinCompletionDelayDays = 30;
+    public const decimal DefaultAtypicalExpenseThresholdPercent = 100m;
+
     /// <summary>
     /// Fixed document identifier within the user's partition.
     /// Each user has at most one constraints document.
@@ -65,6 +69,24 @@ public class TravelConstraints
     /// Defaults to 90 days (SNCF booking window).
     /// </summary>
     public int TrainBookingThresholdDays { get; set; } = 90;
+
+    /// <summary>
+    /// A1 — maximum age in days for past trips to be analyzed.
+    /// Trips ending more than A1 days ago are discarded from analysis.
+    /// </summary>
+    public int A1MaxPastTripAgeDays { get; set; } = DefaultA1MaxPastTripAgeDays;
+
+    /// <summary>
+    /// A2 — minimum completion delay in days before a past trip is analyzed.
+    /// The trip must be at least A2 days after its end date to be analyzed.
+    /// </summary>
+    public int A2MinCompletionDelayDays { get; set; } = DefaultA2MinCompletionDelayDays;
+
+    /// <summary>
+    /// X — threshold above the category average, expressed as a percentage, beyond which a receipt is considered atypical.
+    /// Example: 100 means the receipt exceeds the category mean by 100% or more.
+    /// </summary>
+    public decimal XAtypicalExpenseThresholdPercent { get; set; } = DefaultAtypicalExpenseThresholdPercent;
 
     /// <summary>
     /// Public holiday region identifiers selected by the user (e.g. "france-metropole").
