@@ -299,7 +299,21 @@
     "retry": "Réessayer",
     "trainBookingThresholdDays": "Seuil de rappel de réservation de train (jours)",
     "trainBookingThresholdDaysHint": "Les rappels s'affichent pour les voyages confirmés dont le départ a lieu dans ce nombre de jours (1 à 365). Par défaut, 90 jours (ouverture des réservations SNCF).",
-    "trainBookingThresholdDaysError": "Doit être compris entre 1 et 365."
+    "trainBookingThresholdDaysError": "Doit être compris entre 1 et 365.",
+    "anomalySectionLabel": "Contrôles de conformité des voyages passés",
+    "a1MaxPastTripAgeDays": "A1 — Ancienneté maximale des voyages analysés",
+    "a1Hint": "Les voyages dont la fin remonte à plus de ce nombre de jours ne sont plus analysés.",
+    "a1Error": "A1 doit être compris entre 1 et 3650 jours.",
+    "a2MinCompletionDelayDays": "A2 — Délai de complétude avant analyse",
+    "a2Hint": "Les voyages ne sont analysés qu'après ce délai depuis leur date de fin.",
+    "a2Error": "A2 doit être compris entre 1 et 3650 jours.",
+    "xAtypicalExpenseThresholdPercent": "X — Seuil de dépense atypique",
+    "xHint": "Les justificatifs supérieurs à la moyenne de catégorie de ce pourcentage sont signalés comme atypiques.",
+    "xError": "X doit être supérieur à 0 et ne pas dépasser 1000 %.",
+    "daysUnit": "jours",
+    "percentUnit": "%",
+    "anomalyWindowHelp": "Fenêtre d'analyse : les voyages finissant entre aujourd'hui − A1 et aujourd'hui − A2 sont pris en compte. A1 doit être supérieur à A2.",
+    "anomalyWindowError": "A1 doit être strictement supérieur à A2 pour conserver une fenêtre d'analyse valide."
   },
   "leaveType": {
     "annual": "Congés payés",

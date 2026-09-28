@@ -65,6 +65,47 @@ export class ConstraintsSettingsComponent implements OnInit {
     this.importSchoolIcsStatus() === 'failure' ? 'constraints.schoolIcsImportError' : null,
   );
 
+  private readonly anomalyWindowValidator = (group: AbstractControl): ValidationErrors | null => {
+    const a1 = Number(group.get('a1MaxPastTripAgeDays')?.value ?? 0);
+    const a2 = Number(group.get('a2MinCompletionDelayDays')?.value ?? 0);
+
+    if (!Number.isFinite(a1) || !Number.isFinite(a2) || a1 <= 0 || a2 <= 0) {
+      return null;
+    }
+
+    return a1 > a2 ? null : { anomalyWindowInvalid: true };
+  };
+
+  private readonly a1AnomalyValidator = (control: AbstractControl): ValidationErrors | null => {
+    const group = control.parent;
+    if (!group) {
+      return null;
+    }
+
+    const a1 = Number(control.value ?? NaN);
+    const a2 = Number(group.get('a2MinCompletionDelayDays')?.value ?? NaN);
+    if (!Number.isFinite(a1) || !Number.isFinite(a2) || a1 <= 0 || a2 <= 0) {
+      return null;
+    }
+
+    return a1 > a2 ? null : { anomalyWindowInvalid: true };
+  };
+
+  private readonly a2AnomalyValidator = (control: AbstractControl): ValidationErrors | null => {
+    const group = control.parent;
+    if (!group) {
+      return null;
+    }
+
+    const a1 = Number(group.get('a1MaxPastTripAgeDays')?.value ?? NaN);
+    const a2 = Number(control.value ?? NaN);
+    if (!Number.isFinite(a1) || !Number.isFinite(a2) || a1 <= 0 || a2 <= 0) {
+      return null;
+    }
+
+    return a1 > a2 ? null : { anomalyWindowInvalid: true };
+  };
+
   protected readonly form = this.fb.group({
     monday: [false],
     tuesday: [false],
@@ -76,8 +117,8 @@ export class ConstraintsSettingsComponent implements OnInit {
     maxDaysPerMonth: [null as number | null, [Validators.min(1), Validators.max(31)]],
     planningHorizonDays: [90, [Validators.required, Validators.min(1), Validators.max(365)]],
     trainBookingThresholdDays: [90, [Validators.required, Validators.min(1), Validators.max(365)]],
-    a1MaxPastTripAgeDays: [365, [Validators.required, Validators.min(1), Validators.max(3650)]],
-    a2MinCompletionDelayDays: [30, [Validators.required, Validators.min(1), Validators.max(3650)]],
+    a1MaxPastTripAgeDays: [365, [Validators.required, Validators.min(1), Validators.max(3650), this.a1AnomalyValidator]],
+    a2MinCompletionDelayDays: [30, [Validators.required, Validators.min(1), Validators.max(3650), this.a2AnomalyValidator]],
     xAtypicalExpenseThresholdPercent: [100, [Validators.required, Validators.min(0.1), Validators.max(1000)]],
     considerPublicHolidays: [false],
     considerVacationDays: [false],
@@ -90,17 +131,6 @@ export class ConstraintsSettingsComponent implements OnInit {
     'zone-Zone C': [false],
   }, { validators: this.anomalyWindowValidator });
 
-  private readonly anomalyWindowValidator = (group: AbstractControl): ValidationErrors | null => {
-    const a1 = Number(group.get('a1MaxPastTripAgeDays')?.value ?? 0);
-    const a2 = Number(group.get('a2MinCompletionDelayDays')?.value ?? 0);
-
-    if (!Number.isFinite(a1) || !Number.isFinite(a2) || a1 <= 0 || a2 <= 0) {
-      return null;
-    }
-
-    return a1 > a2 ? null : { anomalyWindowInvalid: true };
-  };
-
   constructor() {
     // Populate the form whenever constraints arrive from a successful load.
     effect(() => {
@@ -112,15 +142,6 @@ export class ConstraintsSettingsComponent implements OnInit {
       }
     });
 
-    this.form.statusChanges.subscribe(() => {
-      const a1 = this.form.get('a1MaxPastTripAgeDays');
-      const a2 = this.form.get('a2MinCompletionDelayDays');
-      if (a1 && a2) {
-        const isInvalid = a1.value && a2.value && Number(a1.value) <= Number(a2.value);
-        a1.setErrors(isInvalid ? { anomalyWindowInvalid: true } : a1.errors);
-        a2.setErrors(isInvalid ? { anomalyWindowInvalid: true } : a2.errors);
-      }
-    });
   }
 
   ngOnInit(): void {
@@ -143,6 +164,9 @@ export class ConstraintsSettingsComponent implements OnInit {
       maxDaysPerMonth: constraints.maxDaysPerMonth ?? null,
       planningHorizonDays: constraints.planningHorizonDays ?? 90,
       trainBookingThresholdDays: constraints.trainBookingThresholdDays ?? 90,
+      a1MaxPastTripAgeDays: constraints.a1MaxPastTripAgeDays ?? 365,
+      a2MinCompletionDelayDays: constraints.a2MinCompletionDelayDays ?? 30,
+      xAtypicalExpenseThresholdPercent: constraints.xAtypicalExpenseThresholdPercent ?? 100,
       considerPublicHolidays: constraints.considerPublicHolidays,
       considerVacationDays: constraints.considerVacationDays,
       isStrict: constraints.isStrict,
@@ -231,6 +255,9 @@ export class ConstraintsSettingsComponent implements OnInit {
       maxDaysPerMonth: v.maxDaysPerMonth ?? null,
       planningHorizonDays: v.planningHorizonDays ?? 90,
       trainBookingThresholdDays: v.trainBookingThresholdDays ?? 90,
+      a1MaxPastTripAgeDays: v.a1MaxPastTripAgeDays ?? 365,
+      a2MinCompletionDelayDays: v.a2MinCompletionDelayDays ?? 30,
+      xAtypicalExpenseThresholdPercent: v.xAtypicalExpenseThresholdPercent ?? 100,
       considerPublicHolidays: v.considerPublicHolidays ?? false,
       considerVacationDays: v.considerVacationDays ?? false,
       isStrict: v.isStrict ?? false,

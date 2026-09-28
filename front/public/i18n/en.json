@@ -299,7 +299,21 @@
     "retry": "Retry",
     "trainBookingThresholdDays": "Train booking reminder threshold (days)",
     "trainBookingThresholdDaysHint": "Reminders are shown for confirmed trips starting within this many days (1 to 365). Default is 90 days (SNCF booking window).",
-    "trainBookingThresholdDaysError": "Must be between 1 and 365."
+    "trainBookingThresholdDaysError": "Must be between 1 and 365.",
+    "anomalySectionLabel": "Past-trip anomaly controls",
+    "a1MaxPastTripAgeDays": "A1 — Maximum age of analyzed past trips",
+    "a1Hint": "Trips that ended more than this many days ago are excluded from analysis.",
+    "a1Error": "A1 must be between 1 and 3650 days.",
+    "a2MinCompletionDelayDays": "A2 — Minimum completion delay before analysis",
+    "a2Hint": "Trips are only analyzed after this delay has elapsed since their end date.",
+    "a2Error": "A2 must be between 1 and 3650 days.",
+    "xAtypicalExpenseThresholdPercent": "X — Atypical expense threshold",
+    "xHint": "Receipts above the category average by this percentage are flagged as atypical.",
+    "xError": "X must be greater than 0 and no more than 1000%.",
+    "daysUnit": "days",
+    "percentUnit": "%",
+    "anomalyWindowHelp": "Analysis window: trips ending between today − A1 and today − A2 are considered. A1 must be greater than A2.",
+    "anomalyWindowError": "A1 must be greater than A2 to keep a valid analysis window."
   },
   "leaveType": {
     "annual": "Annual leave",
