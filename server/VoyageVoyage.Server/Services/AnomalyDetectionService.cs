@@ -20,18 +20,18 @@ public class AnomalyDetectionService(
 
     public async Task<IReadOnlyList<AnomalyAlert>> AnalyzePastTripsAsync(DateTime? evaluationDate = null, CancellationToken cancellationToken = default)
     {
-        var userId = GetCurrentUserId();
+        return await AnalyzePastTripsForUserAsync(GetCurrentUserId(), evaluationDate, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<AnomalyAlert>> AnalyzePastTripsForUserAsync(string userId, DateTime? evaluationDate = null, CancellationToken cancellationToken = default)
+    {
         var today = (evaluationDate ?? DateTime.UtcNow).Date;
         var constraints = await db.TravelConstraints
             .Where(c => c.UserId == userId)
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(cancellationToken) ?? new TravelConstraints();
 
-        var windows = constraints is null
-            ? new TravelConstraints()
-            : constraints;
-
-        var cutoffA1 = today.AddDays(-windows.A1MaxPastTripAgeDays);
-        var cutoffA2 = today.AddDays(-windows.A2MinCompletionDelayDays);
+        var cutoffA1 = today.AddDays(-constraints.A1MaxPastTripAgeDays);
+        var cutoffA2 = today.AddDays(-constraints.A2MinCompletionDelayDays);
 
         var candidateTrips = await db.Trips
             .Where(t => t.UserId == userId)
@@ -43,7 +43,7 @@ public class AnomalyDetectionService(
         var results = new List<AnomalyAlert>();
         foreach (var trip in candidateTrips)
         {
-            results.AddRange(await DetectForTripAsync(trip, windows, today, cancellationToken));
+            results.AddRange(await DetectForTripAsync(trip, constraints, today, userId, cancellationToken));
         }
 
         return results;
@@ -51,7 +51,11 @@ public class AnomalyDetectionService(
 
     public async Task<IReadOnlyList<AnomalyAlert>> AnalyzeTripAsync(string tripId, DateTime? evaluationDate = null, CancellationToken cancellationToken = default)
     {
-        var userId = GetCurrentUserId();
+        return await AnalyzeTripAsync(GetCurrentUserId(), tripId, evaluationDate, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<AnomalyAlert>> AnalyzeTripAsync(string userId, string tripId, DateTime? evaluationDate = null, CancellationToken cancellationToken = default)
+    {
         var trip = await db.Trips
             .Where(t => t.UserId == userId && t.Id == tripId)
             .FirstOrDefaultAsync(cancellationToken);
@@ -63,7 +67,7 @@ public class AnomalyDetectionService(
             .Where(c => c.UserId == userId)
             .FirstOrDefaultAsync(cancellationToken) ?? new TravelConstraints();
 
-        return await DetectForTripAsync(trip, constraints, (evaluationDate ?? DateTime.UtcNow).Date, cancellationToken);
+        return await DetectForTripAsync(trip, constraints, (evaluationDate ?? DateTime.UtcNow).Date, userId, cancellationToken);
     }
 
     public async Task<IReadOnlyList<AnomalyAlert>> GetAlertsAsync(AlertStatus? status = null, CancellationToken cancellationToken = default)
@@ -95,10 +99,9 @@ public class AnomalyDetectionService(
         return alert;
     }
 
-    private async Task<List<AnomalyAlert>> DetectForTripAsync(Trip trip, TravelConstraints constraints, DateTime evaluationDate, CancellationToken cancellationToken)
+    private async Task<List<AnomalyAlert>> DetectForTripAsync(Trip trip, TravelConstraints constraints, DateTime evaluationDate, string userId, CancellationToken cancellationToken)
     {
         var alerts = new List<AnomalyAlert>();
-        var userId = GetCurrentUserId();
 
         if (trip.Status == TripStatus.Planned && IsPastTrip(trip, evaluationDate))
         {
