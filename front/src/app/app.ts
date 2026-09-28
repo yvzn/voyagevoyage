@@ -5,8 +5,9 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { initFlowbite } from 'flowbite';
 import { filter, map } from 'rxjs';
 import { LocaleService } from './locale.service';
+import { VoucherService } from './voucher/voucher.service';
 
-const TRAVEL_ROUTES = ['/calendar', '/planning-dashboard', '/train-bookings', '/hotel-bookings'];
+const TRAVEL_ROUTES = ['/calendar', '/planning-dashboard', '/train-bookings', '/hotel-bookings', '/vouchers'];
 const FISCAL_SUMMARY_ROUTES = ['/expense-summary', '/annual-expense-summary'];
 const SETTINGS_ROUTES = ['/constraints', '/personal-leaves', '/frequent-expenses'];
 
@@ -18,6 +19,7 @@ const SETTINGS_ROUTES = ['/constraints', '/personal-leaves', '/frequent-expenses
 })
 export class App implements OnInit {
   protected readonly localeService = inject(LocaleService);
+  private readonly voucherService = inject(VoucherService);
   protected readonly languageDropdownOpen = signal(false);
   protected readonly drawerId = 'drawer-navigation';
 
@@ -33,6 +35,7 @@ export class App implements OnInit {
   protected readonly travelMenuOpen = signal(false);
   protected readonly fiscalSummaryMenuOpen = signal(false);
   protected readonly settingsMenuOpen = signal(false);
+  protected readonly activeVoucherCount = computed(() => this.voucherService.getActiveVouchers().length);
 
   protected readonly travelSectionOpen = computed(
     () => this.travelMenuOpen() || TRAVEL_ROUTES.some(route => this.currentUrl().startsWith(route)),
