@@ -117,6 +117,91 @@ public class AnomalyDetectionServiceTests
     }
 
     [Fact]
+    public async Task AnalyzeTripAsync_WhenA1A2Unset_SkipsPastTripAnalysis()
+    {
+        var (service, db) = CreateService();
+
+        var trip = new Trip
+        {
+            Id = "trip-zero-constraints",
+            UserId = "test-user",
+            StartDate = new DateOnly(2025, 1, 10),
+            EndDate = new DateOnly(2025, 1, 15),
+            Destination = "Lyon",
+            Status = TripStatus.Planned,
+        };
+        db.Trips.Add(trip);
+
+        db.TravelConstraints.Add(new TravelConstraints
+        {
+            UserId = "test-user",
+            A1MaxPastTripAgeDays = 0,
+            A2MinCompletionDelayDays = 0,
+            XAtypicalExpenseThresholdPercent = 0m,
+        });
+        await db.SaveChangesAsync();
+
+        var alerts = await service.AnalyzeTripAsync(trip.Id, new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+
+        Assert.Empty(alerts);
+    }
+
+    [Fact]
+    public async Task AnalyzeTripAsync_WhenXIsZero_SkipsAtypicalReceiptAlert()
+    {
+        var (service, db) = CreateService();
+
+        var trip = new Trip
+        {
+            Id = "trip-zero-x",
+            UserId = "test-user",
+            StartDate = new DateOnly(2025, 1, 10),
+            EndDate = new DateOnly(2025, 1, 15),
+            Destination = "Bordeaux",
+            Status = TripStatus.Confirmed,
+        };
+        db.Trips.Add(trip);
+
+        db.TravelConstraints.Add(new TravelConstraints
+        {
+            UserId = "test-user",
+            A1MaxPastTripAgeDays = 365,
+            A2MinCompletionDelayDays = 30,
+            XAtypicalExpenseThresholdPercent = 0m,
+        });
+
+        var currentExpense = new Expense
+        {
+            Id = "exp-zero-x",
+            UserId = "test-user",
+            TripId = trip.Id,
+            Date = new DateOnly(2025, 1, 12),
+            Category = ExpenseCategory.Hotel,
+            Amount = 300m,
+            Description = "Atypical",
+        };
+        db.Expenses.Add(currentExpense);
+
+        db.Receipts.Add(new Receipt
+        {
+            Id = "r-zero-x",
+            UserId = "test-user",
+            LinkedEntityType = ReceiptLinkedEntityType.Expense,
+            LinkedEntityId = currentExpense.Id,
+            FileName = "current.pdf",
+            ContentType = "application/pdf",
+            BlobName = "blob4",
+            UploadedAt = DateTimeOffset.UtcNow,
+        });
+
+        await db.SaveChangesAsync();
+
+        var alerts = await service.AnalyzeTripAsync(trip.Id, new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+
+        Assert.DoesNotContain(alerts, a => a.Type == AlertType.AtypicalReceipt);
+    }
+
+    [Fact]
     public async Task AnalyzeTripAsync_DoesNotCreateDuplicateAlerts()
     {
         var (service, db) = CreateService();

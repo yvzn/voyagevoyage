@@ -30,6 +30,11 @@ public class AnomalyDetectionService(
             .Where(c => c.UserId == userId)
             .FirstOrDefaultAsync(cancellationToken) ?? new TravelConstraints();
 
+        if (constraints.A1MaxPastTripAgeDays <= 0 || constraints.A2MinCompletionDelayDays <= 0)
+        {
+            return [];
+        }
+
         var cutoffA1 = today.AddDays(-constraints.A1MaxPastTripAgeDays);
         var cutoffA2 = today.AddDays(-constraints.A2MinCompletionDelayDays);
 
@@ -101,6 +106,11 @@ public class AnomalyDetectionService(
 
     private async Task<List<AnomalyAlert>> DetectForTripAsync(Trip trip, TravelConstraints constraints, DateTime evaluationDate, string userId, CancellationToken cancellationToken)
     {
+        if (constraints.A1MaxPastTripAgeDays <= 0 || constraints.A2MinCompletionDelayDays <= 0)
+        {
+            return [];
+        }
+
         var alerts = new List<AnomalyAlert>();
 
         if (trip.Status == TripStatus.Planned && IsPastTrip(trip, evaluationDate))
@@ -154,6 +164,9 @@ public class AnomalyDetectionService(
                 continue;
 
             var threshold = constraints.XAtypicalExpenseThresholdPercent;
+            if (threshold <= 0m)
+                continue;
+
             var average = await GetCategoryAverageAsync(userId, expense.Category, evaluationDate, cancellationToken);
             var categoryReceiptCount = await GetCategoryReceiptCount(userId, expense.Category, evaluationDate, cancellationToken);
             if (average > 0m && expense.Amount > average * (1m + threshold / 100m) && categoryReceiptCount >= DefaultMinimumReceiptsForCategory)
