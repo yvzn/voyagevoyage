@@ -33,11 +33,15 @@ public class DetectTripAnomaliesFunction(
             .Distinct()
             .ToListAsync(cancellationToken);
 
-        foreach (var userId in userIds)
-        {
-            var detection = new AnomalyDetectionService(db, new BatchCurrentUserService(userId));
-            await detection.AnalyzePastTripsForUserAsync(userId, cancellationToken: cancellationToken);
-        }
+        var analysisTasks = userIds
+            .Select(userId =>
+            {
+                var detection = new AnomalyDetectionService(db, new BatchCurrentUserService(userId));
+                return detection.AnalyzePastTripsForUserAsync(userId, cancellationToken: cancellationToken);
+            })
+            .ToList();
+
+        await Task.WhenAll(analysisTasks);
 
         logger.LogInformation("DetectTripAnomalies completed for {UserCount} users.", userIds.Count);
     }

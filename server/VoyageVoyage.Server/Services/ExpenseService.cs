@@ -12,7 +12,7 @@ namespace VoyageVoyage.Server.Services;
 public class ExpenseService(
     ApplicationDbContext db,
     ICurrentUserService currentUserService,
-    IAnomalyDetectionService? anomalyDetectionService = null) : IExpenseService
+    IAnomalyDetectionService anomalyDetectionService) : IExpenseService
 {
     private string GetCurrentUserId()
     {

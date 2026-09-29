@@ -16,7 +16,7 @@ public class AzureBlobReceiptService(
     ApplicationDbContext db,
     BlobServiceClient blobServiceClient,
     ICurrentUserService currentUserService,
-    IAnomalyDetectionService? anomalyDetectionService = null) : IReceiptService
+    IAnomalyDetectionService anomalyDetectionService) : IReceiptService
 {
     private const string ContainerName = "receipts";
 
