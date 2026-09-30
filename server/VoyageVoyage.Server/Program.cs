@@ -56,6 +56,9 @@ builder.Services.AddScoped<IFiscalRuleService, FiscalRuleService>();
 builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();
 builder.Services.AddScoped<ISchoolHolidayService, SchoolHolidayService>();
 builder.Services.AddScoped<IPersonalLeaveService, PersonalLeaveService>();
+builder.Services.AddScoped<IAnomalyDetectionService, AnomalyDetectionService>();
+builder.Services.AddSingleton<ITripAnalysisQueue, TripAnalysisQueue>();
+builder.Services.AddHostedService<TripAnalysisBackgroundService>();
 builder.Services.AddHostedService<DbInitializerHostedService>();
 
 // Azure Blob Storage for receipt file uploads

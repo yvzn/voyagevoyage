@@ -230,6 +230,7 @@ Use when the number of items is expected to be similar on each load. Show 3 skel
     }
   </ul>
 }
+```
 
 ### 9.2 Blocking loading (forms)
 

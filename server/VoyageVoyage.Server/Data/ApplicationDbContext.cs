@@ -15,6 +15,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<PersonalLeave> PersonalLeaves { get; set; }
     public DbSet<Receipt> Receipts { get; set; }
     public DbSet<BookingConfirmation> BookingConfirmations { get; set; }
+    public DbSet<AnomalyAlert> AnomalyAlerts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -79,6 +80,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasKey(c => c.Id);
             entity.HasIndex(c => c.UserId);
             entity.HasIndex(c => c.TripId);
+        });
+
+        modelBuilder.Entity<AnomalyAlert>(entity =>
+        {
+            entity.HasKey(a => a.Id);
+            entity.HasIndex(a => a.UserId);
+            entity.HasIndex(a => a.TripId);
+            entity.HasIndex(a => new { a.UserId, a.Type, a.TripId, a.ExpenseId })
+                .IsUnique();
         });
     }
 }

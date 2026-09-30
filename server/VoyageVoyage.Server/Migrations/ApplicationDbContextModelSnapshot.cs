@@ -23,6 +23,56 @@ namespace VoyageVoyage.Server.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("VoyageVoyage.Server.Models.AnomalyAlert", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ExpenseId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ReceiptId")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<DateOnly>("TripEndDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("TripId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly>("TripStartDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TripId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "Type", "TripId", "ExpenseId")
+                        .IsUnique();
+
+                    b.ToTable("AnomalyAlerts");
+                });
+
             modelBuilder.Entity("VoyageVoyage.Server.Models.BookingConfirmation", b =>
                 {
                     b.Property<string>("Id")

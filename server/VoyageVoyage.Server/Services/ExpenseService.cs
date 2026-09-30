@@ -9,7 +9,10 @@ namespace VoyageVoyage.Server.Services;
 /// PostgreSQL implementation of <see cref="IExpenseService"/>, backed by EF Core.
 /// All operations are scoped to the authenticated user.
 /// </summary>
-public class ExpenseService(ApplicationDbContext db, ICurrentUserService currentUserService) : IExpenseService
+public class ExpenseService(
+    ApplicationDbContext db,
+    ICurrentUserService currentUserService,
+    ITripAnalysisQueue tripAnalysisQueue) : IExpenseService
 {
     private string GetCurrentUserId()
     {
@@ -66,6 +69,7 @@ public class ExpenseService(ApplicationDbContext db, ICurrentUserService current
         };
         db.Expenses.Add(expense);
         await db.SaveChangesAsync();
+        tripAnalysisQueue.Enqueue(userId, tripId);
         return expense;
     }
 
@@ -81,6 +85,7 @@ public class ExpenseService(ApplicationDbContext db, ICurrentUserService current
 
         db.Expenses.Remove(expense);
         await db.SaveChangesAsync();
+        tripAnalysisQueue.Enqueue(userId, expense.TripId);
         return true;
     }
 
@@ -99,6 +104,7 @@ public class ExpenseService(ApplicationDbContext db, ICurrentUserService current
         expense.Amount = request.Amount;
         expense.Description = request.Description;
         await db.SaveChangesAsync();
+        tripAnalysisQueue.Enqueue(userId, expense.TripId);
         return expense;
     }
 
@@ -114,6 +120,7 @@ public class ExpenseService(ApplicationDbContext db, ICurrentUserService current
 
         db.Expenses.Remove(expense);
         await db.SaveChangesAsync();
+        tripAnalysisQueue.Enqueue(userId, expense.TripId);
         return true;
     }
 }
