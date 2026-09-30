@@ -86,7 +86,6 @@ func start
 
 ## PR safety checklist (before opening/updating a PR)
 
-1. Scope changes to the relevant subproject (`front`, `server`, or `batch`) and avoid unrelated refactors.
 2. Build **all three subprojects** with the commands above, even if you only touched one — cross-cutting model changes can break other projects:
    - `cd front && npm ci && npm run build`
    - `cd server/VoyageVoyage.Server && dotnet build -c Release`
@@ -116,6 +115,5 @@ func start
 
 ## When uncertain
 
-- Prefer small, reviewable PRs.
 - Keep architectural direction from `docs/TECH_STACK.md`.
 - Ask for clarification rather than guessing fiscal/business rules.
