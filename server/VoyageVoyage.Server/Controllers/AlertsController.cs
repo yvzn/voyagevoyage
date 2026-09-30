@@ -17,13 +17,6 @@ public class AlertsController(IAnomalyDetectionService anomalyDetectionService) 
         return Ok(alerts);
     }
 
-    [HttpPost("analyze")]
-    public async Task<ActionResult<IReadOnlyList<AnomalyAlert>>> AnalyzePastTrips()
-    {
-        var alerts = await anomalyDetectionService.AnalyzePastTripsAsync();
-        return Ok(alerts);
-    }
-
     [HttpPatch("{id}")]
     public async Task<ActionResult<AnomalyAlert>> UpdateStatus(string id, [FromBody] UpdateAlertStatusRequest request)
     {

@@ -23,8 +23,7 @@ public class ExpenseService(
 
     private async Task TriggerTripAnalysisAsync(string tripId)
     {
-        if (anomalyDetectionService is not null)
-            await anomalyDetectionService.AnalyzeTripAsync(tripId);
+        await anomalyDetectionService.AnalyzeTripAsync(tripId);
     }
 
     public async Task<IReadOnlyList<Expense>> GetAllByTripAsync(string tripId)

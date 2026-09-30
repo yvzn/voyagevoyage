@@ -52,8 +52,7 @@ public class AzureBlobReceiptService(
             return null;
 
         var receipt = await UploadAsync(userId, ReceiptLinkedEntityType.Expense, expenseId, file);
-        if (anomalyDetectionService is not null)
-            await anomalyDetectionService.AnalyzeTripAsync(expense.TripId);
+        await anomalyDetectionService.AnalyzeTripAsync(expense.TripId);
         return receipt;
     }
 
@@ -100,14 +99,11 @@ public class AzureBlobReceiptService(
         db.Receipts.Remove(receipt);
         await db.SaveChangesAsync();
 
-        if (anomalyDetectionService is not null)
-        {
-            var expense = await db.Expenses
-                .Where(e => e.Id == receipt.LinkedEntityId && e.UserId == userId)
-                .FirstOrDefaultAsync();
-            if (expense is not null)
-                await anomalyDetectionService.AnalyzeTripAsync(expense.TripId);
-        }
+        var expense = await db.Expenses
+            .Where(e => e.Id == receipt.LinkedEntityId && e.UserId == userId)
+            .FirstOrDefaultAsync();
+        if (expense is not null)
+            await anomalyDetectionService.AnalyzeTripAsync(expense.TripId);
 
         return true;
     }
