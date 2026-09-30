@@ -4,9 +4,8 @@ import { NgClass } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Trip } from '../trip/trip.model';
 import { Expense } from '../expense/expense.model';
-import { CalendarDay, CalendarWeek } from './calendar.utils';
+import { CalendarDay, CalendarWeek, getTripsPerDay } from './calendar.utils';
 import { getTripStatusClass, getTripStatusDotClass, getTripStatusTranslationKey } from '../trip/trip-status.utils';
-import { MILLISECONDS_PER_DAY, parseISODateUTC } from '../planning-dashboard/planning-dashboard.utils';
 import { DayConstraints } from './calendar-constraints.utils';
 
 /**
@@ -78,22 +77,7 @@ export class CalendarGridComponent {
 
   /** Map from day key (YYYY-MM-DD) to trips occurring on that day. */
   private readonly tripsPerDay = computed(() => {
-    const map = new Map<string, Trip[]>();
-    for (const trip of this.trips()) {
-      const startTs = parseISODateUTC(trip.startDate);
-      const endTs = parseISODateUTC(trip.endDate);
-      for (let ts = startTs; ts <= endTs; ts += MILLISECONDS_PER_DAY) {
-        const d = new Date(ts);
-        const key = this.dayKey(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-        const existing = map.get(key);
-        if (existing) {
-          existing.push(trip);
-        } else {
-          map.set(key, [trip]);
-        }
-      }
-    }
-    return map;
+    return getTripsPerDay(this.trips());
   });
 
   protected getTripsForDay(day: CalendarDay): Trip[] {

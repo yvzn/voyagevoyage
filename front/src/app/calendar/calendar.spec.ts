@@ -129,6 +129,20 @@ describe('CalendarComponent', () => {
     expect(table).toBeTruthy();
   });
 
+  it('should switch between grid and agenda views', async () => {
+    const fixture = TestBed.createComponent(CalendarComponent);
+    const component = fixture.componentInstance;
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component['viewMode']()).toBe('grid');
+    component.toggleViewMode();
+    fixture.detectChanges();
+    expect(component['viewMode']()).toBe('agenda');
+    expect(fixture.nativeElement.querySelector('app-calendar-agenda')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('app-calendar-grid')).toBeNull();
+  });
+
   it('should display day of week headers', async () => {
     const fixture = TestBed.createComponent(CalendarComponent);
     fixture.detectChanges();
@@ -505,4 +519,3 @@ describe('CalendarComponent — trip form', () => {
     expect(navigateSpy).toHaveBeenCalledWith(['/trip', trip.id]);
   });
 });
-

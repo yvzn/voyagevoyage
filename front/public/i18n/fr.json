@@ -25,6 +25,12 @@
   "tripEventsForDay": "Déplacements du {{date}} {{month}} {{year}}",
   "tripStatusLegendLabel": "Légende des statuts de déplacement",
   "calendar": {
+    "agendaButton": "Agenda",
+    "gridButton": "Grille",
+    "switchToAgenda": "Afficher le calendrier en agenda",
+    "switchToGrid": "Afficher le calendrier en grille",
+    "agendaLabel": "Agenda du calendrier",
+    "addTrip": "Ajouter un déplacement",
     "constraintsLabel": "Contraintes",
     "constraintPublicHolidayAriaLabel": "Jour férié : {{name}} — aller aux paramètres de contraintes",
     "constraintSchoolHolidayAriaLabel": "Vacances scolaires : {{name}} — aller aux paramètres de contraintes",
