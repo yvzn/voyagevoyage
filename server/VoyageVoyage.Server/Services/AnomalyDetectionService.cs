@@ -48,7 +48,7 @@ public class AnomalyDetectionService(
         var results = new List<AnomalyAlert>();
         foreach (var trip in candidateTrips)
         {
-            results.AddRange(await DetectForTripAsync(trip, constraints, today, userId, cancellationToken));
+            results.AddRange(await ReconcileTripAsync(trip, constraints, today, userId, cancellationToken));
         }
 
         return results;
@@ -73,6 +73,46 @@ public class AnomalyDetectionService(
             .FirstOrDefaultAsync(cancellationToken) ?? new TravelConstraints();
 
         return await DetectForTripAsync(trip, constraints, (evaluationDate ?? DateTime.UtcNow).Date, userId, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<AnomalyAlert>> ReconcileTripAsync(string userId, string tripId, DateTime? evaluationDate = null, CancellationToken cancellationToken = default)
+    {
+        var trip = await db.Trips
+            .Where(t => t.UserId == userId && t.Id == tripId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (trip is null)
+            return [];
+
+        var constraints = await db.TravelConstraints
+            .Where(c => c.UserId == userId)
+            .FirstOrDefaultAsync(cancellationToken) ?? new TravelConstraints();
+
+        return await ReconcileTripAsync(trip, constraints, (evaluationDate ?? DateTime.UtcNow).Date, userId, cancellationToken);
+    }
+
+    private async Task<IReadOnlyList<AnomalyAlert>> ReconcileTripAsync(
+        Trip trip,
+        TravelConstraints constraints,
+        DateTime evaluationDate,
+        string userId,
+        CancellationToken cancellationToken)
+    {
+        var detectedAlerts = await DetectForTripAsync(trip, constraints, evaluationDate, userId, cancellationToken);
+        var detectedAlertIds = detectedAlerts.Select(alert => alert.Id).ToHashSet(StringComparer.Ordinal);
+
+        var newAlerts = await db.AnomalyAlerts
+            .Where(alert => alert.UserId == userId && alert.TripId == trip.Id && alert.Status == AlertStatus.New)
+            .ToListAsync(cancellationToken);
+        var staleAlerts = newAlerts.Where(alert => !detectedAlertIds.Contains(alert.Id)).ToList();
+
+        if (staleAlerts.Count > 0)
+        {
+            db.AnomalyAlerts.RemoveRange(staleAlerts);
+            await db.SaveChangesAsync(cancellationToken);
+        }
+
+        return detectedAlerts;
     }
 
     public async Task<IReadOnlyList<AnomalyAlert>> GetAlertsAsync(AlertStatus? status = null, CancellationToken cancellationToken = default)

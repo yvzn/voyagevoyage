@@ -16,7 +16,7 @@ public class AzureBlobReceiptService(
     ApplicationDbContext db,
     BlobServiceClient blobServiceClient,
     ICurrentUserService currentUserService,
-    IAnomalyDetectionService anomalyDetectionService) : IReceiptService
+    ITripAnalysisQueue tripAnalysisQueue) : IReceiptService
 {
     private const string ContainerName = "receipts";
 
@@ -52,7 +52,7 @@ public class AzureBlobReceiptService(
             return null;
 
         var receipt = await UploadAsync(userId, ReceiptLinkedEntityType.Expense, expenseId, file);
-        await anomalyDetectionService.AnalyzeTripAsync(expense.TripId);
+        tripAnalysisQueue.Enqueue(userId, expense.TripId);
         return receipt;
     }
 
@@ -91,6 +91,11 @@ public class AzureBlobReceiptService(
         if (receipt is null)
             return false;
 
+        var tripId = await db.Expenses
+            .Where(e => e.Id == receipt.LinkedEntityId && e.UserId == userId)
+            .Select(e => e.TripId)
+            .FirstOrDefaultAsync();
+
         // Delete binary from blob storage first, then remove metadata from Cosmos DB.
         var container = GetContainerClient();
         var blob = container.GetBlobClient(receipt.BlobName);
@@ -99,11 +104,8 @@ public class AzureBlobReceiptService(
         db.Receipts.Remove(receipt);
         await db.SaveChangesAsync();
 
-        var expense = await db.Expenses
-            .Where(e => e.Id == receipt.LinkedEntityId && e.UserId == userId)
-            .FirstOrDefaultAsync();
-        if (expense is not null)
-            await anomalyDetectionService.AnalyzeTripAsync(expense.TripId);
+        if (tripId is not null)
+            tripAnalysisQueue.Enqueue(userId, tripId);
 
         return true;
     }

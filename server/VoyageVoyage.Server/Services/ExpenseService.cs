@@ -12,18 +12,13 @@ namespace VoyageVoyage.Server.Services;
 public class ExpenseService(
     ApplicationDbContext db,
     ICurrentUserService currentUserService,
-    IAnomalyDetectionService anomalyDetectionService) : IExpenseService
+    ITripAnalysisQueue tripAnalysisQueue) : IExpenseService
 {
     private string GetCurrentUserId()
     {
         var user = currentUserService.GetCurrentUser()
             ?? throw new InvalidOperationException("No authenticated user is available.");
         return user.Id;
-    }
-
-    private async Task TriggerTripAnalysisAsync(string tripId)
-    {
-        await anomalyDetectionService.AnalyzeTripAsync(tripId);
     }
 
     public async Task<IReadOnlyList<Expense>> GetAllByTripAsync(string tripId)
@@ -74,7 +69,7 @@ public class ExpenseService(
         };
         db.Expenses.Add(expense);
         await db.SaveChangesAsync();
-        await TriggerTripAnalysisAsync(tripId);
+        tripAnalysisQueue.Enqueue(userId, tripId);
         return expense;
     }
 
@@ -90,6 +85,7 @@ public class ExpenseService(
 
         db.Expenses.Remove(expense);
         await db.SaveChangesAsync();
+        tripAnalysisQueue.Enqueue(userId, expense.TripId);
         return true;
     }
 
@@ -108,7 +104,7 @@ public class ExpenseService(
         expense.Amount = request.Amount;
         expense.Description = request.Description;
         await db.SaveChangesAsync();
-        await TriggerTripAnalysisAsync(expense.TripId);
+        tripAnalysisQueue.Enqueue(userId, expense.TripId);
         return expense;
     }
 
@@ -124,6 +120,7 @@ public class ExpenseService(
 
         db.Expenses.Remove(expense);
         await db.SaveChangesAsync();
+        tripAnalysisQueue.Enqueue(userId, expense.TripId);
         return true;
     }
 }

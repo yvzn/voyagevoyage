@@ -227,6 +227,46 @@ public class AnomalyDetectionServiceTests
     }
 
     [Fact]
+    public async Task ReconcileTripAsync_RemovesStaleNewAlertsAndPreservesReviewedAlerts()
+    {
+        var (service, db) = CreateService();
+        var trip = new Trip
+        {
+            Id = "trip-reconcile",
+            UserId = "test-user",
+            StartDate = new DateOnly(2025, 1, 10),
+            EndDate = new DateOnly(2025, 1, 15),
+            Destination = "Lyon",
+            Status = TripStatus.Planned,
+        };
+        db.Trips.Add(trip);
+        await db.SaveChangesAsync();
+
+        var initialAlerts = await service.AnalyzeTripAsync(trip.Id, new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        initialAlerts[0].Status = AlertStatus.Handled;
+        initialAlerts[1].Status = AlertStatus.Ignored;
+        await db.SaveChangesAsync();
+        db.TravelConstraints.Add(new TravelConstraints
+        {
+            UserId = "test-user",
+            A1MaxPastTripAgeDays = 0,
+            A2MinCompletionDelayDays = 0,
+        });
+        await db.SaveChangesAsync();
+
+        var reconciled = await service.ReconcileTripAsync(
+            "test-user",
+            trip.Id,
+            new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+
+        var persistedAlerts = await db.AnomalyAlerts.Where(alert => alert.TripId == trip.Id).ToListAsync();
+        Assert.Empty(reconciled);
+        Assert.Equal(2, persistedAlerts.Count);
+        Assert.Contains(persistedAlerts, alert => alert.Status == AlertStatus.Handled);
+        Assert.Contains(persistedAlerts, alert => alert.Status == AlertStatus.Ignored);
+    }
+
+    [Fact]
     public async Task UpdateAlertStatusAsync_UpdatesStatus()
     {
         var (service, db) = CreateService();
