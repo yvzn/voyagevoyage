@@ -29,14 +29,20 @@ export class VoucherListComponent {
   });
 
   protected readonly activeVoucherCount = computed(() => this.voucherService.getActiveVouchers().length);
-  protected readonly usedVouchers = computed(() => this.vouchers().filter((voucher) => voucher.status === 'used'));
+  protected readonly usedVouchers = computed(() => {
+    const category = this.selectedCategory();
+    return this.vouchers().filter((voucher) => voucher.status === 'used' && (category === 'all' || voucher.category === category));
+  });
 
-  protected readonly categoryGroups = computed(() =>
-    this.categories.map((category) => ({
-      category,
-      vouchers: this.vouchers().filter((voucher) => voucher.category === category && voucher.status !== 'used'),
-    })),
-  );
+  protected readonly categoryGroups = computed(() => {
+    const activeCategory = this.selectedCategory();
+    return this.categories
+      .filter((category) => activeCategory === 'all' || category === activeCategory)
+      .map((category) => ({
+        category,
+        vouchers: this.vouchers().filter((voucher) => voucher.category === category && voucher.status !== 'used'),
+      }));
+  });
 
   protected createVoucher(): void {
     this.selectedVoucher.set(null);
