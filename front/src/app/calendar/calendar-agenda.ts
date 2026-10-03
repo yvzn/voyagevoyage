@@ -52,7 +52,7 @@ export class CalendarAgendaComponent {
   }
 
   protected getConstraintsForDay(day: CalendarDay): DayConstraints {
-    return this.constraintsPerDay().get(this.dayKey(day)) ?? { publicHolidays: [], schoolHolidays: [], personalLeaves: [] };
+    return this.constraintsPerDay().get(this.dayKey(day)) ?? { publicHolidays: [], schoolHolidays: [], personalLeaves: [], noTravelDays: [] };
   }
 
   protected isRestrictedWeekday(day: CalendarDay): boolean {
@@ -62,7 +62,7 @@ export class CalendarAgendaComponent {
 
   protected getDayCellClass(day: CalendarDay): string {
     const constraints = this.getConstraintsForDay(day);
-    const blocked = this.isRestrictedWeekday(day) || constraints.publicHolidays.length > 0 || constraints.personalLeaves.length > 0;
+    const blocked = this.isRestrictedWeekday(day) || constraints.publicHolidays.length > 0 || constraints.personalLeaves.length > 0 || constraints.noTravelDays.length > 0;
     return blocked
       ? 'border-gray-200 dark:border-gray-700'
       : 'border-blue-100 dark:border-blue-700/50';

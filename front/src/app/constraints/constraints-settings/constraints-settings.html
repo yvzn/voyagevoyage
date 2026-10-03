@@ -328,6 +328,27 @@
       </div>
     </div>
 
+    <div class="mb-6 flex items-start gap-3">
+      <input
+        id="consider-no-travel-days"
+        type="checkbox"
+        formControlName="considerNoTravelDays"
+        class="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700"
+      />
+      <div>
+        <label for="consider-no-travel-days" class="block text-sm font-medium text-gray-900 dark:text-white">
+          {{ 'constraints.considerNoTravelDays' | translate }}
+        </label>
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          {{ 'constraints.considerNoTravelDaysHint' | translate }}
+        </p>
+        <a routerLink="/no-travel-days"
+          class="mt-2 inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600">
+          {{ 'constraints.manageNoTravelDays' | translate }}
+        </a>
+      </div>
+    </div>
+
     <!-- Strict vs Flexible -->
     <fieldset class="mb-6 rounded-lg border border-gray-200 p-4 dark:border-gray-600">
       <legend class="px-2 text-sm font-semibold text-gray-900 dark:text-white">

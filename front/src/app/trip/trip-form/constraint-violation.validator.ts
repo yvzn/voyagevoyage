@@ -1,6 +1,8 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { TravelConstraints, PublicHoliday } from '../../constraints/constraints.model';
 import { PersonalLeave } from '../../personal-leave/personal-leave.model';
+import { NoTravelDay } from '../../no-travel-days/no-travel-day.model';
+import { isNoTravelDate } from '../../no-travel-days/no-travel-day.utils';
 import { Trip, TripStatus } from '../trip.model';
 
 /**
@@ -11,6 +13,7 @@ export type ConstraintViolationReason =
   | 'allowedDaysOfWeek'
   | 'publicHoliday'
   | 'personalLeave'
+  | 'noTravelDay'
   | 'maxDaysPerMonth';
 
 /** Detail carried by the constraintWarning / constraintError validation error. */
@@ -44,6 +47,7 @@ export function constraintViolationValidator(
   getPersonalLeaves: () => PersonalLeave[] = () => [],
   getExistingTrips: () => Trip[] = () => [],
   getCurrentTripId: () => string | null = () => null,
+  getNoTravelDays: () => NoTravelDay[] = () => [],
 ): ValidatorFn {
   return (group: AbstractControl): ValidationErrors | null => {
     const constraints = getConstraints();
@@ -97,6 +101,19 @@ export function constraintViolationValidator(
             reasons.push('personalLeave');
             break outer;
           }
+        }
+        current.setDate(current.getDate() + 1);
+      }
+    }
+
+    // 3. Check no-travel days
+    if (constraints.considerNoTravelDays) {
+      const noTravelDays = getNoTravelDays();
+      const current = new Date(startDate);
+      while (current <= endDate) {
+        if (isNoTravelDate(formatDate(current), noTravelDays)) {
+          reasons.push('noTravelDay');
+          break;
         }
         current.setDate(current.getDate() + 1);
       }

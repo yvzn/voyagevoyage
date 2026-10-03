@@ -76,11 +76,12 @@ Build the core data layer and a usable trip calendar.
   - public holidays (API import or manual entry)
   - school holidays by zone (import or manual entry)
   - personal leave days
+  - no-travel days for important meetings, special events, or other commitments
   - travel constraints (allowed weekdays, min/max duration)
 - Trip calendar:
   - monthly calendar view
   - create, edit, delete trip entries
-  - visual overlays for public holidays, school holidays, and personal leave
+  - visual overlays for public holidays, school holidays, personal leave, and no-travel days
   - trip statuses: Planned, Confirmed, Cancelled
   - ICS export for external calendar sync
 
@@ -96,7 +97,7 @@ Help users identify valid trip slots quickly.
 ### Features
 - Date suggestion engine:
   - suggest slots based on configured constraints
-  - exclude public holidays, school holidays, personal leave
+  - exclude public holidays, school holidays, personal leave, and configured no-travel days
   - conflict detection for overlapping trips
   - configurable planning horizon (for example 2 to 3 months)
 - Planning dashboard:
@@ -151,7 +152,7 @@ Automate deductible amount calculations and produce reporting outputs.
   - daily remote work allowance (configurable)
 - Automatic calculations:
   - meal deduction logic using allowance and meal voucher contribution
-  - automatic remote work day computation (working days excluding trip days and leave)
+  - automatic remote work day computation (working days excluding trip days, personal leave, and public holidays; no-travel days remain normal days)
   - net deductible amount per expense
 - Summary and exports:
   - monthly summary by category with gross/net totals

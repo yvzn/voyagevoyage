@@ -8,6 +8,8 @@ import { PersonalLeaveActions } from '../personal-leave/store/personal-leave.act
 import { selectAllTrips, selectTripsLoadStatus } from '../trip/store/trip.selectors';
 import { selectConstraints, selectPublicHolidays, selectSettingsLoadStatus } from '../constraints/store/settings.selectors';
 import { selectAllPersonalLeaves } from '../personal-leave/store/personal-leave.selectors';
+import { NoTravelDayActions } from '../no-travel-days/store/no-travel-day.actions';
+import { selectAllNoTravelDays } from '../no-travel-days/store/no-travel-day.reducer';
 import { getTripStatusClass, getTripStatusTranslationKey } from '../trip/trip-status.utils';
 import { LocaleService } from '../locale.service';
 import { TripFormComponent } from '../trip/trip-form/trip-form';
@@ -42,6 +44,7 @@ export class PlanningDashboardComponent {
     this.store.dispatch(SettingsActions.loadSettings());
     this.store.dispatch(SettingsActions.loadPublicHolidays());
     this.store.dispatch(PersonalLeaveActions.loadPersonalLeaves());
+    this.store.dispatch(NoTravelDayActions.loadNoTravelDays());
   }
 
   private readonly trips = this.store.selectSignal(selectAllTrips);
@@ -50,6 +53,7 @@ export class PlanningDashboardComponent {
   private readonly constraints = this.store.selectSignal(selectConstraints);
   private readonly publicHolidays = this.store.selectSignal(selectPublicHolidays);
   private readonly personalLeaves = this.store.selectSignal(selectAllPersonalLeaves);
+  private readonly noTravelDays = this.store.selectSignal(selectAllNoTravelDays);
 
   protected readonly isLoading = computed(
     () => this.tripsLoadStatus() === 'loading' || this.settingsLoadStatus() === 'loading',
@@ -91,6 +95,7 @@ export class PlanningDashboardComponent {
       this.personalLeaves(),
       4,
       this.trips(),
+      this.noTravelDays(),
     );
   });
 

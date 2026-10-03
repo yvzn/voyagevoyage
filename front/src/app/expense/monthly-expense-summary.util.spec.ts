@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { Expense, ExpenseCategory } from './expense.model';
 import { FiscalRule } from '../fiscal-rule/fiscal-rule.model';
 import { LeaveType } from '../personal-leave/personal-leave.model';
+import { NoTravelDay } from '../no-travel-days/no-travel-day.model';
+import { isNoTravelDate } from '../no-travel-days/no-travel-day.utils';
 import { Trip, TripStatus } from '../trip/trip.model';
 import {
   ANNUAL_SUMMARY_CATEGORIES,
@@ -137,6 +139,20 @@ describe('buildMonthlyExpenseSummary', () => {
     expect(summary.days[1].cells[ExpenseCategory.RemoteWork]).toBeUndefined();
     expect(summary.days[5].cells[ExpenseCategory.RemoteWork]).toBeUndefined();
     expect(summary.days[2].cells[ExpenseCategory.RemoteWork]?.net).toBe(12);
+  });
+
+  it('keeps remote-work allowance on no-travel days', () => {
+    const noTravelDay: NoTravelDay = {
+      id: 'no-travel-1',
+      startDate: '2026-02-02',
+      endDate: '2026-02-02',
+      isRecurring: true,
+      label: 'Important meeting',
+    };
+    expect(isNoTravelDate('2026-02-02', [noTravelDay])).toBe(true);
+
+    const summary = buildMonthlyExpenseSummary([], 2026, 1, [rule]);
+    expect(summary.days[1].cells[ExpenseCategory.RemoteWork]?.net).toBe(12);
   });
 
   it('sums the grand total across all categories', () => {

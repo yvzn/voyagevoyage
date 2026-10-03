@@ -137,6 +137,11 @@
                 <span>{{ (isError ? 'tripForm.constraintPersonalLeaveError' : 'tripForm.constraintPersonalLeaveWarning') | translate }}</span>
               </li>
             }
+            @if (violationReasons().includes('noTravelDay')) {
+              <li>
+                <span>{{ (isError ? 'tripForm.constraintNoTravelDayError' : 'tripForm.constraintNoTravelDayWarning') | translate }}</span>
+              </li>
+            }
             @if (violationReasons().includes('maxDaysPerMonth')) {
               <li class="flex items-start gap-2">
                 <!-- Chart / limit icon -->
@@ -188,4 +193,3 @@
     </form>
   </div>
 </dialog>
-

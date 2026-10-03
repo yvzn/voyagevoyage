@@ -26,6 +26,8 @@ import { constraintViolationValidator, ConstraintViolationReason } from './const
 import { getTripStatusTranslationKey } from '../trip-status.utils';
 import { PersonalLeaveActions } from '../../personal-leave/store/personal-leave.actions';
 import { selectAllPersonalLeaves } from '../../personal-leave/store/personal-leave.selectors';
+import { NoTravelDayActions } from '../../no-travel-days/store/no-travel-day.actions';
+import { selectAllNoTravelDays } from '../../no-travel-days/store/no-travel-day.reducer';
 
 function endDateAfterStartDate(group: AbstractControl): ValidationErrors | null {
   const start = group.get('startDate')?.value as string;
@@ -63,6 +65,7 @@ export class TripFormComponent implements AfterViewInit {
   private readonly constraints = this.store.selectSignal(selectConstraints);
   private readonly publicHolidays = this.store.selectSignal(selectPublicHolidays);
   private readonly personalLeaves = this.store.selectSignal(selectAllPersonalLeaves);
+  private readonly noTravelDays = this.store.selectSignal(selectAllNoTravelDays);
   private readonly allTrips = this.store.selectSignal(selectAllTrips);
   private readonly createStatus = this.store.selectSignal(selectTripsCreateStatus);
   private readonly updateStatus = this.store.selectSignal(selectTripsUpdateStatus);
@@ -109,6 +112,7 @@ export class TripFormComponent implements AfterViewInit {
           () => this.personalLeaves(),
           () => this.allTrips(),
           () => this.trip()?.id ?? null,
+          () => this.noTravelDays(),
         ),
       ],
     },
@@ -118,6 +122,13 @@ export class TripFormComponent implements AfterViewInit {
     // Ensure public holidays and personal leaves are available for constraint checking
     this.store.dispatch(SettingsActions.loadPublicHolidays());
     this.store.dispatch(PersonalLeaveActions.loadPersonalLeaves());
+    this.store.dispatch(NoTravelDayActions.loadNoTravelDays());
+
+    effect(() => {
+      this.constraints();
+      this.noTravelDays();
+      this.form.updateValueAndValidity({ emitEvent: false });
+    });
 
     effect(() => {
       const t = this.trip();
