@@ -45,6 +45,7 @@ public class TravelConstraintsService(
         existing.MaxDaysPerMonth = request.MaxDaysPerMonth;
         existing.ConsiderPublicHolidays = request.ConsiderPublicHolidays;
         existing.ConsiderVacationDays = request.ConsiderVacationDays;
+        existing.ConsiderNoTravelDays = request.ConsiderNoTravelDays;
         existing.IsStrict = request.IsStrict;
         existing.PlanningHorizonDays = request.PlanningHorizonDays;
         existing.TrainBookingThresholdDays = request.TrainBookingThresholdDays;

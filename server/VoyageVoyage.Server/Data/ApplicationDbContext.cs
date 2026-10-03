@@ -13,6 +13,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<PublicHoliday> PublicHolidays { get; set; }
     public DbSet<SchoolHoliday> SchoolHolidays { get; set; }
     public DbSet<PersonalLeave> PersonalLeaves { get; set; }
+    public DbSet<NoTravelDay> NoTravelDays { get; set; }
     public DbSet<Receipt> Receipts { get; set; }
     public DbSet<BookingConfirmation> BookingConfirmations { get; set; }
     public DbSet<AnomalyAlert> AnomalyAlerts { get; set; }
@@ -67,6 +68,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         {
             entity.HasKey(l => l.Id);
             entity.HasIndex(l => l.UserId);
+        });
+
+        modelBuilder.Entity<NoTravelDay>(entity =>
+        {
+            entity.HasKey(day => day.Id);
+            entity.HasIndex(day => day.UserId);
         });
 
         modelBuilder.Entity<Receipt>(entity =>
