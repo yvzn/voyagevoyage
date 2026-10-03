@@ -239,8 +239,7 @@
     "hotelBookingSectionHeading": "Réservations d'hôtel à effectuer"
   },
   "voucher": {
-    "heading": "Mes bons",
-    "subheading": "Suivez et appliquez vos offres de voyage.",
+    "heading": "Mes bons et codes promotionnels",
     "addButton": "Ajouter un bon",
     "emptyState": "Aucun bon enregistré pour le moment.",
     "filter": { "all": "Tous" },

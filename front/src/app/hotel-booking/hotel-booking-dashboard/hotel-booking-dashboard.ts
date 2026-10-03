@@ -90,7 +90,13 @@ export class HotelBookingDashboardComponent {
     return max !== null ? all.slice(0, max) : all;
   });
 
-  protected readonly activeVoucherCount = computed(() => this.voucherService.getActiveVoucherCount(VoucherCategory.Hotel));
+  protected readonly activeVouchers = computed(() => this.voucherService.getActiveVouchers(VoucherCategory.Hotel));
+  protected readonly activeVoucherCount = computed(() => this.activeVouchers().length);
+  protected readonly expandedVoucherTripId = signal<string | null>(null);
+
+  protected toggleVoucherDetails(tripId: string): void {
+    this.expandedVoucherTripId.update((current) => (current === tripId ? null : tripId));
+  }
 
   /** Show "view all" link only when displaying a limited subset (dashboard card mode). */
   protected readonly showViewAllLink = computed(() => this.maxItems() !== null);

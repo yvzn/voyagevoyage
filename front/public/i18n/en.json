@@ -239,8 +239,7 @@
     "hotelBookingSectionHeading": "Hotel bookings to make"
   },
   "voucher": {
-    "heading": "My vouchers",
-    "subheading": "Track and apply your travel offers.",
+    "heading": "My vouchers and promotional codes",
     "addButton": "Add voucher",
     "emptyState": "No vouchers saved yet.",
     "filter": { "all": "All" },
@@ -253,7 +252,7 @@
     "deleteConfirmText": "This voucher will be permanently removed.",
     "cancelButton": "Cancel",
     "usedSection": "Used vouchers",
-    "badge": "bonus",
+    "badge": "voucher(s)",
     "status": { "active": "Active", "expired": "Expired", "used": "Used" },
     "category": { "train": "Train", "hotel": "Hotel" },
     "form": {

@@ -112,29 +112,43 @@
               }
             </span>
           </span>
-          <span class="ml-4 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-            <svg aria-hidden="true" class="h-3.5 w-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" stroke-linecap="round"
-              stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
-              <rect x="2" y="4" width="20" height="14" rx="3" />
-              <rect x="4.5" y="7" width="5" height="4" rx="1" />
-              <rect x="14.5" y="7" width="5" height="4" rx="1" />
-              <line x1="12" y1="7" x2="12" y2="11" />
-              <line x1="2" y1="15.5" x2="22" y2="15.5" />
-              <circle cx="6" cy="19" r="2" fill="currentColor" />
-              <circle cx="18" cy="19" r="2" fill="currentColor" />
-              <line x1="0" y1="21" x2="24" y2="21" />
-            </svg>
-            {{ 'trainBookingDashboard.toBook' | translate }}
+          <span class="ml-4 inline-flex items-center gap-2">
             @if (activeVoucherCount() > 0) {
-              <span class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+              <button type="button" (click)="$event.preventDefault(); $event.stopPropagation(); toggleVoucherDetails(trip.id)" [attr.aria-expanded]="expandedVoucherTripId() === trip.id" class="cursor-pointer inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-blue-900/40 dark:text-blue-300 dark:hover:bg-blue-900/60">
                 <svg aria-hidden="true" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M8 7h8a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z" />
                   <path d="M15 9.5h.01M9 14.5h6" />
                 </svg>
                 {{ activeVoucherCount() }} {{ 'voucher.badge' | translate }}
-              </span>
+              </button>
             }
+            <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+              <svg aria-hidden="true" class="h-3.5 w-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" stroke-linecap="round"
+                stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="4" width="20" height="14" rx="3" />
+                <rect x="4.5" y="7" width="5" height="4" rx="1" />
+                <rect x="14.5" y="7" width="5" height="4" rx="1" />
+                <line x1="12" y1="7" x2="12" y2="11" />
+                <line x1="2" y1="15.5" x2="22" y2="15.5" />
+                <circle cx="6" cy="19" r="2" fill="currentColor" />
+                <circle cx="18" cy="19" r="2" fill="currentColor" />
+                <line x1="0" y1="21" x2="24" y2="21" />
+              </svg>
+              {{ 'trainBookingDashboard.toBook' | translate }}
+            </span>
           </span>
+          @if (expandedVoucherTripId() === trip.id && activeVouchers().length > 0) {
+            <div class="mt-2 rounded-lg border border-blue-200 bg-blue-50 p-2 text-xs text-blue-800 dark:border-blue-700 dark:bg-blue-900/20 dark:text-blue-200">
+              @for (voucher of activeVouchers(); track voucher.id) {
+                <div class="flex flex-col gap-0.5 py-1">
+                  <span class="font-semibold">{{ voucher.code }}</span>
+                  @if (voucher.description) {
+                    <span>{{ voucher.description }}</span>
+                  }
+                </div>
+              }
+            </div>
+          }
         </a>
       </li>
     }
