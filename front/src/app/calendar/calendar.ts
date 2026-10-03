@@ -19,6 +19,7 @@ import { selectAllTrips, selectTripsLoadStatus, selectTripsError, selectCalendar
 import { selectConstraints } from '../constraints/store/settings.selectors';
 import { getTripStatusDotClass, getTripStatusTranslationKey } from '../trip/trip-status.utils';
 import { CalendarGridComponent } from './calendar-grid';
+import { CalendarAgendaComponent } from './calendar-agenda';
 import { PersonalLeaveActions } from '../personal-leave/store/personal-leave.actions';
 import { selectConstraintsPerDay } from './calendar.selectors';
 import { ExpenseActions } from '../expense/store/expense.actions';
@@ -27,7 +28,7 @@ import { selectAllExpenses } from '../expense/store/expense.selectors';
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [NgClass, TranslatePipe, TripFormComponent, CalendarGridComponent],
+  imports: [NgClass, TranslatePipe, TripFormComponent, CalendarGridComponent, CalendarAgendaComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './calendar.html',
 })
@@ -90,8 +91,20 @@ export class CalendarComponent {
   /** Pre-filled date for new trip creation (YYYY-MM-DD) */
   protected readonly formDefaultDate = signal<string | null>(null);
 
+  protected readonly viewMode = signal<'grid' | 'agenda'>(this.getDefaultViewMode());
+
   protected readonly getTripStatusDotClass = getTripStatusDotClass;
   protected readonly getTripStatusTranslationKey = getTripStatusTranslationKey;
+
+  private getDefaultViewMode(): 'grid' | 'agenda' {
+    return typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 767px)').matches
+      ? 'agenda'
+      : 'grid';
+  }
+
+  toggleViewMode(): void {
+    this.viewMode.update(mode => mode === 'grid' ? 'agenda' : 'grid');
+  }
 
   private formatDayKey(day: CalendarDay): string {
     return `${day.year}-${String(day.month + 1).padStart(2, '0')}-${String(day.date).padStart(2, '0')}`;

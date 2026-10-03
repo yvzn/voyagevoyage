@@ -1,6 +1,24 @@
-import { getCalendarWeeks, getDayOfWeekNames, getMonthNames } from './calendar.utils';
+import { getCalendarWeeks, getDayOfWeekNames, getMonthNames, getTripsPerDay } from './calendar.utils';
+import { TripStatus } from '../trip/trip.model';
 
 describe('calendar.utils', () => {
+  it('should map multi-day trips to every matching day', () => {
+    const trip = {
+      id: 'trip-1',
+      startDate: '2026-04-06',
+      endDate: '2026-04-08',
+      destination: 'Lyon',
+      status: TripStatus.Confirmed,
+    };
+
+    const tripsPerDay = getTripsPerDay([trip]);
+
+    expect(tripsPerDay.get('2026-04-06')).toEqual([trip]);
+    expect(tripsPerDay.get('2026-04-07')).toEqual([trip]);
+    expect(tripsPerDay.get('2026-04-08')).toEqual([trip]);
+    expect(tripsPerDay.has('2026-04-09')).toBe(false);
+  });
+
   describe('getCalendarWeeks', () => {
     it('should return weeks for a given month', () => {
       const weeks = getCalendarWeeks(2026, 0); // January 2026

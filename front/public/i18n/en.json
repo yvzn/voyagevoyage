@@ -25,6 +25,12 @@
   "tripEventsForDay": "Trip events for {{month}} {{date}}, {{year}}",
   "tripStatusLegendLabel": "Trip status legend",
   "calendar": {
+    "agendaButton": "Agenda",
+    "gridButton": "Grid",
+    "switchToAgenda": "Switch to agenda view",
+    "switchToGrid": "Switch to grid view",
+    "agendaLabel": "Calendar agenda",
+    "addTrip": "Add trip",
     "constraintsLabel": "Constraints",
     "constraintPublicHolidayAriaLabel": "Public holiday: {{name}} — go to constraints settings",
     "constraintSchoolHolidayAriaLabel": "School holiday: {{name}} — go to constraints settings",

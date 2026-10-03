@@ -97,6 +97,15 @@
 
         <button
           type="button"
+          (click)="toggleViewMode()"
+          class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+          [attr.aria-label]="(viewMode() === 'grid' ? 'calendar.switchToAgenda' : 'calendar.switchToGrid') | translate"
+        >
+          {{ (viewMode() === 'grid' ? 'calendar.agendaButton' : 'calendar.gridButton') | translate }}
+        </button>
+
+        <button
+          type="button"
           (click)="openCreateForm()"
           class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600"
         >
@@ -109,21 +118,37 @@
     </div>
   </nav>
 
-  <!-- Calendar grid -->
-  <div class="overflow-x-auto rounded-lg bg-white shadow-sm dark:bg-gray-800" role="grid" aria-labelledby="calendar-heading">
-    <app-calendar-grid
-      [weeks]="weeks()"
-      [trips]="trips()"
-      [expenses]="expenses()"
-      [constraintsPerDay]="constraintsPerDay()"
-      [allowedDaysOfWeek]="allowedDaysOfWeek()"
-      [dayNames]="dayOfWeekNames()"
-      [displayMonth]="displayMonth()"
-      [displayYear]="displayYear()"
-      (tripClicked)="navigateToTrip($event)"
-      (addTripClicked)="openCreateForm($event)"
-    />
-  </div>
+  @if (viewMode() === 'grid') {
+    <div class="overflow-x-auto rounded-lg bg-white shadow-sm dark:bg-gray-800" role="grid" aria-labelledby="calendar-heading">
+      <app-calendar-grid
+        [weeks]="weeks()"
+        [trips]="trips()"
+        [expenses]="expenses()"
+        [constraintsPerDay]="constraintsPerDay()"
+        [allowedDaysOfWeek]="allowedDaysOfWeek()"
+        [dayNames]="dayOfWeekNames()"
+        [displayMonth]="displayMonth()"
+        [displayYear]="displayYear()"
+        (tripClicked)="navigateToTrip($event)"
+        (addTripClicked)="openCreateForm($event)"
+      />
+    </div>
+  } @else {
+    <div class="rounded-lg bg-white shadow-sm dark:bg-gray-800" aria-labelledby="calendar-heading">
+      <app-calendar-agenda
+        [weeks]="weeks()"
+        [trips]="trips()"
+        [expenses]="expenses()"
+        [constraintsPerDay]="constraintsPerDay()"
+        [allowedDaysOfWeek]="allowedDaysOfWeek()"
+        [dayNames]="dayOfWeekNames()"
+        [displayMonth]="displayMonth()"
+        [displayYear]="displayYear()"
+        (tripClicked)="navigateToTrip($event)"
+        (addTripClicked)="openCreateForm($event)"
+      />
+    </div>
+  }
 
   <!-- Status legend -->
   <div class="mt-4 flex flex-wrap gap-4 rounded-lg bg-white px-4 py-3 shadow-sm dark:bg-gray-800" role="note" [attr.aria-label]="'tripStatusLegendLabel' | translate">
@@ -149,4 +174,3 @@
     (cancelled)="closeForm()"
   />
 }
-

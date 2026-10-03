@@ -1,0 +1,79 @@
+<ol class="divide-y divide-gray-200 dark:divide-gray-700" [attr.aria-label]="'calendar.agendaLabel' | translate">
+  @for (day of days(); track trackByDay($index, day)) {
+    <li class="border-l-4 px-4 py-3" [ngClass]="getDayCellClass(day)">
+      <div class="flex items-start gap-3">
+        <div class="w-16 shrink-0 text-center">
+          <div class="text-xs font-medium uppercase text-gray-500 dark:text-gray-400">{{ getDayName(day) }}</div>
+          <div
+            class="mx-auto mt-1 inline-flex h-9 w-9 items-center justify-center rounded-full text-lg font-semibold"
+            [class.bg-blue-600]="day.isToday"
+            [class.text-white]="day.isToday"
+            [class.text-gray-900]="!day.isToday"
+            [class.dark:text-white]="!day.isToday"
+          >{{ day.date }}</div>
+        </div>
+        <div class="min-w-0 flex-1">
+          @let constraints = getConstraintsForDay(day);
+          @if (constraints.publicHolidays.length > 0 || constraints.schoolHolidays.length > 0 || constraints.personalLeaves.length > 0 || isRestrictedWeekday(day)) {
+            <div class="mb-1 flex flex-wrap gap-1 text-xs text-gray-500 dark:text-gray-400">
+              @if (isRestrictedWeekday(day)) {
+                <a routerLink="/constraints" class="hover:underline">{{ 'calendar.constraintsLabel' | translate }}</a>
+              }
+              @if (constraints.publicHolidays.length > 0) {
+                <span>{{ constraints.publicHolidays[0].name }}</span>
+              }
+              @if (constraints.schoolHolidays.length > 0) {
+                <span>{{ constraints.schoolHolidays[0].name }}</span>
+              }
+              @for (leave of constraints.personalLeaves; track leave.id) {
+                <a [routerLink]="['/personal-leaves', leave.id]" class="hover:underline">{{ leave.label || ('leaveType.' + leave.type | translate) }}</a>
+              }
+            </div>
+          }
+          @if (getTripsForDay(day).length > 0) {
+            <ul class="space-y-1" [attr.aria-label]="'tripEventsForDay' | translate : { date: day.date, month: displayMonth(), year: displayYear() }">
+              @for (trip of getTripsForDay(day); track trip.id) {
+                <li>
+                  <button
+                    type="button"
+                    class="w-full cursor-pointer rounded px-2 py-1.5 text-left text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    [ngClass]="getTripStatusClass(trip.status)"
+                    [title]="trip.destination"
+                    [attr.aria-label]="getTripAriaLabel(trip)"
+                    (click)="tripClicked.emit(trip)"
+                  >
+                    <span class="inline-flex items-center gap-1.5">
+                      <span class="truncate">{{ trip.destination }}</span>
+                      @if (trip.trainBooking) {
+                        <svg aria-hidden="true" class="inline-block h-3 w-3 shrink-0" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width=".5">
+                          <rect x=".5" y=".5" width="9" height="6" rx="1" /><rect x="1.5" y="1.5" width="2.5" height="2" rx=".5" /><rect x="6" y="1.5" width="2.5" height="2" rx=".5" /><circle cx="2" cy="8" r="1" /><circle cx="8" cy="8" r="1" />
+                        </svg>
+                      }
+                      @if (trip.hotelBooking) {
+                        <svg aria-hidden="true" class="inline-block h-3 w-3 shrink-0" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width=".5">
+                          <path d="M1 9V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v5M.5 9.5h9M2.2 9V6.5h2V9M6.2 5.5H8M6.2 7H8M1 3l4-2 4 2" />
+                        </svg>
+                      }
+                      @if (tripHasExpenses(trip)) {
+                        <svg aria-hidden="true" class="inline-block h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      }
+                    </span>
+                  </button>
+                </li>
+              }
+            </ul>
+          } @else {
+            <button
+              type="button"
+              (click)="addTripClicked.emit(day)"
+              class="cursor-pointer text-sm text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-500 dark:hover:text-gray-300"
+              [attr.aria-label]="'addTripForDay' | translate : { date: day.date, month: displayMonth(), year: displayYear() }"
+            >{{ 'calendar.addTrip' | translate }}</button>
+          }
+        </div>
+      </div>
+    </li>
+  }
+</ol>

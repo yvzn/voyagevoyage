@@ -1,3 +1,6 @@
+import { Trip } from '../trip/trip.model';
+import { MILLISECONDS_PER_DAY, parseISODateUTC } from '../planning-dashboard/planning-dashboard.utils';
+
 export interface CalendarDay {
   date: number;
   month: number;
@@ -8,6 +11,25 @@ export interface CalendarDay {
 
 export interface CalendarWeek {
   days: CalendarDay[];
+}
+
+export function getTripsPerDay(trips: Trip[]): Map<string, Trip[]> {
+  const map = new Map<string, Trip[]>();
+  for (const trip of trips) {
+    const startTs = parseISODateUTC(trip.startDate);
+    const endTs = parseISODateUTC(trip.endDate);
+    for (let ts = startTs; ts <= endTs; ts += MILLISECONDS_PER_DAY) {
+      const d = new Date(ts);
+      const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+      const existing = map.get(key);
+      if (existing) {
+        existing.push(trip);
+      } else {
+        map.set(key, [trip]);
+      }
+    }
+  }
+  return map;
 }
 
 export function getCalendarWeeks(year: number, month: number): CalendarWeek[] {
