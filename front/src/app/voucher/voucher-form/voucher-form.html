@@ -1,0 +1,39 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+  <div class="flex items-center justify-between">
+    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+      {{ (isEdit() ? 'voucher.form.editTitle' : 'voucher.form.createTitle') | translate }}
+    </h2>
+  </div>
+
+  <div>
+    <label for="voucher-code" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">{{ 'voucher.form.code' | translate }}</label>
+    <input id="voucher-code" formControlName="code" type="text" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white" [class.border-red-500]="form.controls.code.invalid && form.controls.code.touched" />
+    @if (form.controls.code.invalid && form.controls.code.touched) {
+      <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ 'voucher.form.codeRequired' | translate }}</p>
+    }
+  </div>
+
+  <div>
+    <label for="voucher-category" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">{{ 'voucher.form.category' | translate }}</label>
+    <select id="voucher-category" formControlName="category" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white">
+      @for (category of categories; track category) {
+        <option [value]="category">{{ ('voucher.category.' + category) | translate }}</option>
+      }
+    </select>
+  </div>
+
+  <div>
+    <label for="voucher-description" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">{{ 'voucher.form.description' | translate }}</label>
+    <textarea id="voucher-description" formControlName="description" rows="3" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white"></textarea>
+  </div>
+
+  <div>
+    <label for="voucher-expiration-date" class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">{{ 'voucher.form.expirationDate' | translate }}</label>
+    <input id="voucher-expiration-date" formControlName="expirationDate" type="date" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white" />
+  </div>
+
+  <div class="flex justify-end gap-2 pt-2">
+    <button type="button" (click)="onCancel()" class="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">{{ 'voucher.form.cancel' | translate }}</button>
+    <button type="submit" class="rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">{{ (isEdit() ? 'voucher.form.save' : 'voucher.form.create') | translate }}</button>
+  </div>
+</form>

@@ -12,6 +12,8 @@ import { selectConstraints, selectSettingsLoadStatus } from '../../constraints/s
 import { getTripStatusClass } from '../../trip/trip-status.utils';
 import { LocaleService } from '../../locale.service';
 import { Trip } from '../../trip/trip.model';
+import { VoucherCategory } from '../../voucher/voucher.model';
+import { VoucherService } from '../../voucher/voucher.service';
 import { getTripsNeedingTrainBooking } from '../train-booking.utils';
 
 export { getTripsNeedingTrainBooking } from '../train-booking.utils';
@@ -32,6 +34,7 @@ export class TrainBookingDashboardComponent {
   protected readonly isParsing = computed(() => this.parseStatus() === 'loading');
 
   protected readonly localeService = inject(LocaleService);
+  private readonly voucherService = inject(VoucherService);
 
   /** When set, limits the number of items displayed (used in preview mode). */
   readonly maxItems = input<number | null>(null);
@@ -86,6 +89,14 @@ export class TrainBookingDashboardComponent {
     const all = this.allPendingTrips();
     return max !== null ? all.slice(0, max) : all;
   });
+
+  protected readonly activeVouchers = computed(() => this.voucherService.getActiveVouchers(VoucherCategory.Train));
+  protected readonly activeVoucherCount = computed(() => this.activeVouchers().length);
+  protected readonly expandedVoucherTripId = signal<string | null>(null);
+
+  protected toggleVoucherDetails(tripId: string): void {
+    this.expandedVoucherTripId.update((current) => (current === tripId ? null : tripId));
+  }
 
   /** Show "view all" link only when displaying a limited subset (dashboard card mode). */
   protected readonly showViewAllLink = computed(() => this.maxItems() !== null);
