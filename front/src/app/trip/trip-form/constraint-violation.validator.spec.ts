@@ -3,6 +3,7 @@ import { DayOfWeek, TravelConstraints, PublicHoliday } from '../../constraints/c
 import { PersonalLeave, LeaveType } from '../../personal-leave/personal-leave.model';
 import { Trip, TripStatus } from '../trip.model';
 import { constraintViolationValidator } from './constraint-violation.validator';
+import { NoTravelDay } from '../../no-travel-days/no-travel-day.model';
 
 function makeConstraints(overrides: Partial<TravelConstraints> = {}): TravelConstraints {
   return {
@@ -26,6 +27,7 @@ function makeGroup(
   personalLeaves: PersonalLeave[] = [],
   existingTrips: Trip[] = [],
   currentTripId: string | null = null,
+  noTravelDays: NoTravelDay[] = [],
 ) {
   const fb = new FormBuilder();
   return fb.group(
@@ -37,6 +39,7 @@ function makeGroup(
         () => personalLeaves,
         () => existingTrips,
         () => currentTripId,
+        () => noTravelDays,
       ),
     },
   );
@@ -165,6 +168,58 @@ describe('constraintViolationValidator', () => {
       expect(group.errors).toBeNull();
     });
 
+    describe('no-travel day constraint', () => {
+      const noTravelDay: NoTravelDay = {
+        id: 'n1',
+        startDate: '2026-08-10',
+        endDate: '2026-08-10',
+        isRecurring: true,
+        label: 'Annual meeting',
+      };
+
+      it('does not flag an overlap when no-travel days are not excluded', () => {
+        const group = makeGroup(
+          '2027-08-10',
+          '2027-08-10',
+          makeConstraints({ considerNoTravelDays: false }),
+          [],
+          [],
+          [],
+          null,
+          [noTravelDay],
+        );
+        expect(group.errors).toBeNull();
+      });
+
+      it('warns when a trip overlaps an annually recurring day', () => {
+        const group = makeGroup(
+          '2027-08-10',
+          '2027-08-10',
+          makeConstraints({ considerNoTravelDays: true, isStrict: false }),
+          [],
+          [],
+          [],
+          null,
+          [noTravelDay],
+        );
+        expect(group.getError('constraintWarning').reasons).toContain('noTravelDay');
+      });
+
+      it('blocks a trip overlapping a one-time no-travel period in strict mode', () => {
+        const group = makeGroup(
+          '2026-08-12',
+          '2026-08-12',
+          makeConstraints({ considerNoTravelDays: true, isStrict: true }),
+          [],
+          [],
+          [],
+          null,
+          [{ ...noTravelDay, startDate: '2026-08-10', endDate: '2026-08-14', isRecurring: false }],
+        );
+        expect(group.getError('constraintError').reasons).toContain('noTravelDay');
+      });
+    });
+
     it('should return constraintWarning when trip overlaps a personal leave (flexible)', () => {
       const constraints = makeConstraints({ considerVacationDays: true, isStrict: false });
       const group = makeGroup('2026-08-10', '2026-08-12', constraints, [], [leave]);
@@ -267,4 +322,3 @@ describe('constraintViolationValidator', () => {
     });
   });
 });
-

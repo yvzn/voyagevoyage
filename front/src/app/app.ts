@@ -8,7 +8,8 @@ import { LocaleService } from './locale.service';
 
 const TRAVEL_ROUTES = ['/calendar', '/planning-dashboard', '/train-bookings', '/hotel-bookings'];
 const FISCAL_SUMMARY_ROUTES = ['/expense-summary', '/annual-expense-summary'];
-const SETTINGS_ROUTES = ['/constraints', '/personal-leaves', '/frequent-expenses'];
+const SETTINGS_ROUTES = ['/constraints', '/frequent-expenses'];
+const LEAVE_ROUTES = ['/personal-leaves', '/no-travel-days'];
 
 @Component({
   selector: 'app-root',
@@ -33,6 +34,7 @@ export class App implements OnInit {
   protected readonly travelMenuOpen = signal(false);
   protected readonly fiscalSummaryMenuOpen = signal(false);
   protected readonly settingsMenuOpen = signal(false);
+  protected readonly leaveMenuOpen = signal(false);
 
   protected readonly travelSectionOpen = computed(
     () => this.travelMenuOpen() || TRAVEL_ROUTES.some(route => this.currentUrl().startsWith(route)),
@@ -42,6 +44,9 @@ export class App implements OnInit {
   );
   protected readonly settingsSectionOpen = computed(
     () => this.settingsMenuOpen() || SETTINGS_ROUTES.some(route => this.currentUrl().startsWith(route)),
+  );
+  protected readonly leaveSectionOpen = computed(
+    () => this.leaveMenuOpen() || LEAVE_ROUTES.some(route => this.currentUrl().startsWith(route)),
   );
 
   ngOnInit(): void {
@@ -105,6 +110,10 @@ export class App implements OnInit {
 
   toggleSettingsMenu(): void {
     this.settingsMenuOpen.update(v => !v);
+  }
+
+  toggleLeaveMenu(): void {
+    this.leaveMenuOpen.update(v => !v);
   }
 
   @HostListener('document:click')

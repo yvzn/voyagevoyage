@@ -13,6 +13,7 @@ import { expensesFeature } from './expense/store/expense.reducer';
 import { frequentExpenseFeature } from './frequent-expense/store/frequent-expense.reducer';
 import { fiscalRuleFeature } from './fiscal-rule/store/fiscal-rule.reducer';
 import { personalLeaveFeature } from './personal-leave/store/personal-leave.reducer';
+import { noTravelDayFeature } from './no-travel-days/store/no-travel-day.reducer';
 import { receiptsFeature } from './receipt/store/receipt.reducer';
 import { bookingConfirmationsFeature } from './booking-confirmation/store/booking-confirmation.reducer';
 import * as tripEffects from './trip/store/trip.effects';
@@ -21,6 +22,7 @@ import * as expenseEffects from './expense/store/expense.effects';
 import * as frequentExpenseEffects from './frequent-expense/store/frequent-expense.effects';
 import * as fiscalRuleEffects from './fiscal-rule/store/fiscal-rule.effects';
 import * as personalLeaveEffects from './personal-leave/store/personal-leave.effects';
+import * as noTravelDayEffects from './no-travel-days/store/no-travel-day.effects';
 import * as receiptEffects from './receipt/store/receipt.effects';
 import * as bookingConfirmationEffects from './booking-confirmation/store/booking-confirmation.effects';
 
@@ -40,9 +42,10 @@ export const appConfig: ApplicationConfig = {
       [frequentExpenseFeature.name]: frequentExpenseFeature.reducer,
       [fiscalRuleFeature.name]: fiscalRuleFeature.reducer,
       [personalLeaveFeature.name]: personalLeaveFeature.reducer,
+      [noTravelDayFeature.name]: noTravelDayFeature.reducer,
       [receiptsFeature.name]: receiptsFeature.reducer,
       [bookingConfirmationsFeature.name]: bookingConfirmationsFeature.reducer,
     }),
-    provideEffects(tripEffects, settingsEffects, expenseEffects, frequentExpenseEffects, fiscalRuleEffects, personalLeaveEffects, receiptEffects, bookingConfirmationEffects),
+    provideEffects(tripEffects, settingsEffects, expenseEffects, frequentExpenseEffects, fiscalRuleEffects, personalLeaveEffects, noTravelDayEffects, receiptEffects, bookingConfirmationEffects),
   ],
 };

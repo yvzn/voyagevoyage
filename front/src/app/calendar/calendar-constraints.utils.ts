@@ -1,12 +1,15 @@
 import { PublicHoliday, SchoolHoliday } from '../constraints/constraints.model';
 import { PersonalLeave } from '../personal-leave/personal-leave.model';
 import { MILLISECONDS_PER_DAY, parseISODateUTC } from '../planning-dashboard/planning-dashboard.utils';
+import { NoTravelDay } from '../no-travel-days/no-travel-day.model';
+import { getRecurringDate } from '../no-travel-days/no-travel-day.utils';
 
 /** Constraints resolved for a single calendar day. */
 export interface DayConstraints {
   publicHolidays: PublicHoliday[];
   schoolHolidays: SchoolHoliday[];
   personalLeaves: PersonalLeave[];
+  noTravelDays: NoTravelDay[];
 }
 
 function isoKey(year: number, month: number, date: number): string {
@@ -16,7 +19,7 @@ function isoKey(year: number, month: number, date: number): string {
 function getOrCreate(map: Map<string, DayConstraints>, key: string): DayConstraints {
   let entry = map.get(key);
   if (!entry) {
-    entry = { publicHolidays: [], schoolHolidays: [], personalLeaves: [] };
+    entry = { publicHolidays: [], schoolHolidays: [], personalLeaves: [], noTravelDays: [] };
     map.set(key, entry);
   }
   return entry;
@@ -30,6 +33,8 @@ export function buildConstraintsPerDay(
   publicHolidays: PublicHoliday[],
   schoolHolidays: SchoolHoliday[],
   personalLeaves: PersonalLeave[],
+  noTravelDays: NoTravelDay[] = [],
+  calendarYear: number = new Date().getFullYear(),
 ): Map<string, DayConstraints> {
   const map = new Map<string, DayConstraints>();
 
@@ -52,6 +57,22 @@ export function buildConstraintsPerDay(
     for (let ts = startTs; ts <= endTs; ts += MILLISECONDS_PER_DAY) {
       const d = new Date(ts);
       getOrCreate(map, isoKey(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())).personalLeaves.push(leave);
+    }
+  }
+
+  for (const day of noTravelDays) {
+    if (day.isRecurring) {
+      for (const year of [calendarYear - 1, calendarYear, calendarYear + 1]) {
+        const date = getRecurringDate(year, day);
+        if (date) getOrCreate(map, date).noTravelDays.push(day);
+      }
+      continue;
+    }
+    const startTs = parseISODateUTC(day.startDate);
+    const endTs = parseISODateUTC(day.endDate);
+    for (let ts = startTs; ts <= endTs; ts += MILLISECONDS_PER_DAY) {
+      const d = new Date(ts);
+      getOrCreate(map, isoKey(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())).noTravelDays.push(day);
     }
   }
 

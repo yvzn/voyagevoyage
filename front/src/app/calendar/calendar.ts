@@ -22,6 +22,7 @@ import { CalendarGridComponent } from './calendar-grid';
 import { CalendarAgendaComponent } from './calendar-agenda';
 import { PersonalLeaveActions } from '../personal-leave/store/personal-leave.actions';
 import { selectConstraintsPerDay } from './calendar.selectors';
+import { NoTravelDayActions } from '../no-travel-days/store/no-travel-day.actions';
 import { ExpenseActions } from '../expense/store/expense.actions';
 import { selectAllExpenses } from '../expense/store/expense.selectors';
 
@@ -43,6 +44,7 @@ export class CalendarComponent {
     this.store.dispatch(SettingsActions.loadPublicHolidays());
     this.store.dispatch(SettingsActions.loadSchoolHolidays());
     this.store.dispatch(PersonalLeaveActions.loadPersonalLeaves());
+    this.store.dispatch(NoTravelDayActions.loadNoTravelDays());
 
     // Load expenses for all trips when trips are loaded
     effect(() => {

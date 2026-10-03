@@ -86,7 +86,7 @@ export class CalendarGridComponent {
 
   protected getConstraintsForDay(day: CalendarDay): DayConstraints {
     const key = this.dayKey(day.year, day.month, day.date);
-    return this.constraintsPerDay().get(key) ?? { publicHolidays: [], schoolHolidays: [], personalLeaves: [] };
+    return this.constraintsPerDay().get(key) ?? { publicHolidays: [], schoolHolidays: [], personalLeaves: [], noTravelDays: [] };
   }
 
   /** Returns true when the day falls outside the allowed weekdays (if any restriction is configured). */
@@ -108,7 +108,8 @@ export class CalendarGridComponent {
     const hasBlockingConstraint =
       this.isRestrictedWeekday(day) ||
       (constraints?.publicHolidays.length ?? 0) > 0 ||
-      (constraints?.personalLeaves.length ?? 0) > 0;
+      (constraints?.personalLeaves.length ?? 0) > 0 ||
+      (constraints?.noTravelDays.length ?? 0) > 0;
     if (hasBlockingConstraint) {
       return 'hover:bg-gray-50 dark:hover:bg-gray-700/30';
     }

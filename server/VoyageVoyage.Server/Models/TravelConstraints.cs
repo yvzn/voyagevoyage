@@ -54,6 +54,11 @@ public class TravelConstraints
     public bool ConsiderVacationDays { get; set; }
 
     /// <summary>
+    /// When true, no-travel days are excluded from allowed travel days.
+    /// </summary>
+    public bool ConsiderNoTravelDays { get; set; }
+
+    /// <summary>
     /// When true, constraints are strict (mandatory).
     /// When false, constraints are flexible (derogations allowed).
     /// </summary>

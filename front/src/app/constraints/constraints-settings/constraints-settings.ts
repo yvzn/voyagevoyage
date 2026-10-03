@@ -122,6 +122,7 @@ export class ConstraintsSettingsComponent implements OnInit {
     xAtypicalExpenseThresholdPercent: [100, [Validators.required, Validators.min(0.1), Validators.max(1000)]],
     considerPublicHolidays: [false],
     considerVacationDays: [false],
+    considerNoTravelDays: [false],
     isStrict: [false],
     // One boolean control per public holiday region
     'region-france-metropole': [false],
@@ -169,6 +170,7 @@ export class ConstraintsSettingsComponent implements OnInit {
       xAtypicalExpenseThresholdPercent: constraints.xAtypicalExpenseThresholdPercent ?? 100,
       considerPublicHolidays: constraints.considerPublicHolidays,
       considerVacationDays: constraints.considerVacationDays,
+      considerNoTravelDays: constraints.considerNoTravelDays ?? false,
       isStrict: constraints.isStrict,
       'region-france-metropole': constraints.publicHolidayRegions?.includes('france-metropole') ?? false,
       'zone-Zone A': constraints.schoolHolidayZones?.includes('Zone A') ?? false,
@@ -260,6 +262,7 @@ export class ConstraintsSettingsComponent implements OnInit {
       xAtypicalExpenseThresholdPercent: v.xAtypicalExpenseThresholdPercent ?? 100,
       considerPublicHolidays: v.considerPublicHolidays ?? false,
       considerVacationDays: v.considerVacationDays ?? false,
+      considerNoTravelDays: v.considerNoTravelDays ?? false,
       isStrict: v.isStrict ?? false,
       publicHolidayRegions: this.buildPublicHolidayRegions(),
       schoolHolidayZones: this.buildSchoolHolidayZones(),
