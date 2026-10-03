@@ -5,6 +5,10 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { initFlowbite } from 'flowbite';
 import { filter, map } from 'rxjs';
 import { LocaleService } from './locale.service';
+import { Alert, AlertStatus } from './alerts/alert.model';
+import { AlertsService } from './alerts/alerts.service';
+import { Trip } from './trip/trip.model';
+import { TripService } from './trip/trip.service';
 import { VoucherService } from './voucher/voucher.service';
 
 const TRAVEL_ROUTES = ['/calendar', '/planning-dashboard', '/train-bookings', '/hotel-bookings', '/vouchers'];
@@ -22,8 +26,18 @@ export class App implements OnInit {
   private readonly voucherService = inject(VoucherService);
   protected readonly languageDropdownOpen = signal(false);
   protected readonly drawerId = 'drawer-navigation';
+  protected readonly alertsOpen = signal(false);
+  protected readonly alertStatus = AlertStatus;
+  protected readonly alerts = signal<Alert[]>([]);
+  protected readonly trips = signal<Trip[]>([]);
+  protected readonly alertsLoading = signal(false);
+  protected readonly alertsLoadError = signal(false);
+  protected readonly alertUpdatingId = signal<string | null>(null);
+  protected readonly alertActionMessage = signal<string | null>(null);
 
   private readonly router = inject(Router);
+  private readonly alertsService = inject(AlertsService);
+  private readonly tripService = inject(TripService);
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
       filter((event) => event instanceof NavigationEnd),
@@ -31,6 +45,11 @@ export class App implements OnInit {
     ),
     { initialValue: this.router.url },
   );
+  protected readonly currentTripId = computed(() => {
+    const match = this.currentUrl().match(/^\/trip\/([^/?]+)/);
+    return match ? decodeURIComponent(match[1]) : null;
+  });
+  protected readonly alertCount = computed(() => this.alerts().length);
 
   protected readonly travelMenuOpen = signal(false);
   protected readonly fiscalSummaryMenuOpen = signal(false);
@@ -50,9 +69,72 @@ export class App implements OnInit {
   ngOnInit(): void {
     this.localeService.syncDocumentLang();
     initFlowbite();
+    this.loadAlerts();
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe(() => this.closeMobileDrawer());
+  }
+
+  protected toggleAlerts(): void {
+    this.alertsOpen.update(open => !open);
+  }
+
+  protected loadAlerts(): void {
+    this.alertsLoading.set(true);
+    this.alertsLoadError.set(false);
+    this.alertsService.getAll(AlertStatus.New).subscribe({
+      next: alerts => {
+        this.alerts.set(alerts);
+        this.alertsLoading.set(false);
+        if (alerts.length > 0) {
+          this.tripService.getAll().subscribe({
+            next: trips => this.trips.set(trips),
+            error: () => this.trips.set([]),
+          });
+        }
+      },
+      error: () => {
+        this.alertsLoadError.set(true);
+        this.alertsLoading.set(false);
+      },
+    });
+  }
+
+  protected updateAlertStatus(alert: Alert, status: AlertStatus.Handled | AlertStatus.Ignored): void {
+    if (this.alertUpdatingId()) {
+      return;
+    }
+
+    this.alertUpdatingId.set(alert.id);
+    this.alertActionMessage.set(null);
+    this.alertsService.updateStatus(alert.id, status).subscribe({
+      next: () => {
+        this.alerts.update(alerts => alerts.filter(item => item.id !== alert.id));
+        this.alertActionMessage.set(
+          status === AlertStatus.Handled ? 'alerts.handledFeedback' : 'alerts.ignoredFeedback',
+        );
+        this.alertUpdatingId.set(null);
+      },
+      error: () => {
+        this.alertActionMessage.set('alerts.updateError');
+        this.alertUpdatingId.set(null);
+      },
+    });
+  }
+
+  protected tripName(alert: Alert): string {
+    return this.trips().find(trip => trip.id === alert.tripId)?.destination ?? 'alerts.unknownTrip';
+  }
+
+  protected alertDescriptionKey(alert: Alert): string {
+    return `alerts.types.${alert.type}`;
+  }
+
+  protected formatAlertDate(date: string): string {
+    return new Intl.DateTimeFormat(this.localeService.currentLocale(), {
+      dateStyle: 'medium',
+      timeZone: 'UTC',
+    }).format(new Date(`${date}T00:00:00Z`));
   }
 
   protected closeMobileDrawer(): void {
