@@ -17,7 +17,7 @@
           @if (constraints.publicHolidays.length > 0 || constraints.schoolHolidays.length > 0 || constraints.personalLeaves.length > 0 || isRestrictedWeekday(day)) {
             <div class="mb-1 flex flex-wrap gap-1 text-xs text-gray-500 dark:text-gray-400">
               @if (isRestrictedWeekday(day)) {
-                <a routerLink="/constraints" class="hover:underline">{{ 'calendar.constraintAllowedDaysAriaLabel' | translate }}</a>
+                <a routerLink="/constraints" class="hover:underline">{{ 'calendar.constraintsLabel' | translate }}</a>
               }
               @if (constraints.publicHolidays.length > 0) {
                 <span>{{ constraints.publicHolidays[0].name }}</span>
@@ -68,7 +68,7 @@
             <button
               type="button"
               (click)="addTripClicked.emit(day)"
-              class="text-sm text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-500 dark:hover:text-gray-300"
+              class="cursor-pointer text-sm text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-500 dark:hover:text-gray-300"
               [attr.aria-label]="'addTripForDay' | translate : { date: day.date, month: displayMonth(), year: displayYear() }"
             >{{ 'calendar.addTrip' | translate }}</button>
           }

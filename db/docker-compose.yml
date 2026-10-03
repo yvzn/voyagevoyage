@@ -28,21 +28,21 @@ services:
       timeout: 5s
       retries: 5
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    volumes:
-      - ./servers.json:/pgadmin4/servers.json:ro
-    ports:
-      - "5050:80"
-    networks:
-      - vv-local
-    depends_on:
-      postgres:
-        condition: service_healthy
+  # pgadmin:
+  #   image: dpage/pgadmin4:latest
+  #   restart: unless-stopped
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+  #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+  #   volumes:
+  #     - ./servers.json:/pgadmin4/servers.json:ro
+  #   ports:
+  #     - "5050:80"
+  #   networks:
+  #     - vv-local
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
 
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite:3.35.0
