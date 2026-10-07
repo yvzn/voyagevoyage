@@ -13,6 +13,7 @@ import { FrequentExpenseSettingsComponent } from './frequent-expense/frequent-ex
 import { FiscalRuleSettingsComponent } from './fiscal-rule/fiscal-rule-settings/fiscal-rule-settings';
 import { MonthlyExpenseSummaryComponent } from './monthly-expense-summary/monthly-expense-summary';
 import { AnnualExpenseSummaryComponent } from './annual-expense-summary/annual-expense-summary';
+import { VoucherListComponent } from './voucher/voucher-list/voucher-list';
 
 export const routes: Routes = [
   {
@@ -35,6 +36,10 @@ export const routes: Routes = [
   {
     path: 'hotel-bookings',
     component: HotelBookingListComponent,
+  },
+  {
+    path: 'vouchers',
+    component: VoucherListComponent,
   },
   {
     path: 'trip/:id',
