@@ -362,7 +362,7 @@
             <ul class="space-y-3" aria-label="{{ 'alerts.title' | translate }}">
               @for (alert of alerts(); track alert.id) {
                 <li>
-                  <article class="rounded-lg border border-rose-200 bg-rose-50 p-3 transition-opacity dark:border-rose-900 dark:bg-rose-950/30"
+                  <article class="rounded-lg border border-rose-200 p-3 transition-opacity dark:border-rose-900"
                     [class.border-rose-400]="currentTripId() === alert.tripId"
                     [class.ring-1]="currentTripId() === alert.tripId"
                     [class.ring-rose-300]="currentTripId() === alert.tripId"
