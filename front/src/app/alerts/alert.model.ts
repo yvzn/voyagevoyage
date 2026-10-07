@@ -1,15 +1,15 @@
 export enum AlertStatus {
-  New = 'New',
-  Handled = 'Handled',
-  Ignored = 'Ignored',
+  New = 'new',
+  Handled = 'handled',
+  Ignored = 'ignored',
 }
 
 export enum AlertType {
-  TripStillPlanned = 'TripStillPlanned',
-  MissingBooking = 'MissingBooking',
-  MissingReceipt = 'MissingReceipt',
-  AtypicalReceipt = 'AtypicalReceipt',
-  BookingDatesInconsistent = 'BookingDatesInconsistent',
+  TripStillPlanned = 'tripStillPlanned',
+  MissingBooking = 'missingBooking',
+  MissingReceipt = 'missingReceipt',
+  AtypicalReceipt = 'atypicalReceipt',
+  BookingDatesInconsistent = 'bookingDatesInconsistent',
 }
 
 export interface Alert {

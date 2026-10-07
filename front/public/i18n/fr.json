@@ -20,11 +20,11 @@
     "ignoredFeedback": "Alerte ignorée.",
     "updateError": "Impossible de mettre à jour cette alerte. Veuillez réessayer.",
     "types": {
-      "TripStillPlanned": "Ce voyage passé est toujours indiqué comme planifié.",
-      "MissingBooking": "Aucune réservation de train ou d'hôtel n'est enregistrée pour ce voyage.",
-      "MissingReceipt": "Aucun reçu n'est associé à ce voyage.",
-      "AtypicalReceipt": "Le montant d'un reçu est inhabituellement élevé pour sa catégorie.",
-      "BookingDatesInconsistent": "Les dates de réservation ne correspondent pas aux dates du voyage."
+      "tripStillPlanned": "Ce voyage passé est toujours indiqué comme planifié.",
+      "missingBooking": "Aucune réservation de train ou d'hôtel n'est enregistrée pour ce voyage.",
+      "missingReceipt": "Aucun reçu n'est associé à ce voyage.",
+      "atypicalReceipt": "Le montant d'un reçu est inhabituellement élevé pour sa catégorie.",
+      "bookingDatesInconsistent": "Les dates de réservation ne correspondent pas aux dates du voyage."
     }
   },
   "sidenavLabel": "Menu de navigation",

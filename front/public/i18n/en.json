@@ -20,11 +20,11 @@
     "ignoredFeedback": "Alert ignored.",
     "updateError": "Unable to update this alert. Please try again.",
     "types": {
-      "TripStillPlanned": "This past trip is still marked as planned.",
-      "MissingBooking": "No train or hotel booking is recorded for this trip.",
-      "MissingReceipt": "No receipt is attached to this trip.",
-      "AtypicalReceipt": "A receipt amount is unusually high for its category.",
-      "BookingDatesInconsistent": "Booking dates do not match the trip dates."
+      "tripStillPlanned": "This past trip is still marked as planned.",
+      "missingBooking": "No train or hotel booking is recorded for this trip.",
+      "missingReceipt": "No receipt is attached to this trip.",
+      "atypicalReceipt": "A receipt amount is unusually high for its category.",
+      "bookingDatesInconsistent": "Booking dates do not match the trip dates."
     }
   },
   "sidenavLabel": "Side navigation",

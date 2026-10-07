@@ -34,15 +34,15 @@ describe('AlertsService', () => {
 
     service.getAll(AlertStatus.New).subscribe(value => result = value);
 
-    httpMock.expectOne(request => request.url === '/api/alerts' && request.params.get('status') === 'New')
+    httpMock.expectOne(request => request.url === '/api/alerts' && request.params.get('status') === 'new')
       .flush(alerts);
 
     expect(result).toEqual(alerts);
   });
 
   it.each([
-    [AlertStatus.Handled, 'Handled'],
-    [AlertStatus.Ignored, 'Ignored'],
+    [AlertStatus.Handled, 'handled'],
+    [AlertStatus.Ignored, 'ignored'],
   ])('updates an alert to %s', (status, expectedStatus) => {
     const alert: Alert = {
       id: 'alert-1',
