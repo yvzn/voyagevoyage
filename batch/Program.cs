@@ -14,13 +14,15 @@ builder.Services
     .AddApplicationInsightsTelemetryWorkerService()
     .ConfigureFunctionsApplicationInsights();
 
-// PostgreSQL for public holidays import
 var postgresConnectionString = builder.Configuration["ConnectionStrings:PostgresDb"]
     ?? builder.Configuration["PostgresDb:ConnectionString"];
 
 if (!string.IsNullOrEmpty(postgresConnectionString))
 {
     builder.Services.AddDbContextFactory<BatchDbContext>(options =>
+        options.UseNpgsql(postgresConnectionString));
+
+    builder.Services.AddDbContext<VoyageVoyage.Server.Data.ApplicationDbContext>(options =>
         options.UseNpgsql(postgresConnectionString));
 }
 
