@@ -134,22 +134,28 @@
           }
         </div>
         @if (expandedVoucherTripId() === trip.id && activeVouchers().length > 0) {
-          <div class="mt-2 rounded-xl border border-blue-200 bg-blue-50 p-3 text-xs text-blue-800 dark:border-blue-700 dark:bg-blue-900/20 dark:text-blue-200">
+          <div class="mt-2 rounded-lg border border-gray-200 bg-white p-3 text-xs text-gray-800 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
             <div class="mb-2 flex items-center justify-between gap-2">
-              <span class="text-[10px] font-semibold uppercase tracking-wide text-blue-700 dark:text-blue-300">{{ 'voucher.heading' | translate }}</span>
-              <a [routerLink]="['/vouchers']" class="font-medium text-blue-700 underline-offset-2 hover:underline dark:text-blue-300">{{ 'voucher.heading' | translate }}</a>
+              <span class="text-[10px] font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">{{ 'voucher.heading' | translate }}</span>
+              <a [routerLink]="['/vouchers']" [attr.aria-label]="'voucher.heading' | translate" class="inline-flex cursor-pointer rounded p-1 text-blue-700 transition-colors hover:bg-blue-100 hover:underline dark:text-blue-300 dark:hover:bg-blue-900/40">
+                <svg aria-hidden="true" class="h-5 w-5 text-blue-700 dark:text-blue-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 7h8a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z" />
+                  <path d="M15 9.5h.01M9 14.5h6" />
+                  <path d="M3 10.5 7 8l-4 2.5Z" />
+                </svg>
+              </a>
             </div>
             @for (voucher of activeVouchers(); track voucher.id) {
-              <div class="flex flex-col gap-1 border-t border-blue-100 py-2 first:border-t-0 first:pt-0 dark:border-blue-800/80">
+              <div class="flex flex-col gap-1 border-t border-gray-100 py-2 first:border-t-0 first:pt-0 dark:border-blue-800/80">
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0">
-                    <div class="font-semibold text-blue-900 dark:text-blue-100">{{ voucher.code }}</div>
+                    <div class="font-semibold text-gray-900 dark:text-gray-100">{{ voucher.code }}</div>
                     @if (voucher.description) {
-                      <div class="mt-0.5 text-blue-700 dark:text-blue-200">{{ voucher.description }}</div>
+                      <div class="mt-0.5 text-gray-600 dark:text-gray-300">{{ voucher.description }}</div>
                     }
                   </div>
                   @if (voucher.expirationDate) {
-                    <div class="shrink-0 text-right text-[10px] text-blue-700/80 dark:text-blue-200/80">
+                    <div class="shrink-0 text-right text-[10px] text-gray-500 dark:text-gray-400">
                       {{ 'voucher.expirationDate' | translate }}<br />{{ formatDate(voucher.expirationDate) }}
                     </div>
                   }
