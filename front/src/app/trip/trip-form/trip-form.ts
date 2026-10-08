@@ -8,6 +8,7 @@ import {
   inject,
   input,
   output,
+  signal,
   viewChild,
   ChangeDetectionStrategy
 } from '@angular/core';
@@ -86,12 +87,7 @@ export class TripFormComponent implements AfterViewInit {
     return null;
   });
 
-  /** Violation reasons from the form's constraintWarning or constraintError. */
-  protected readonly violationReasons = computed<ConstraintViolationReason[]>(() => {
-    const detail =
-      this.form.getError('constraintWarning') ?? this.form.getError('constraintError');
-    return detail?.reasons ?? [];
-  });
+  protected readonly violationReasons = signal<ConstraintViolationReason[]>([]);
 
   /** Tracks which save operation (create/update) was last dispatched by this instance. */
   private saveOp: 'create' | 'update' | null = null;
@@ -128,7 +124,12 @@ export class TripFormComponent implements AfterViewInit {
       this.constraints();
       this.noTravelDays();
       this.form.updateValueAndValidity({ emitEvent: false });
+      this.updateViolationReasons();
     });
+
+    this.form.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.updateViolationReasons());
 
     effect(() => {
       const t = this.trip();
@@ -185,6 +186,12 @@ export class TripFormComponent implements AfterViewInit {
         else if (us === 'failure') { this.saveOp = null; }
       }
     });
+  }
+
+  private updateViolationReasons(): void {
+    const detail =
+      this.form.getError('constraintWarning') ?? this.form.getError('constraintError');
+    this.violationReasons.set(detail?.reasons ?? []);
   }
 
   ngAfterViewInit(): void {

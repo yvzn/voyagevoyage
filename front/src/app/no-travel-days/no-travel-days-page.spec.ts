@@ -93,4 +93,18 @@ describe('NoTravelDaysPageComponent', () => {
     component.confirmDelete(sampleDay);
     expect(dispatch).toHaveBeenCalledWith(NoTravelDayActions.deleteNoTravelDay({ id: sampleDay.id }));
   });
+
+  it('shows the delete confirmation with the shared alert and button styles', async () => {
+    await setup();
+    const fixture = TestBed.createComponent(NoTravelDaysPageComponent);
+    fixture.detectChanges();
+    fixture.componentInstance.requestDelete(sampleDay);
+    fixture.detectChanges();
+
+    const dialog = fixture.nativeElement.querySelector('[role="alertdialog"]') as HTMLElement;
+    const buttons = Array.from(dialog.querySelectorAll('button'));
+    expect(dialog.classList.contains('bg-red-50')).toBe(true);
+    expect(buttons[0].classList.contains('bg-red-600')).toBe(true);
+    expect(buttons[1].classList.contains('border-gray-300')).toBe(true);
+  });
 });

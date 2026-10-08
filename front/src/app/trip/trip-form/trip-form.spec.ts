@@ -7,6 +7,8 @@ import { ApiStatus } from '../store/trip.reducer';
 import { selectTripsCreateStatus, selectTripsUpdateStatus, selectAllTrips } from '../store/trip.selectors';
 import { selectConstraints, selectPublicHolidays } from '../../constraints/store/settings.selectors';
 import { selectAllPersonalLeaves } from '../../personal-leave/store/personal-leave.selectors';
+import { selectAllNoTravelDays } from '../../no-travel-days/store/no-travel-day.reducer';
+import { NoTravelDay } from '../../no-travel-days/no-travel-day.model';
 import { TravelConstraints, DayOfWeek } from '../../constraints/constraints.model';
 
 const EN_TRANSLATIONS = {
@@ -46,6 +48,7 @@ beforeEach(() => {
 
 async function setupModule(
   constraints: TravelConstraints | null = null,
+  noTravelDays: NoTravelDay[] = [],
 ): Promise<MockStore> {
   await TestBed.configureTestingModule({
     imports: [TripFormComponent],
@@ -56,6 +59,7 @@ async function setupModule(
           { selector: selectConstraints, value: constraints },
           { selector: selectPublicHolidays, value: [] },
           { selector: selectAllPersonalLeaves, value: [] },
+          { selector: selectAllNoTravelDays, value: noTravelDays },
           { selector: selectAllTrips, value: [] },
           { selector: selectTripsCreateStatus, value: 'idle' as ApiStatus },
           { selector: selectTripsUpdateStatus, value: 'idle' as ApiStatus },
@@ -297,6 +301,54 @@ describe('TripFormComponent — validation', () => {
 
     // End date should remain unchanged
     expect(component['form'].get('endDate')?.value).toBe('2026-08-05');
+  });
+
+  it('shows a no-travel violation when the trip date overlaps a no-travel day', async () => {
+    const noTravelDay: NoTravelDay = {
+      id: 'meeting',
+      startDate: '2026-08-10',
+      endDate: '2026-08-10',
+      isRecurring: false,
+      label: 'Annual meeting',
+    };
+    const store = TestBed.inject(MockStore);
+    store.overrideSelector(selectConstraints, {
+      allowedDaysOfWeek: [DayOfWeek.Friday],
+      maxDaysPerMonth: null,
+      considerPublicHolidays: false,
+      considerVacationDays: false,
+      considerNoTravelDays: true,
+      isStrict: false,
+      planningHorizonDays: 90,
+      publicHolidayRegions: [],
+      schoolHolidayZones: [],
+    });
+    const noTravelDaysSelector = store.overrideSelector(selectAllNoTravelDays, []);
+    store.refreshState();
+
+    const fixture = TestBed.createComponent(TripFormComponent);
+    fixture.componentRef.setInput('trip', null);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    fixture.componentInstance['form'].setValue({
+      destination: 'Paris',
+      startDate: '2026-08-10',
+      endDate: '2026-08-10',
+      status: TripStatus.Planned,
+    });
+    fixture.detectChanges();
+    expect(fixture.componentInstance['violationReasons']()).not.toContain(
+      'noTravelDay',
+    );
+
+    noTravelDaysSelector.setResult([noTravelDay]);
+    store.refreshState();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(fixture.componentInstance['violationReasons']()).toContain(
+      'noTravelDay',
+    );
   });
 });
 
