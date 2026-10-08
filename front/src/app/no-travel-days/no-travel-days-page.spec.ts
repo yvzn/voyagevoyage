@@ -1,3 +1,5 @@
+import { provideMockActions } from '@ngrx/effects/testing';
+import { EMPTY } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { provideTranslateService } from '@ngx-translate/core';
@@ -26,6 +28,7 @@ async function setup(): Promise<MockStore> {
     imports: [NoTravelDaysPageComponent],
     providers: [
       provideTranslateService(),
+      provideMockActions(() => EMPTY),
       provideMockStore({
         selectors: [
           { selector: selectAllNoTravelDays, value: [sampleDay] },

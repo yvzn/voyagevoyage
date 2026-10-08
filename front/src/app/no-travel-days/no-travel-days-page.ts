@@ -1,7 +1,9 @@
-import { Component, ChangeDetectionStrategy, computed, effect, inject, OnInit, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, inject, OnInit, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
+import { Actions, ofType } from '@ngrx/effects';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NoTravelDay } from './no-travel-day.model';
 import { NoTravelDayActions } from './store/no-travel-day.actions';
 import {
@@ -28,6 +30,7 @@ function endAfterStartValidator(group: AbstractControl): ValidationErrors | null
 })
 export class NoTravelDaysPageComponent implements OnInit {
   private readonly store = inject(Store);
+  private readonly actions$ = inject(Actions);
   private readonly fb = inject(FormBuilder);
   protected readonly localeService = inject(LocaleService);
 
@@ -50,8 +53,6 @@ export class NoTravelDaysPageComponent implements OnInit {
   protected readonly isFormOpen = signal(false);
   protected readonly editingDay = signal<NoTravelDay | null>(null);
   protected readonly deletingDayId = signal<string | null>(null);
-  private pendingSave: 'create' | 'update' | null = null;
-  private pendingDelete = false;
 
   protected readonly form = this.fb.group({
     startDate: ['', Validators.required],
@@ -72,26 +73,16 @@ export class NoTravelDaysPageComponent implements OnInit {
       }
     });
 
-    effect(() => {
-      const operation = this.pendingSave;
-      if (!operation) return;
-      const status = operation === 'create' ? this.createStatus() : this.updateStatus();
-      if (status === 'success') {
-        this.pendingSave = null;
-        this.closeForm();
-      } else if (status === 'failure') {
-        this.pendingSave = null;
-      }
-    });
+    this.actions$
+      .pipe(
+        ofType(NoTravelDayActions.createNoTravelDaySuccess, NoTravelDayActions.updateNoTravelDaySuccess),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => this.closeForm());
 
-    effect(() => {
-      if (this.pendingDelete && this.deleteStatus() === 'success') {
-        this.pendingDelete = false;
-        this.deletingDayId.set(null);
-      } else if (this.pendingDelete && this.deleteStatus() === 'failure') {
-        this.pendingDelete = false;
-      }
-    });
+    this.actions$
+      .pipe(ofType(NoTravelDayActions.deleteNoTravelDaySuccess), takeUntilDestroyed())
+      .subscribe(() => this.deletingDayId.set(null));
   }
 
   ngOnInit(): void {
@@ -134,7 +125,6 @@ export class NoTravelDaysPageComponent implements OnInit {
       label: value.label ?? '',
     };
     const day = this.editingDay();
-    this.pendingSave = day ? 'update' : 'create';
     if (day) {
       this.store.dispatch(NoTravelDayActions.updateNoTravelDay({ id: day.id, request }));
     } else {
@@ -152,7 +142,6 @@ export class NoTravelDaysPageComponent implements OnInit {
 
   confirmDelete(day: NoTravelDay): void {
     if (this.isDeleting()) return;
-    this.pendingDelete = true;
     this.store.dispatch(NoTravelDayActions.deleteNoTravelDay({ id: day.id }));
   }
 

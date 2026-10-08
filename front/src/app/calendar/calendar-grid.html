@@ -151,7 +151,7 @@
                         @for (noTravelDay of constraints.noTravelDays; track noTravelDay.id) {
                           <a
                             routerLink="/no-travel-days"
-                            class="inline-flex items-center rounded p-0.5 text-orange-600 hover:bg-orange-100 focus:outline-none focus:ring-1 focus:ring-orange-400 dark:text-orange-400 dark:hover:bg-orange-900/30"
+                            class="inline-flex items-center rounded p-0.5 text-gray-400 hover:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-400 dark:text-gray-500 dark:hover:bg-gray-600/40"
                             [title]="noTravelDay.label || ('noTravelDays.heading' | translate)"
                             [attr.aria-label]="'calendar.constraintNoTravelDayAriaLabel' | translate : { label: noTravelDay.label || ('noTravelDays.heading' | translate) }"
                           >
