@@ -50,6 +50,7 @@ At a high level:
 - Controller / service decomposition
 - PostgreSQL
 - Azure Storage
+- NuGet package versions are managed centrally in the repository-root `Directory.Packages.props`.
 
 ### Batch / background processing
 

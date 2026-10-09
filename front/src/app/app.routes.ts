@@ -1,7 +1,5 @@
 import { Routes } from '@angular/router';
 import { CalendarComponent } from './calendar/calendar';
-import { ConstraintsSettingsComponent } from './constraints/constraints-settings/constraints-settings';
-import { TripDetailComponent } from './trip/trip-detail/trip-detail';
 import { ExpenseDetailComponent } from './expense/expense-detail/expense-detail';
 import { PlanningDashboardComponent } from './planning-dashboard/planning-dashboard';
 import { DashboardComponent } from './dashboard/dashboard';
@@ -12,8 +10,8 @@ import { TrainBookingListComponent } from './train-booking/train-booking-list/tr
 import { HotelBookingListComponent } from './hotel-booking/hotel-booking-list/hotel-booking-list';
 import { FrequentExpenseSettingsComponent } from './frequent-expense/frequent-expense-settings/frequent-expense-settings';
 import { FiscalRuleSettingsComponent } from './fiscal-rule/fiscal-rule-settings/fiscal-rule-settings';
-import { MonthlyExpenseSummaryComponent } from './monthly-expense-summary/monthly-expense-summary';
 import { AnnualExpenseSummaryComponent } from './annual-expense-summary/annual-expense-summary';
+import { VoucherListComponent } from './voucher/voucher-list/voucher-list';
 
 export const routes: Routes = [
   {
@@ -38,8 +36,13 @@ export const routes: Routes = [
     component: HotelBookingListComponent,
   },
   {
+    path: 'vouchers',
+    component: VoucherListComponent,
+  },
+  {
     path: 'trip/:id',
-    component: TripDetailComponent,
+    loadComponent: () =>
+      import('./trip/trip-detail/trip-detail').then((m) => m.TripDetailComponent),
   },
   {
     path: 'expense/:id',
@@ -47,7 +50,10 @@ export const routes: Routes = [
   },
   {
     path: 'constraints',
-    component: ConstraintsSettingsComponent,
+    loadComponent: () =>
+      import('./constraints/constraints-settings/constraints-settings').then(
+        (m) => m.ConstraintsSettingsComponent,
+      ),
   },
   {
     path: 'frequent-expenses',
@@ -55,7 +61,10 @@ export const routes: Routes = [
   },
   {
     path: 'expense-summary',
-    component: MonthlyExpenseSummaryComponent,
+    loadComponent: () =>
+      import('./monthly-expense-summary/monthly-expense-summary').then(
+        (m) => m.MonthlyExpenseSummaryComponent,
+      ),
   },
   {
     path: 'annual-expense-summary',
