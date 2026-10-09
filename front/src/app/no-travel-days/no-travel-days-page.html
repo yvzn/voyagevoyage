@@ -81,8 +81,34 @@
                 </div>
               </div>
             } @else {
-              <button type="button" (click)="openEditForm(day)" class="cursor-pointer text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">{{ 'noTravelDays.edit' | translate }}</button>
-              <button type="button" (click)="requestDelete(day)" class="cursor-pointer text-sm font-medium text-red-600 hover:underline">{{ 'noTravelDays.delete' | translate }}</button>
+              <button
+                type="button"
+                (click)="openEditForm(day)"
+                class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600"
+              >
+                <svg
+                  class="h-4 w-4"
+                  aria-hidden="true"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"
+                  />
+                </svg>
+                {{ 'noTravelDays.edit' | translate }}
+              </button>
+              <button
+                type="button"
+                (click)="requestDelete(day)"
+                class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300 dark:border-red-600 dark:text-red-400 dark:hover:bg-red-900/20"
+              >
+                {{ 'noTravelDays.delete' | translate }}
+              </button>
             }
           </div>
         </li>
