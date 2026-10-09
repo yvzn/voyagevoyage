@@ -1,6 +1,8 @@
 import { Trip, TripStatus } from '../trip/trip.model';
 import { TravelConstraints, PublicHoliday } from '../constraints/constraints.model';
 import { PersonalLeave } from '../personal-leave/personal-leave.model';
+import { NoTravelDay } from '../no-travel-days/no-travel-day.model';
+import { isNoTravelDate } from '../no-travel-days/no-travel-day.utils';
 
 export interface PlannedTripItem {
   type: 'planned-trip';
@@ -117,6 +119,7 @@ export function suggestTripSlots(
   personalLeaves: PersonalLeave[],
   maxSuggestions: number = 4,
   trips: Trip[] = [],
+  noTravelDays: NoTravelDay[] = [],
 ): TripSlotSuggestion[] {
   if (remainingDays <= 0) return [];
 
@@ -137,7 +140,7 @@ export function suggestTripSlots(
   const current = new Date(startDate);
   while (current <= lastDayOfMonth) {
     const dateStr = formatDateLocal(current);
-    if (!isDayBlocked(dateStr, current.getDay(), constraints, publicHolidaySet, personalLeaves)) {
+    if (!isDayBlocked(dateStr, current.getDay(), constraints, publicHolidaySet, personalLeaves, noTravelDays)) {
       validDates.push(dateStr);
     }
     current.setDate(current.getDate() + 1);
@@ -194,6 +197,7 @@ function isDayBlocked(
   constraints: TravelConstraints,
   publicHolidaySet: Set<string>,
   personalLeaves: PersonalLeave[],
+  noTravelDays: NoTravelDay[],
 ): boolean {
   if (constraints.allowedDaysOfWeek.length > 0 && !constraints.allowedDaysOfWeek.includes(dayOfWeek)) {
     return true;
@@ -204,6 +208,9 @@ function isDayBlocked(
   if (constraints.considerVacationDays) {
     for (const leave of personalLeaves) {
       if (dateStr >= leave.startDate && dateStr <= leave.endDate) {
+        return true;
+      }
+      if (constraints.considerNoTravelDays && isNoTravelDate(dateStr, noTravelDays)) {
         return true;
       }
     }

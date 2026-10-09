@@ -19,5 +19,6 @@ public record UpdateTravelConstraintsRequest(
     int TrainBookingThresholdDays = 90,
     int A1MaxPastTripAgeDays = TravelConstraints.DefaultA1MaxPastTripAgeDays,
     int A2MinCompletionDelayDays = TravelConstraints.DefaultA2MinCompletionDelayDays,
-    decimal XAtypicalExpenseThresholdPercent = TravelConstraints.DefaultAtypicalExpenseThresholdPercent
+    decimal XAtypicalExpenseThresholdPercent = TravelConstraints.DefaultAtypicalExpenseThresholdPercent,
+    bool ConsiderNoTravelDays = false
 );

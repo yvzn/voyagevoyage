@@ -95,7 +95,7 @@
                   </span>
                   @if (day.isCurrentMonth) {
                     @let constraints = getConstraintsForDay(day);
-                    @if (constraints.publicHolidays.length > 0 || constraints.schoolHolidays.length > 0 || constraints.personalLeaves.length > 0 || isRestrictedWeekday(day)) {
+                    @if (constraints.publicHolidays.length > 0 || constraints.schoolHolidays.length > 0 || constraints.personalLeaves.length > 0 || constraints.noTravelDays.length > 0 || isRestrictedWeekday(day)) {
                       <div class="flex flex-wrap gap-0.5" [attr.aria-label]="'calendar.constraintsLabel' | translate">
                         @if (isRestrictedWeekday(day)) {
                           <a
@@ -103,9 +103,8 @@
                             class="inline-flex items-center rounded p-0.5 text-gray-400 hover:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-400 dark:text-gray-500 dark:hover:bg-gray-600/40"
                             [attr.aria-label]="'calendar.constraintAllowedDaysAriaLabel' | translate"
                           >
-                            <!-- Calendar / week icon (same as in trip form constraint warnings) -->
-                            <svg class="h-3.5 w-3.5 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10h16M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01M6 4v2M18 4v2M5 6h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z"/>
+                            <svg class="h-3.5 w-3.5 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5" />
                             </svg>
                           </a>
                         }
@@ -145,6 +144,20 @@
                             <!-- Person icon (same as in trip form constraint warnings) -->
                             <svg class="h-3.5 w-3.5 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4Z"/>
+                            </svg>
+                          </a>
+                        }
+                        @for (noTravelDay of constraints.noTravelDays; track noTravelDay.id) {
+                          <a
+                            routerLink="/no-travel-days"
+                            class="inline-flex items-center rounded p-0.5 text-gray-400 hover:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-400 dark:text-gray-500 dark:hover:bg-gray-600/40"
+                            [title]="noTravelDay.label || ('noTravelDays.heading' | translate)"
+                            [attr.aria-label]="'calendar.constraintNoTravelDayAriaLabel' | translate : { label: noTravelDay.label || ('noTravelDays.heading' | translate) }"
+                          >
+                            <svg class="h-3.5 w-3.5 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M20 11V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5M8 3v4M16 3v4M4 10h16" />
+                              <circle cx="17" cy="17" r="4.5" />
+                              <path stroke-linecap="round" stroke-linejoin="round" d="m13.8 20.2 6.4-6.4" />
                             </svg>
                           </a>
                         }

@@ -1,0 +1,166 @@
+<section class="mx-auto max-w-3xl">
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ 'noTravelDays.heading' | translate }}</h1>
+    <button type="button" (click)="openCreateForm()"
+      class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600">
+      {{ 'noTravelDays.addButton' | translate }}
+    </button>
+  </div>
+  <p class="mb-6 text-sm text-gray-600 dark:text-gray-300">{{ 'noTravelDays.description' | translate }}</p>
+
+  @if (loadError()) {
+    <div role="alert" class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-800 dark:bg-red-900/30 dark:text-red-400">
+      <p>{{ 'noTravelDays.loadError' | translate }}</p>
+      <button type="button" (click)="retryLoad()" class="mt-2 cursor-pointer font-medium underline">{{ 'noTravelDays.retry' | translate }}</button>
+    </div>
+  }
+  @if (deleteError()) {
+    <p role="alert" class="mb-4 text-sm text-red-600 dark:text-red-400">{{ 'noTravelDays.deleteError' | translate }}</p>
+  }
+  @if (isLoading()) {
+    <p role="status" class="py-8 text-center text-sm text-gray-500 dark:text-gray-400">{{ 'noTravelDays.loading' | translate }}</p>
+  } @else if (days().length === 0) {
+    <p class="rounded-lg border border-dashed border-gray-300 p-8 text-center text-sm text-gray-500 dark:border-gray-600 dark:text-gray-400">
+      {{ 'noTravelDays.empty' | translate }}
+    </p>
+  } @else {
+    <ul class="divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white dark:divide-gray-700 dark:border-gray-700 dark:bg-gray-800">
+      @for (day of days(); track day.id) {
+        <li class="flex flex-wrap items-center justify-between gap-3 p-4">
+          <div>
+            <p class="font-medium text-gray-900 dark:text-white">
+              @if (day.label) { {{ day.label }} } @else { {{ 'noTravelDays.untitled' | translate }} }
+            </p>
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+              @if (day.isRecurring) {
+                {{ formatDate(day.startDate) }}
+                <span class="ml-2 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-800 dark:bg-purple-900/40 dark:text-purple-300">
+                  {{ 'noTravelDays.recurringBadge' | translate }}
+                </span>
+              } @else if (day.startDate === day.endDate) {
+                {{ formatDate(day.startDate) }}
+              } @else {
+                {{ formatDate(day.startDate) }} – {{ formatDate(day.endDate) }}
+              }
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            @if (deletingDayId() === day.id) {
+              <div
+                role="alertdialog"
+                aria-labelledby="no-travel-delete-confirm-message"
+                class="w-full rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-700 dark:bg-red-900/20"
+              >
+                <p id="no-travel-delete-confirm-message" class="text-sm font-medium text-red-800 dark:text-red-300">
+                  {{ 'noTravelDays.confirmDelete' | translate }}
+                </p>
+                <div class="mt-3 flex gap-3">
+                  <button
+                    type="button"
+                    (click)="confirmDelete(day)"
+                    [disabled]="isDeleting()"
+                    [attr.aria-busy]="isDeleting() ? 'true' : null"
+                    class="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300 disabled:opacity-50 dark:bg-red-700 dark:hover:bg-red-600"
+                  >
+                    @if (isDeleting()) {
+                      <svg class="inline h-4 w-4 animate-spin" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.568 3 7.036l-2.745z"/>
+                      </svg>
+                    }
+                    {{ (isDeleting() ? 'noTravelDays.deleting' : 'noTravelDays.delete') | translate }}
+                  </button>
+                  <button
+                    type="button"
+                    (click)="cancelDelete()"
+                    [disabled]="isDeleting()"
+                    class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                  >
+                    {{ 'noTravelDays.cancel' | translate }}
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <button
+                type="button"
+                (click)="openEditForm(day)"
+                class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600"
+              >
+                <svg
+                  class="h-4 w-4"
+                  aria-hidden="true"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"
+                  />
+                </svg>
+                {{ 'noTravelDays.edit' | translate }}
+              </button>
+              <button
+                type="button"
+                (click)="requestDelete(day)"
+                class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300 dark:border-red-600 dark:text-red-400 dark:hover:bg-red-900/20"
+              >
+                {{ 'noTravelDays.delete' | translate }}
+              </button>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+
+  @if (isFormOpen()) {
+    <div class="mt-6 rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
+      <h2 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+        {{ (editingDay() ? 'noTravelDays.editTitle' : 'noTravelDays.createTitle') | translate }}
+      </h2>
+      <p class="mb-4 text-sm text-gray-600 dark:text-gray-300">{{ 'noTravelDays.formDescription' | translate }}</p>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <fieldset [disabled]="isSaving()" class="space-y-4">
+          <div>
+            <label for="no-travel-start" class="mb-1 block text-sm font-medium text-gray-900 dark:text-white">{{ 'noTravelDays.startDate' | translate }}</label>
+            <input id="no-travel-start" type="date" formControlName="startDate" required
+              class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+          </div>
+          @if (!form.controls.isRecurring.value) {
+            <div>
+              <label for="no-travel-end" class="mb-1 block text-sm font-medium text-gray-900 dark:text-white">{{ 'noTravelDays.endDate' | translate }}</label>
+              <input id="no-travel-end" type="date" formControlName="endDate" required
+                class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+            </div>
+            @if (form.errors?.['endBeforeStart']) {
+              <p role="alert" class="text-xs text-red-600 dark:text-red-400">{{ 'noTravelDays.endBeforeStart' | translate }}</p>
+            }
+          }
+          <label for="no-travel-recurring" class="flex cursor-pointer items-start gap-2 text-sm text-gray-900 dark:text-white">
+            <input id="no-travel-recurring" type="checkbox" formControlName="isRecurring"
+              class="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+            <span>
+              <span class="font-medium">{{ 'noTravelDays.recurring' | translate }}</span>
+              <span class="mt-1 block text-xs text-gray-500 dark:text-gray-400">{{ 'noTravelDays.recurringHint' | translate }}</span>
+            </span>
+          </label>
+          <div>
+            <label for="no-travel-label" class="mb-1 block text-sm font-medium text-gray-900 dark:text-white">{{ 'noTravelDays.label' | translate }}</label>
+            <input id="no-travel-label" type="text" formControlName="label"
+              class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+          </div>
+        </fieldset>
+        @if (saveError()) {
+          <p role="alert" class="mt-3 text-sm text-red-600 dark:text-red-400">{{ 'noTravelDays.saveError' | translate }}</p>
+        }
+        <div class="mt-5 flex justify-end gap-2">
+          <button type="button" (click)="closeForm()" class="cursor-pointer rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">{{ 'noTravelDays.cancel' | translate }}</button>
+          <button type="submit" [disabled]="form.invalid || isSaving()" class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">{{ (isSaving() ? 'noTravelDays.saving' : 'noTravelDays.save') | translate }}</button>
+        </div>
+      </form>
+    </div>
+  }
+</section>

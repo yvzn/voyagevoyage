@@ -14,7 +14,7 @@
         </div>
         <div class="min-w-0 flex-1">
           @let constraints = getConstraintsForDay(day);
-          @if (constraints.publicHolidays.length > 0 || constraints.schoolHolidays.length > 0 || constraints.personalLeaves.length > 0 || isRestrictedWeekday(day)) {
+          @if (constraints.publicHolidays.length > 0 || constraints.schoolHolidays.length > 0 || constraints.personalLeaves.length > 0 || constraints.noTravelDays.length > 0 || isRestrictedWeekday(day)) {
             <div class="mb-1 flex flex-wrap gap-1 text-xs text-gray-500 dark:text-gray-400">
               @if (isRestrictedWeekday(day)) {
                 <a routerLink="/constraints" class="hover:underline">{{ 'calendar.constraintsLabel' | translate }}</a>
@@ -27,6 +27,9 @@
               }
               @for (leave of constraints.personalLeaves; track leave.id) {
                 <a [routerLink]="['/personal-leaves', leave.id]" class="hover:underline">{{ leave.label || ('leaveType.' + leave.type | translate) }}</a>
+              }
+              @for (noTravelDay of constraints.noTravelDays; track noTravelDay.id) {
+                <a routerLink="/no-travel-days" class="hover:underline">{{ noTravelDay.label || ('noTravelDays.heading' | translate) }}</a>
               }
             </div>
           }

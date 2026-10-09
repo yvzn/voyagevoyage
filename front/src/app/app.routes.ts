@@ -5,6 +5,7 @@ import { PlanningDashboardComponent } from './planning-dashboard/planning-dashbo
 import { DashboardComponent } from './dashboard/dashboard';
 import { PersonalLeavePageComponent } from './personal-leave/personal-leave-page/personal-leave-page';
 import { PersonalLeaveDetailComponent } from './personal-leave/personal-leave-detail/personal-leave-detail';
+import { NoTravelDaysPageComponent } from './no-travel-days/no-travel-days-page';
 import { TrainBookingListComponent } from './train-booking/train-booking-list/train-booking-list';
 import { HotelBookingListComponent } from './hotel-booking/hotel-booking-list/hotel-booking-list';
 import { FrequentExpenseSettingsComponent } from './frequent-expense/frequent-expense-settings/frequent-expense-settings';
@@ -80,5 +81,9 @@ export const routes: Routes = [
   {
     path: 'personal-leaves/:id',
     component: PersonalLeaveDetailComponent,
+  },
+  {
+    path: 'no-travel-days',
+    component: NoTravelDaysPageComponent,
   },
 ];

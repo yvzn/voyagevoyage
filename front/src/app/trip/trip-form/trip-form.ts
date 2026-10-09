@@ -8,6 +8,7 @@ import {
   inject,
   input,
   output,
+  signal,
   viewChild,
   ChangeDetectionStrategy
 } from '@angular/core';
@@ -26,6 +27,8 @@ import { constraintViolationValidator, ConstraintViolationReason } from './const
 import { getTripStatusTranslationKey } from '../trip-status.utils';
 import { PersonalLeaveActions } from '../../personal-leave/store/personal-leave.actions';
 import { selectAllPersonalLeaves } from '../../personal-leave/store/personal-leave.selectors';
+import { NoTravelDayActions } from '../../no-travel-days/store/no-travel-day.actions';
+import { selectAllNoTravelDays } from '../../no-travel-days/store/no-travel-day.reducer';
 
 function endDateAfterStartDate(group: AbstractControl): ValidationErrors | null {
   const start = group.get('startDate')?.value as string;
@@ -63,6 +66,7 @@ export class TripFormComponent implements AfterViewInit {
   private readonly constraints = this.store.selectSignal(selectConstraints);
   private readonly publicHolidays = this.store.selectSignal(selectPublicHolidays);
   private readonly personalLeaves = this.store.selectSignal(selectAllPersonalLeaves);
+  private readonly noTravelDays = this.store.selectSignal(selectAllNoTravelDays);
   private readonly allTrips = this.store.selectSignal(selectAllTrips);
   private readonly createStatus = this.store.selectSignal(selectTripsCreateStatus);
   private readonly updateStatus = this.store.selectSignal(selectTripsUpdateStatus);
@@ -83,12 +87,7 @@ export class TripFormComponent implements AfterViewInit {
     return null;
   });
 
-  /** Violation reasons from the form's constraintWarning or constraintError. */
-  protected readonly violationReasons = computed<ConstraintViolationReason[]>(() => {
-    const detail =
-      this.form.getError('constraintWarning') ?? this.form.getError('constraintError');
-    return detail?.reasons ?? [];
-  });
+  protected readonly violationReasons = signal<ConstraintViolationReason[]>([]);
 
   /** Tracks which save operation (create/update) was last dispatched by this instance. */
   private saveOp: 'create' | 'update' | null = null;
@@ -109,6 +108,7 @@ export class TripFormComponent implements AfterViewInit {
           () => this.personalLeaves(),
           () => this.allTrips(),
           () => this.trip()?.id ?? null,
+          () => this.noTravelDays(),
         ),
       ],
     },
@@ -118,6 +118,18 @@ export class TripFormComponent implements AfterViewInit {
     // Ensure public holidays and personal leaves are available for constraint checking
     this.store.dispatch(SettingsActions.loadPublicHolidays());
     this.store.dispatch(PersonalLeaveActions.loadPersonalLeaves());
+    this.store.dispatch(NoTravelDayActions.loadNoTravelDays());
+
+    effect(() => {
+      this.constraints();
+      this.noTravelDays();
+      this.form.updateValueAndValidity({ emitEvent: false });
+      this.updateViolationReasons();
+    });
+
+    this.form.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.updateViolationReasons());
 
     effect(() => {
       const t = this.trip();
@@ -174,6 +186,12 @@ export class TripFormComponent implements AfterViewInit {
         else if (us === 'failure') { this.saveOp = null; }
       }
     });
+  }
+
+  private updateViolationReasons(): void {
+    const detail =
+      this.form.getError('constraintWarning') ?? this.form.getError('constraintError');
+    this.violationReasons.set(detail?.reasons ?? []);
   }
 
   ngAfterViewInit(): void {

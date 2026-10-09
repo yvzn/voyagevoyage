@@ -19,6 +19,7 @@ export interface TravelConstraints {
   maxDaysPerMonth: number | null;
   considerPublicHolidays: boolean;
   considerVacationDays: boolean;
+  considerNoTravelDays?: boolean;
   isStrict: boolean;
   planningHorizonDays: number;
   trainBookingThresholdDays?: number;
@@ -34,6 +35,7 @@ export interface UpdateTravelConstraintsRequest {
   maxDaysPerMonth: number | null;
   considerPublicHolidays: boolean;
   considerVacationDays: boolean;
+  considerNoTravelDays?: boolean;
   isStrict: boolean;
   planningHorizonDays: number;
   trainBookingThresholdDays?: number;
