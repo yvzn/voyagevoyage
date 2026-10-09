@@ -216,14 +216,40 @@
           <li>
             <button type="button" (click)="toggleLeaveMenu()" [attr.aria-expanded]="leaveSectionOpen()"
               class="flex items-center w-full p-2 text-base font-medium text-gray-900 rounded-lg cursor-pointer dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+              <svg aria-hidden="true"
+                class="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 3v1.5M5.64 5.64l1.06 1.06M18.36 5.64 17.3 6.7M3 12h1.5M19.5 12H21M7.5 12a4.5 4.5 0 0 1 9 0M3 15.75c1.5 0 1.5 1.5 3 1.5s1.5-1.5 3-1.5 1.5 1.5 3 1.5 1.5-1.5 3-1.5 1.5 1.5 3 1.5 1.5-1.5 3-1.5M3 20.25c1.5 0 1.5-1.5 3-1.5s1.5 1.5 3 1.5 1.5-1.5 3-1.5 1.5 1.5 3 1.5 1.5-1.5 3-1.5 1.5 1.5 3 1.5" />
+              </svg>
               <span class="ml-3 flex-1 text-left">{{ 'leaveCommitmentsNavSection' | translate }}</span>
               <svg aria-hidden="true" [class.rotate-180]="leaveSectionOpen()" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
               </svg>
             </button>
             <ul [class.hidden]="!leaveSectionOpen()" class="py-1 space-y-1">
-            <li><a routerLink="/personal-leaves" routerLinkActive="bg-gray-100 dark:bg-gray-700" class="flex items-center py-2 pl-8 pr-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"><span class="ml-3">{{ 'personalLeaveNavItem' | translate }}</span></a></li>
-              <li><a routerLink="/no-travel-days" routerLinkActive="bg-gray-100 dark:bg-gray-700" class="flex items-center py-2 pl-8 pr-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"><span class="ml-3">{{ 'noTravelDaysNavItem' | translate }}</span></a></li>
+              <li>
+                <a routerLink="/personal-leaves" routerLinkActive="bg-gray-100 dark:bg-gray-700"
+                  class="flex items-center py-2 pl-8 pr-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                  <svg aria-hidden="true"
+                    class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                    fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4Z" />
+                  </svg>
+                  <span class="ml-3">{{ 'personalLeaveNavItem' | translate }}</span>
+                </a>
+              </li>
+              <li><a routerLink="/no-travel-days" routerLinkActive="bg-gray-100 dark:bg-gray-700" class="flex items-center py-2 pl-8 pr-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                <svg aria-hidden="true"
+                  class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                  fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M20 11V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5M8 3v4M16 3v4M4 10h16" />
+                  <circle cx="17" cy="17" r="4.5" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m13.8 20.2 6.4-6.4" />
+                </svg>
+                <span class="ml-3">{{ 'noTravelDaysNavItem' | translate }}</span></a></li>
             </ul>
           </li>
         </ul>
