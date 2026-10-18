@@ -3,7 +3,7 @@ import { Expense, ExpenseCategory } from './expense.model';
 import { FiscalRule } from '../fiscal-rule/fiscal-rule.model';
 import { PublicHoliday } from '../constraints/constraints.model';
 import { PersonalLeave } from '../personal-leave/personal-leave.model';
-import { Trip } from '../trip/trip.model';
+import { Trip, TripStatus } from '../trip/trip.model';
 
 export const MONTHLY_SUMMARY_CATEGORIES = [
   ExpenseCategory.Meal,
@@ -95,6 +95,17 @@ function dateToIso(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+function getActiveTrips(trips: Trip[] = []): Trip[] {
+  return trips.filter((trip) => trip.status !== TripStatus.Cancelled);
+}
+
+function excludeCancelledTripExpenses(expenses: Expense[], trips: Trip[] = []): Expense[] {
+  const cancelledTripIds = new Set(
+    trips.filter((trip) => trip.status === TripStatus.Cancelled).map((trip) => trip.id),
+  );
+  return expenses.filter((expense) => !cancelledTripIds.has(expense.tripId));
+}
+
 function getTripDaySet(trips: Trip[] = []): Set<string> {
   const tripDays = new Set<string>();
 
@@ -178,6 +189,7 @@ export function buildMonthlyExpenseSummary(
   publicHolidays: PublicHoliday[] = [],
   personalLeaves: PersonalLeave[] = [],
 ): MonthlyExpenseSummary {
+  expenses = excludeCancelledTripExpenses(expenses, trips);
   const totalDaysInMonth = new Date(year, monthIndex + 1, 0).getDate();
   const categoryTotals: Record<MonthlySummaryCategory, number> = {
     [ExpenseCategory.Meal]: 0,
@@ -188,7 +200,7 @@ export function buildMonthlyExpenseSummary(
   };
 
   const days: MonthlySummaryDay[] = [];
-  const tripDays = getTripDaySet(trips);
+  const tripDays = getTripDaySet(getActiveTrips(trips));
   const publicHolidayDays = new Set(publicHolidays.map((holiday) => holiday.date));
   const personalLeaveDays = new Set<string>();
   for (const leave of personalLeaves) {
@@ -453,7 +465,7 @@ function createExpenseExportRows(
   const tripMap = new Map(trips.map((trip) => [trip.id, trip]));
   const rows: Array<Array<string | number>> = [];
 
-  const relevantExpenses = expenses.filter((expense) => {
+  const relevantExpenses = excludeCancelledTripExpenses(expenses, trips).filter((expense) => {
     const date = new Date(`${expense.date}T00:00:00`);
     const matchesYear = year === undefined || date.getFullYear() === year;
     const matchesMonth = monthIndex === undefined || date.getMonth() === monthIndex;
