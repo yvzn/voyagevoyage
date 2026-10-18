@@ -106,7 +106,7 @@ export const createExpenseForDateEffect = createEffect(
       withLatestFrom(store.select(selectAllTrips)),
       switchMap(([{ date, request }, trips]) => {
         const existingTrip = trips.find(
-          (t) => t.startDate <= date && date <= t.endDate,
+          (t) => t.status !== TripStatus.Cancelled && t.startDate <= date && date <= t.endDate,
         );
 
         if (existingTrip) {

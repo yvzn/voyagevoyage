@@ -39,7 +39,7 @@ public class AnomalyDetectionService(
         var cutoffA2 = today.AddDays(-constraints.A2MinCompletionDelayDays);
 
         var candidateTrips = await db.Trips
-            .Where(t => t.UserId == userId)
+            .Where(t => t.UserId == userId && t.Status != TripStatus.Cancelled)
             .Where(t => t.EndDate <= DateOnly.FromDateTime(today))
             .Where(t => t.EndDate >= DateOnly.FromDateTime(cutoffA1))
             .Where(t => t.EndDate <= DateOnly.FromDateTime(cutoffA2))
@@ -62,7 +62,7 @@ public class AnomalyDetectionService(
     public async Task<IReadOnlyList<AnomalyAlert>> AnalyzeTripAsync(string userId, string tripId, DateTime? evaluationDate = null, CancellationToken cancellationToken = default)
     {
         var trip = await db.Trips
-            .Where(t => t.UserId == userId && t.Id == tripId)
+            .Where(t => t.UserId == userId && t.Id == tripId && t.Status != TripStatus.Cancelled)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (trip is null)
@@ -78,7 +78,7 @@ public class AnomalyDetectionService(
     public async Task<IReadOnlyList<AnomalyAlert>> ReconcileTripAsync(string userId, string tripId, DateTime? evaluationDate = null, CancellationToken cancellationToken = default)
     {
         var trip = await db.Trips
-            .Where(t => t.UserId == userId && t.Id == tripId)
+            .Where(t => t.UserId == userId && t.Id == tripId && t.Status != TripStatus.Cancelled)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (trip is null)
