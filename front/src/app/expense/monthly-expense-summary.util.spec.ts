@@ -249,3 +249,50 @@ describe('buildMonthlyExpenseSummary', () => {
     expect(csv).toContain('\r\n');
   });
 });
+
+describe('cancelled trips', () => {
+  const rule: FiscalRule = {
+    id: 'rule-1',
+    startDate: '2026-02-01',
+    endDate: '2026-02-28',
+    mealAllowance: 20,
+    mealVoucherFaceValue: 10,
+    mealVoucherEmployerContributionPercentage: 60,
+    remoteWorkAllowance: 12,
+  };
+  const activeTrip: Trip = { id: 'trip-1', startDate: '2026-02-05', endDate: '2026-02-05', destination: 'Lyon', status: TripStatus.Planned };
+  const cancelledTrip: Trip = { id: 'trip-2', startDate: '2026-02-03', endDate: '2026-02-03', destination: 'Nantes', status: TripStatus.Cancelled };
+  const expenses = [
+    makeExpense('2026-02-05', ExpenseCategory.Train, 40, 'trip-1'),
+    makeExpense('2026-02-03', ExpenseCategory.Train, 100, 'trip-2', 'Cancelled train'),
+  ];
+
+  it('excludes cancelled-trip expenses from monthly totals', () => {
+    const summary = buildMonthlyExpenseSummary(expenses, 2026, 1, [rule], [activeTrip, cancelledTrip]);
+
+    expect(summary.categoryTotals[ExpenseCategory.Train]).toBe(40);
+    expect(summary.days[2].cells[ExpenseCategory.Train]).toBeUndefined();
+  });
+
+  it('excludes cancelled-trip expenses from annual totals', () => {
+    const summary = buildAnnualExpenseSummary(expenses, 2026, [rule], [activeTrip, cancelledTrip]);
+
+    expect(summary.categoryTotals['travel']).toBe(40);
+  });
+
+  it('grants remote work allowance on days covered only by a cancelled trip', () => {
+    const summary = buildMonthlyExpenseSummary(expenses, 2026, 1, [rule], [activeTrip, cancelledTrip]);
+
+    expect(summary.days[2].cells[ExpenseCategory.RemoteWork]?.net).toBe(12);
+    expect(summary.days[4].cells[ExpenseCategory.RemoteWork]).toBeUndefined();
+  });
+
+  it('excludes cancelled-trip expenses from CSV exports', () => {
+    const monthly = buildMonthlyExpenseExportCsv(expenses, [rule], [activeTrip, cancelledTrip], 2026, 1, 'en', fakeTranslateService as TranslateService);
+    const annual = buildAnnualExpenseExportCsv(expenses, [rule], [activeTrip, cancelledTrip], 2026, 'en', fakeTranslateService as TranslateService);
+
+    expect(monthly).not.toContain('Cancelled train');
+    expect(annual).not.toContain('Cancelled train');
+    expect(monthly).toContain('Lyon');
+  });
+});
