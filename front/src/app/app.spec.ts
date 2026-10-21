@@ -213,6 +213,25 @@ describe('App', () => {
     expect(document.body.classList.contains('overflow-hidden')).toBeTruthy();
   });
 
+  it('should collapse the side menu to a hamburger and overlay alerts on small screens', async () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const el = fixture.nativeElement as HTMLElement;
+    const menu = el.querySelector('#drawer-navigation')!;
+    const burger = el.querySelector('button[data-drawer-toggle]')!;
+    expect(menu.classList.contains('md:translate-x-0')).toBe(true);
+    expect(burger.classList.contains('md:hidden')).toBe(true);
+
+    el.querySelector<HTMLButtonElement>('[aria-controls="alerts-drawer"]')?.click();
+    fixture.detectChanges();
+
+    expect(menu.classList.contains('lg:translate-x-0')).toBe(true);
+    expect(menu.classList.contains('md:translate-x-0')).toBe(false);
+    expect(burger.classList.contains('lg:hidden')).toBe(true);
+    expect(el.querySelector('#alerts-drawer')?.classList.contains('max-md:fixed')).toBe(true);
+  });
+
   it('should keep the drawer open on desktop widths', () => {
     window.matchMedia = vi.fn().mockReturnValue({
       matches: false,

@@ -147,7 +147,8 @@ export class App implements OnInit {
       return;
     }
 
-    if (!window.matchMedia('(max-width: 767px)').matches) {
+    const query = this.alertsOpen() ? '(max-width: 1023px)' : '(max-width: 767px)';
+    if (!window.matchMedia(query).matches) {
       return;
     }
 

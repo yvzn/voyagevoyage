@@ -271,3 +271,8 @@ A feature is not complete unless:
 - feedback states are present for loading, success, warning, and error situations where relevant
 - the solution aligns with the shared Angular, Tailwind CSS, and Flowbite approach
 - the screen does not introduce unnecessary complexity or inconsistent patterns
+## Alerts drawer layout
+
+- On screens >= 1024px the alerts drawer pushes the main content and the side menu stays visible.
+- On screens < 1024px, opening the alerts drawer collapses the side menu to the hamburger button.
+- On screens < 768px the alerts drawer is an overlay and does not push the main content.

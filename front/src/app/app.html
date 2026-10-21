@@ -9,7 +9,8 @@
       <div class="flex justify-start items-center">
         <button data-drawer-target="drawer-navigation" data-drawer-toggle="drawer-navigation"
           aria-controls="drawer-navigation"
-          class="p-2 mr-2 text-gray-600 rounded-lg cursor-pointer md:hidden hover:text-gray-900 hover:bg-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700 focus:ring-2 focus:ring-gray-100 dark:focus:ring-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+          [class]="alertsOpen() ? 'lg:hidden' : 'md:hidden'"
+          class="p-2 mr-2 text-gray-600 rounded-lg cursor-pointer hover:text-gray-900 hover:bg-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700 focus:ring-2 focus:ring-gray-100 dark:focus:ring-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
           <svg aria-hidden="true" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"
             xmlns="http://www.w3.org/2000/svg">
             <path fill-rule="evenodd"
@@ -87,7 +88,8 @@
 
   <!-- Sidebar -->
   <aside
-    class="fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform -translate-x-full bg-white border-r border-gray-200 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+    class="fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform -translate-x-full bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700"
+    [class]="alertsOpen() ? 'lg:translate-x-0' : 'md:translate-x-0'"
     [attr.aria-label]="'sidenavLabel' | translate" id="drawer-navigation">
     <div class="flex flex-col h-full bg-white dark:bg-gray-800">
       <div class="overflow-y-auto flex-1 py-5 px-3">
@@ -350,12 +352,12 @@
     </div>
   </aside>
 
-  <div class="flex min-h-dvh pt-14 md:ml-64">
+  <div class="flex min-h-dvh pt-14" [class]="alertsOpen() ? 'lg:ml-64' : 'md:ml-64'">
     <main id="main-content" class="min-w-0 flex-1 p-4 pt-6">
       <router-outlet />
     </main>
       <aside id="alerts-drawer" aria-labelledby="alerts-heading" [class.hidden]="!alertsOpen()"
-        class="sticky top-14 flex h-[calc(100dvh-3.5rem)] w-[min(90vw,24rem)] shrink-0 flex-col border-l border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 sm:w-96">
+        class="max-md:fixed max-md:right-0 max-md:top-14 max-md:z-30 max-md:shadow-xl md:sticky md:top-14 flex h-[calc(100dvh-3.5rem)] w-[min(90vw,24rem)] shrink-0 flex-col border-l border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 sm:w-96">
         <div class="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
           <h2 id="alerts-heading" class="text-lg font-semibold text-gray-900 dark:text-white">
             {{ 'alerts.title' | translate }}
