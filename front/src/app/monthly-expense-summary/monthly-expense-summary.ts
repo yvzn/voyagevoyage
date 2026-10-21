@@ -25,8 +25,10 @@ import {
 } from '../expense/monthly-expense-summary.util';
 import { FiscalRuleActions } from '../fiscal-rule/store/fiscal-rule.actions';
 import { selectAllFiscalRules } from '../fiscal-rule/store/fiscal-rule.selectors';
+import { SettingsActions } from '../constraints/store/settings.actions';
 import { selectPublicHolidays } from '../constraints/store/settings.selectors';
 import { LocaleService } from '../locale.service';
+import { PersonalLeaveActions } from '../personal-leave/store/personal-leave.actions';
 import { selectAllPersonalLeaves } from '../personal-leave/store/personal-leave.selectors';
 import { TripActions } from '../trip/store/trip.actions';
 import { selectAllTrips } from '../trip/store/trip.selectors';
@@ -73,6 +75,8 @@ export class MonthlyExpenseSummaryComponent {
 
     this.store.dispatch(TripActions.loadTrips());
     this.store.dispatch(FiscalRuleActions.loadFiscalRules());
+    this.store.dispatch(SettingsActions.loadPublicHolidays());
+    this.store.dispatch(PersonalLeaveActions.loadPersonalLeaves());
 
     effect(() => {
       const trips = this.trips();

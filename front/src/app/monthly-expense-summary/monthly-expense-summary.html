@@ -85,9 +85,11 @@
         </thead>
         <tbody>
           @for (day of summary().days; track day.date) {
-          <tr class="align-top">
+          <tr [class]="day.isDayOff ? 'align-top bg-gray-100 dark:bg-gray-700' : 'align-top'">
             <th
-              class="border-b border-r border-gray-200 bg-gray-50 px-3 py-2 text-left font-medium text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
+              [class]="day.isDayOff
+                ? 'border-b border-r border-gray-200 bg-gray-200 px-3 py-2 text-left font-medium text-gray-800 dark:border-gray-600 dark:bg-gray-600 dark:text-gray-100'
+                : 'border-b border-r border-gray-200 bg-gray-50 px-3 py-2 text-left font-medium text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100'">
               <span class="block text-lg leading-none">{{ day.day }}</span>
               <span class="mt-1 block text-[10px] uppercase tracking-[0.12em] text-gray-500 dark:text-gray-400">
                 {{ getDayOfWeekShort(day.date) }}

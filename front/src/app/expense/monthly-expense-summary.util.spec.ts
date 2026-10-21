@@ -141,6 +141,21 @@ describe('buildMonthlyExpenseSummary', () => {
     expect(summary.days[2].cells[ExpenseCategory.RemoteWork]?.net).toBe(12);
   });
 
+  it('marks weekends, public holidays, and inclusive personal leave dates as days off', () => {
+    const holiday = { id: 'holiday-1', date: '2026-02-02', name: 'Holiday', region: 'france-metropole' };
+    const leave = { id: 'leave-1', startDate: '2026-02-09', endDate: '2026-02-10', type: LeaveType.Annual, label: 'Leave' };
+
+    const summary = buildMonthlyExpenseSummary([], 2026, 1, [], [], [holiday], [leave]);
+    const dayOffByDate = new Map(summary.days.map(({ date, isDayOff }) => [date, isDayOff]));
+
+    expect(dayOffByDate.get('2026-02-01')).toBe(true);
+    expect(dayOffByDate.get('2026-02-07')).toBe(true);
+    expect(dayOffByDate.get('2026-02-02')).toBe(true);
+    expect(dayOffByDate.get('2026-02-09')).toBe(true);
+    expect(dayOffByDate.get('2026-02-10')).toBe(true);
+    expect(dayOffByDate.get('2026-02-03')).toBe(false);
+  });
+
   it('keeps remote-work allowance on no-travel days', () => {
     const noTravelDay: NoTravelDay = {
       id: 'no-travel-1',

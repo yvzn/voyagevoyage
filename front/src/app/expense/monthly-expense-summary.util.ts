@@ -34,6 +34,7 @@ export interface MonthlySummaryCell {
 export interface MonthlySummaryDay {
   date: string;
   day: number;
+  isDayOff: boolean;
   cells: Partial<Record<MonthlySummaryCategory, MonthlySummaryCell>>;
   dayTotal: number;
 }
@@ -147,9 +148,7 @@ function getRemoteWorkAllowanceCell(
     return undefined;
   }
 
-  const date = new Date(`${isoDate}T00:00:00`);
-  const isWorkingDay = date.getDay() >= 1 && date.getDay() <= 5;
-  if (!isWorkingDay || tripDays.has(isoDate) || publicHolidayDays.has(isoDate) || personalLeaveDays.has(isoDate)) {
+  if (isDayOff(isoDate, publicHolidayDays, personalLeaveDays) || tripDays.has(isoDate)) {
     return undefined;
   }
 
@@ -160,6 +159,20 @@ function getRemoteWorkAllowanceCell(
     net: fiscalRule.remoteWorkAllowance,
     sourceExpenses: [],
   };
+}
+
+function isDayOff(
+  isoDate: string,
+  publicHolidayDays: Set<string>,
+  personalLeaveDays: Set<string>,
+): boolean {
+  const dayOfWeek = new Date(`${isoDate}T00:00:00`).getDay();
+  return (
+    dayOfWeek === 0 ||
+    dayOfWeek === 6 ||
+    publicHolidayDays.has(isoDate) ||
+    personalLeaveDays.has(isoDate)
+  );
 }
 
 function calculateTotals(
@@ -250,6 +263,7 @@ export function buildMonthlyExpenseSummary(
     days.push({
       date: isoDate,
       day,
+      isDayOff: isDayOff(isoDate, publicHolidayDays, personalLeaveDays),
       cells,
       dayTotal,
     });
