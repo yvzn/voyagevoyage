@@ -8,6 +8,7 @@ import { Alert, AlertStatus, AlertType } from './alerts/alert.model';
 import { AlertsService } from './alerts/alerts.service';
 import { App } from './app';
 import { TripService } from './trip/trip.service';
+import { VoucherService } from './voucher/voucher.service';
 
 @Component({
   standalone: true,
@@ -60,6 +61,7 @@ describe('App', () => {
         provideTranslateService(),
         { provide: AlertsService, useValue: alertsService },
         { provide: TripService, useValue: tripsService },
+        { provide: VoucherService, useValue: { getActiveVouchers: () => [] } },
       ],
     }).compileComponents();
   });

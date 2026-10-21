@@ -19,13 +19,32 @@
     }
   </div>
 
+  @if (loadError()) {
+    <div role="alert" class="mb-6 flex items-center justify-between gap-3 rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-800 dark:border-red-700 dark:bg-red-900/20 dark:text-red-300">
+      <span>{{ 'voucher.loadError' | translate }}</span>
+      <button type="button" (click)="retryLoad()" class="cursor-pointer rounded-lg border border-red-300 px-3 py-1.5 text-xs font-medium hover:bg-red-100 dark:border-red-700 dark:hover:bg-red-900/40">
+        {{ 'voucher.retryButton' | translate }}
+      </button>
+    </div>
+  }
+
+  @if (actionError()) {
+    <div role="alert" class="mb-6 rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-800 dark:border-red-700 dark:bg-red-900/20 dark:text-red-300">
+      {{ 'voucher.actionError' | translate }}
+    </div>
+  }
+
+  @if (loading()) {
+    <p role="status" class="mb-6 text-sm text-gray-600 dark:text-gray-300">{{ 'voucher.loading' | translate }}</p>
+  }
+
   @if (isFormOpen()) {
     <div class="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <app-voucher-form [voucher]="selectedVoucher()" (saved)="onFormSaved($event)" (cancelled)="onFormCancelled()" />
     </div>
   }
 
-  @if (vouchers().length === 0) {
+  @if (!loading() && !loadError() && vouchers().length === 0) {
     <div class="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6 text-sm text-gray-600 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300">
       {{ 'voucher.emptyState' | translate }}
     </div>
