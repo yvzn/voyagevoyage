@@ -17,6 +17,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Receipt> Receipts { get; set; }
     public DbSet<BookingConfirmation> BookingConfirmations { get; set; }
     public DbSet<AnomalyAlert> AnomalyAlerts { get; set; }
+    public DbSet<Voucher> Vouchers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -87,6 +88,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasKey(c => c.Id);
             entity.HasIndex(c => c.UserId);
             entity.HasIndex(c => c.TripId);
+        });
+
+        modelBuilder.Entity<Voucher>(entity =>
+        {
+            entity.HasKey(v => v.Id);
+            entity.HasIndex(v => v.UserId);
         });
 
         modelBuilder.Entity<AnomalyAlert>(entity =>

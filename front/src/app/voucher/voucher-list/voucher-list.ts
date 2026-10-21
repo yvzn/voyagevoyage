@@ -16,6 +16,10 @@ export class VoucherListComponent {
   private readonly voucherService = inject(VoucherService);
 
   protected readonly vouchers = this.voucherService.vouchers;
+  protected readonly loading = this.voucherService.loading;
+  protected readonly loadError = this.voucherService.loadError;
+  protected readonly saving = signal(false);
+  protected readonly actionError = signal(false);
   protected readonly selectedCategory = signal<VoucherCategory | 'all'>('all');
   protected readonly isFormOpen = signal(false);
   protected readonly selectedVoucher = signal<Voucher | null>(null);
@@ -55,13 +59,27 @@ export class VoucherListComponent {
   }
 
   protected onFormSaved(request: CreateVoucherRequest | UpdateVoucherRequest): void {
-    const voucher = this.selectedVoucher();
-    if (voucher) {
-      this.voucherService.updateVoucher(voucher.id, request as UpdateVoucherRequest);
-    } else {
-      this.voucherService.addVoucher(request as CreateVoucherRequest);
+    if (this.saving()) {
+      return;
     }
-    this.closeForm();
+
+    const voucher = this.selectedVoucher();
+    const save$ = voucher
+      ? this.voucherService.updateVoucher(voucher.id, request as UpdateVoucherRequest)
+      : this.voucherService.addVoucher(request as CreateVoucherRequest);
+
+    this.saving.set(true);
+    this.actionError.set(false);
+    save$.subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.closeForm();
+      },
+      error: () => {
+        this.saving.set(false);
+        this.actionError.set(true);
+      },
+    });
   }
 
   protected onFormCancelled(): void {
@@ -71,10 +89,14 @@ export class VoucherListComponent {
   protected closeForm(): void {
     this.isFormOpen.set(false);
     this.selectedVoucher.set(null);
+    this.actionError.set(false);
   }
 
   protected markAsUsed(voucher: Voucher): void {
-    this.voucherService.markVoucherAsUsed(voucher.id);
+    this.actionError.set(false);
+    this.voucherService.markVoucherAsUsed(voucher.id).subscribe({
+      error: () => this.actionError.set(true),
+    });
   }
 
   protected deleteVoucher(voucher: Voucher): void {
@@ -83,10 +105,22 @@ export class VoucherListComponent {
 
   protected confirmDelete(): void {
     const voucher = this.voucherToDelete();
-    if (voucher) {
-      this.voucherService.deleteVoucher(voucher.id);
-      this.voucherToDelete.set(null);
+    if (!voucher) {
+      return;
     }
+
+    this.actionError.set(false);
+    this.voucherService.deleteVoucher(voucher.id).subscribe({
+      next: () => this.voucherToDelete.set(null),
+      error: () => {
+        this.voucherToDelete.set(null);
+        this.actionError.set(true);
+      },
+    });
+  }
+
+  protected retryLoad(): void {
+    this.voucherService.load();
   }
 
   protected cancelDelete(): void {
