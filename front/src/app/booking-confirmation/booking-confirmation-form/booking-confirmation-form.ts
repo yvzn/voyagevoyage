@@ -67,7 +67,7 @@ export class BookingConfirmationFormComponent implements AfterViewInit {
   /** Trips auto-filtered by date overlap with parsed start/end; all trips if no date available. */
   protected readonly suggestedTrips = computed<Trip[]>(() => {
     const p = this.parsed();
-    const trips = this.allTrips();
+    const trips = this.allTrips().filter((trip) => trip.status !== TripStatus.Cancelled);
     if (!p?.startDate) return trips;
     return trips.filter((t) => t.startDate <= p.startDate! && t.endDate >= p.startDate!);
   });

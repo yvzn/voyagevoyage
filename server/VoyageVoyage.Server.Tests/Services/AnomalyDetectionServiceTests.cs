@@ -60,6 +60,33 @@ public class AnomalyDetectionServiceTests
     }
 
     [Fact]
+    public async Task AnomalyDetection_SkipsCancelledTrips()
+    {
+        var (service, db) = CreateService();
+        var trip = new Trip
+        {
+            Id = "trip-cancelled",
+            UserId = "test-user",
+            StartDate = new DateOnly(2025, 12, 1),
+            EndDate = new DateOnly(2025, 12, 5),
+            Destination = "Paris",
+            Status = TripStatus.Cancelled,
+        };
+        db.Trips.Add(trip);
+        await db.SaveChangesAsync();
+        var evaluationDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        var pastTripAlerts = await service.AnalyzePastTripsForUserAsync("test-user", evaluationDate);
+        var tripAlerts = await service.AnalyzeTripAsync(trip.Id, evaluationDate);
+        var reconciledAlerts = await service.ReconcileTripAsync("test-user", trip.Id, evaluationDate);
+
+        Assert.Empty(pastTripAlerts);
+        Assert.Empty(tripAlerts);
+        Assert.Empty(reconciledAlerts);
+        Assert.Empty(await db.AnomalyAlerts.ToListAsync());
+    }
+
+    [Fact]
     public async Task AnalyzeTripAsync_TriggersAtypicalReceiptAlertWhenAboveCategoryAverage()
     {
         var (service, db) = CreateService();
