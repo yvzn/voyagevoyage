@@ -10,9 +10,7 @@ await builder.addCSharpApp('server', '../server/VoyageVoyage.Server/VoyageVoyage
 
 await builder.addJavaScriptApp('front', '../front')
     .withUrl("http://localhost:4200")
-    .withRunScript('start')
-    .withNpm({ installArgs: ["--legacy-peer-deps"] });
+    .withRunScript('start');
 
 await builder.build().run();
-
 

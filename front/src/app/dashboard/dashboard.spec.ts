@@ -59,7 +59,7 @@ async function setupWithMockStore(trips: Trip[] = []): Promise<void> {
 
 describe('DashboardComponent', () => {
   beforeEach(async () => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date(2026, 0, 15)); // Thursday 2026-01-15
     await setupWithMockStore();
   });
@@ -145,7 +145,7 @@ describe('DashboardComponent', () => {
 
   it('should display trip in mini calendar when trip falls in the 2-week range', async () => {
     vi.useRealTimers();
-    vi.useFakeTimers();
+    vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date(2026, 0, 15));
 
     const trips: Trip[] = [
