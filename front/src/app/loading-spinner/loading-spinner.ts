@@ -31,6 +31,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     }
 
     .vv-spinner-arc {
+      transform-box: view-box;
       transform-origin: 20px 20px;
       animation: vv-spinner-rotate 1.4s linear infinite;
     }
