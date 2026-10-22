@@ -3,6 +3,7 @@ import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, Validati
 import { NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { FiscalRule, CreateFiscalRuleRequest, UpdateFiscalRuleRequest } from '../fiscal-rule.model';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 function dateRangeValidator(control: AbstractControl): ValidationErrors | null {
   const startDate = control.get('startDate')?.value;
@@ -16,7 +17,7 @@ function dateRangeValidator(control: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-fiscal-rule-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgClass, TranslatePipe],
+  imports: [ReactiveFormsModule, NgClass, TranslatePipe, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './fiscal-rule-form.html',
 })

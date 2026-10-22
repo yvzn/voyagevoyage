@@ -6,11 +6,12 @@ import { FiscalRule, CreateFiscalRuleRequest, UpdateFiscalRuleRequest } from '..
 import { selectAllFiscalRules, selectDeleteStatus, selectLoadStatus } from '../store/fiscal-rule.selectors';
 import { FiscalRuleActions } from '../store/fiscal-rule.actions';
 import { FiscalRuleFormComponent } from '../fiscal-rule-form/fiscal-rule-form';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 @Component({
   selector: 'app-fiscal-rule-list',
   standalone: true,
-  imports: [CommonModule, TranslatePipe, DecimalPipe, DatePipe, FiscalRuleFormComponent],
+  imports: [CommonModule, TranslatePipe, DecimalPipe, DatePipe, FiscalRuleFormComponent, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './fiscal-rule-list.html',
 })

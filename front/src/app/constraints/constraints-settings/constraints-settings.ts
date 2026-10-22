@@ -6,6 +6,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { DayOfWeek, PUBLIC_HOLIDAY_REGIONS, SCHOOL_HOLIDAY_ZONES, TravelConstraints } from '../constraints.model';
 import { SettingsActions } from '../store/settings.actions';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 import {
   selectConstraints,
   selectSettingsImportIcsStatus,
@@ -17,7 +18,7 @@ import {
 @Component({
   selector: 'app-constraints-settings',
   standalone: true,
-  imports: [ReactiveFormsModule, NgClass, RouterLink, TranslatePipe],
+  imports: [ReactiveFormsModule, NgClass, RouterLink, TranslatePipe, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './constraints-settings.html',
 })

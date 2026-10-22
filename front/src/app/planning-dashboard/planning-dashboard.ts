@@ -13,6 +13,7 @@ import { selectAllNoTravelDays } from '../no-travel-days/store/no-travel-day.red
 import { getTripStatusClass, getTripStatusTranslationKey } from '../trip/trip-status.utils';
 import { LocaleService } from '../locale.service';
 import { TripFormComponent } from '../trip/trip-form/trip-form';
+import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner';
 import {
   getPlanningItems,
   suggestTripSlots,
@@ -25,7 +26,7 @@ import {
 @Component({
   selector: 'app-planning-dashboard',
   standalone: true,
-  imports: [RouterLink, TranslatePipe, TripFormComponent],
+  imports: [RouterLink, TranslatePipe, TripFormComponent, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './planning-dashboard.html',
 })

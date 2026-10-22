@@ -3,11 +3,12 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { FrequentExpenseListComponent } from '../frequent-expense-list/frequent-expense-list';
 import { FrequentExpenseActions } from '../store/frequent-expense.actions';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 @Component({
   selector: 'app-frequent-expense-settings',
   standalone: true,
-  imports: [TranslatePipe, FrequentExpenseListComponent],
+  imports: [TranslatePipe, FrequentExpenseListComponent, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './frequent-expense-settings.html',
 })

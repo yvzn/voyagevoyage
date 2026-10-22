@@ -3,11 +3,12 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { FiscalRuleListComponent } from '../fiscal-rule-list/fiscal-rule-list';
 import { FiscalRuleActions } from '../store/fiscal-rule.actions';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 @Component({
   selector: 'app-fiscal-rule-settings',
   standalone: true,
-  imports: [TranslatePipe, FiscalRuleListComponent],
+  imports: [TranslatePipe, FiscalRuleListComponent, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './fiscal-rule-settings.html',
 })

@@ -6,11 +6,12 @@ import { Store } from '@ngrx/store';
 import { FrequentExpense, FrequentExpenseWithDateOverride } from '../../frequent-expense/frequent-expense.model';
 import { selectAllFrequentExpenses, selectLoadStatus } from '../../frequent-expense/store/frequent-expense.selectors';
 import { FrequentExpenseActions } from '../../frequent-expense/store/frequent-expense.actions';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 @Component({
   selector: 'app-add-frequent-expenses-modal',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, TranslatePipe, DecimalPipe],
+  imports: [ReactiveFormsModule, CommonModule, TranslatePipe, DecimalPipe, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './add-frequent-expenses-modal.html',
 })

@@ -25,11 +25,12 @@ import { selectConstraintsPerDay } from './calendar.selectors';
 import { NoTravelDayActions } from '../no-travel-days/store/no-travel-day.actions';
 import { ExpenseActions } from '../expense/store/expense.actions';
 import { selectAllExpenses } from '../expense/store/expense.selectors';
+import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [NgClass, TranslatePipe, TripFormComponent, CalendarGridComponent, CalendarAgendaComponent],
+  imports: [NgClass, TranslatePipe, TripFormComponent, CalendarGridComponent, CalendarAgendaComponent, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './calendar.html',
 })

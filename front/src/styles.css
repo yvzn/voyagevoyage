@@ -7,3 +7,105 @@
 @plugin "flowbite/plugin";
 @source "../node_modules/flowbite";
 
+#bootstrap-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  background: #fff;
+  color: #1f2937;
+  transition: opacity 180ms ease-out, visibility 180ms ease-out;
+}
+
+.app-ready #bootstrap-loader {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.bootstrap-mark {
+  overflow: visible;
+  animation: bootstrap-pulse 2.4s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.bootstrap-needle {
+  transform-origin: 60px 66px;
+  animation: bootstrap-needle-sweep 2.8s cubic-bezier(.25, .46, .45, .94) infinite;
+}
+
+.bootstrap-route {
+  stroke-dasharray: 5 6;
+  stroke-dashoffset: 60;
+  animation: bootstrap-route-dash 2.8s ease-in-out infinite;
+}
+
+.bootstrap-destination {
+  animation: bootstrap-destination-pop 2.8s ease-in-out infinite;
+}
+
+.bootstrap-wordmark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -.03em;
+}
+
+.bootstrap-wordmark span:first-child {
+  color: #1d4ed8;
+}
+
+.bootstrap-wordmark span:last-child {
+  color: #087781;
+}
+
+.bootstrap-label {
+  color: #6b7280;
+  font-size: .8125rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+@keyframes bootstrap-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.04); opacity: .92; }
+}
+
+@keyframes bootstrap-needle-sweep {
+  0% { transform: rotate(-20deg); }
+  20% { transform: rotate(38deg); }
+  40% { transform: rotate(-8deg); }
+  55% { transform: rotate(22deg); }
+  70% { transform: rotate(-4deg); }
+  82% { transform: rotate(10deg); }
+  100% { transform: rotate(0); }
+}
+
+@keyframes bootstrap-route-dash {
+  0% { stroke-dashoffset: 60; opacity: .2; }
+  50% { stroke-dashoffset: 0; opacity: .75; }
+  100% { stroke-dashoffset: -60; opacity: .2; }
+}
+
+@keyframes bootstrap-destination-pop {
+  0%, 60%, 100% { r: 4; }
+  75% { r: 6; }
+  90% { r: 4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #bootstrap-loader,
+  .bootstrap-mark,
+  .bootstrap-needle,
+  .bootstrap-route,
+  .bootstrap-destination {
+    animation: none;
+    transition: none;
+  }
+}

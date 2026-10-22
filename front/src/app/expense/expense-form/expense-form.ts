@@ -18,11 +18,12 @@ import { Expense, ExpenseCategory, CreateExpenseRequest, UpdateExpenseRequest } 
 import { ExpenseActions } from '../store/expense.actions';
 import { selectExpensesCreateStatus, selectExpensesUpdateStatus } from '../store/expense.selectors';
 import { LocaleService } from '../../locale.service';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 @Component({
   selector: 'app-expense-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgClass, TranslatePipe],
+  imports: [ReactiveFormsModule, NgClass, TranslatePipe, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './expense-form.html',
 })

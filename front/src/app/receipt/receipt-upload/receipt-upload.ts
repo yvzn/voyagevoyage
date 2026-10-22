@@ -10,11 +10,12 @@ import {
 } from '../store/receipt.reducer';
 import { ReceiptService } from '../receipt.service';
 import { ReceiptPreviewComponent } from '../receipt-preview/receipt-preview';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 @Component({
   selector: 'app-receipt-upload',
   standalone: true,
-  imports: [TranslatePipe, ReceiptPreviewComponent],
+  imports: [TranslatePipe, ReceiptPreviewComponent, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './receipt-upload.html',
 })

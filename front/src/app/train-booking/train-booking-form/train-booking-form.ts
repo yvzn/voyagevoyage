@@ -17,11 +17,12 @@ import { Trip, TrainBooking } from '../../trip/trip.model';
 import { TripActions } from '../../trip/store/trip.actions';
 import { selectTripsUpdateStatus } from '../../trip/store/trip.selectors';
 import { LocaleService } from '../../locale.service';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 @Component({
   selector: 'app-train-booking-form',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe],
+  imports: [ReactiveFormsModule, TranslatePipe, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './train-booking-form.html',
 })

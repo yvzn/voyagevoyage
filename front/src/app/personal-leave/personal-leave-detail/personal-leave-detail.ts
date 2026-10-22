@@ -13,11 +13,12 @@ import {
 import { PersonalLeaveFormComponent } from '../personal-leave-form/personal-leave-form';
 import { LocaleService } from '../../locale.service';
 import { LeaveType } from '../personal-leave.model';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 @Component({
   selector: 'app-personal-leave-detail',
   standalone: true,
-  imports: [RouterLink, TranslatePipe, PersonalLeaveFormComponent],
+  imports: [RouterLink, TranslatePipe, PersonalLeaveFormComponent, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './personal-leave-detail.html',
 })

@@ -11,11 +11,12 @@ import {
 } from '../store/personal-leave.selectors';
 import { PersonalLeaveFormComponent } from '../personal-leave-form/personal-leave-form';
 import { LocaleService } from '../../locale.service';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 @Component({
   selector: 'app-personal-leave-page',
   standalone: true,
-  imports: [RouterLink, TranslatePipe, PersonalLeaveFormComponent],
+  imports: [RouterLink, TranslatePipe, PersonalLeaveFormComponent, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './personal-leave-page.html',
 })

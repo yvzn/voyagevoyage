@@ -5,9 +5,43 @@
   <title>Voyage Voyage</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/svg+xml" href="voyage-mark.svg">
 </head>
 <body>
+  <div id="bootstrap-loader" role="status" aria-live="polite" aria-label="Loading Voyage Voyage">
+    <svg class="bootstrap-mark" width="120" height="140" viewBox="0 0 120 140" fill="none"
+      xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M60 8 Q60 -4 72 -5 Q84 -6 84 6 Q84 16 76 20" stroke="#16BAC5" stroke-width="3"
+        stroke-linecap="round" />
+      <path d="M27 10 Q10 10 10 27 L10 104 C10 122 60 136 60 136 C60 136 110 122 110 104 L110 27 Q110 10 93 10 Z"
+        fill="#1D4ED8" />
+      <circle cx="60" cy="14" r="8" fill="#EFE9F4" />
+      <circle cx="60" cy="14" r="4.5" fill="#1D4ED8" />
+      <rect x="20" y="28" width="80" height="76" rx="8" fill="#EFE9F4" />
+      <circle cx="60" cy="66" r="30" stroke="#1D4ED8" stroke-width=".75" opacity=".15" />
+      <circle cx="60" cy="66" r="22" stroke="#1D4ED8" stroke-width=".5" opacity=".12" />
+      <circle cx="60" cy="66" r="6" fill="#1D4ED8" opacity=".1" />
+      <path d="M60 36v5m0 50v5M30 66h5m50 0h5M39 45l4 4m34-4-4 4M39 87l4-4m34 4-4-4"
+        stroke="#1D4ED8" stroke-width="1.5" stroke-linecap="round" opacity=".3" />
+      <g class="bootstrap-needle">
+        <path d="m60 38 3 24-3-4-3 4 3-24Z" fill="#16BAC5" />
+        <path d="m60 94 3-24-3 4-3-4 3 24Z" fill="#1D4ED8" opacity=".38" />
+        <path d="m88 66-24-3 4 3-4 3 24-3ZM32 66l24-3-4 3 4 3-24-3Z" fill="#1D4ED8" opacity=".38" />
+      </g>
+      <circle cx="60" cy="66" r="4" fill="#16BAC5" />
+      <circle cx="60" cy="66" r="2" fill="#EFE9F4" />
+      <path class="bootstrap-route" d="M38 86 Q48 56 78 40" stroke="#16BAC5" stroke-width="1.75"
+        stroke-linecap="round" />
+      <circle cx="38" cy="86" r="3" fill="#1D4ED8" opacity=".45" />
+      <circle class="bootstrap-destination" cx="78" cy="40" r="4" fill="#16BAC5" />
+      <rect x="36" y="110" width="48" height="2.5" rx="1" fill="#EFE9F4" opacity=".35" />
+      <rect x="42" y="116" width="36" height="2.5" rx="1" fill="#EFE9F4" opacity=".22" />
+    </svg>
+    <div class="bootstrap-wordmark" aria-hidden="true">
+      <span>Voyage</span><span>Voyage</span>
+    </div>
+    <span class="bootstrap-label">Loading</span>
+  </div>
   <app-root></app-root>
 </body>
 </html>

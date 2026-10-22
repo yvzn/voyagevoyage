@@ -3,11 +3,12 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { BookingConfirmationActions } from '../store/booking-confirmation.actions';
 import { selectParseStatus } from '../store/booking-confirmation.reducer';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 @Component({
   selector: 'app-booking-confirmation-upload',
   standalone: true,
-  imports: [TranslatePipe],
+  imports: [TranslatePipe, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './booking-confirmation-upload.html',
 })

@@ -34,13 +34,14 @@ import { TrainBookingFormComponent } from '../../train-booking/train-booking-for
 import { HotelBookingFormComponent } from '../../hotel-booking/hotel-booking-form/hotel-booking-form';
 import { AddFrequentExpensesModalComponent } from '../add-frequent-expenses-modal/add-frequent-expenses-modal';
 import { FrequentExpenseWithDateOverride } from '../../frequent-expense/frequent-expense.model';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 type BookingType = 'train' | 'hotel';
 
 @Component({
   selector: 'app-trip-detail',
   standalone: true,
-  imports: [NgClass, DecimalPipe, TranslatePipe, TripFormComponent, RouterLink, ExpenseFormComponent, TrainBookingFormComponent, HotelBookingFormComponent, BookingConfirmationDialogComponent, AddFrequentExpensesModalComponent],
+  imports: [NgClass, DecimalPipe, TranslatePipe, TripFormComponent, RouterLink, ExpenseFormComponent, TrainBookingFormComponent, HotelBookingFormComponent, BookingConfirmationDialogComponent, AddFrequentExpensesModalComponent, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trip-detail.html',
 })

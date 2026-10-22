@@ -187,6 +187,13 @@ Any deviation should be intentional, documented, and justified by a concrete fun
 
 These patterns ensure consistent, accessible, and layout-stable feedback during async operations.
 
+### 9.0 VoyageVoyage visual identity
+
+- Show the animated compass-tag brand mark and blue/teal wordmark while the application bootstraps; remove the overlay once the Angular application has mounted.
+- Use the static compass-tag mark for the header and favicon. Keep the header wordmark side-by-side, with the first “Voyage” blue and the second teal.
+- Use the shared `<app-loading-spinner>` element for asynchronous loading indicators. Set its size with Tailwind width/height classes; the arc inherits `currentColor`, the track is a subdued blue, and the center dot is teal. Add `aria-hidden="true"` when accompanying text already announces the loading state, or use `role="status"` with a translated `aria-label` when the spinner stands alone.
+- Respect `prefers-reduced-motion` for all brand and loading animations.
+
 ### 9.1 Non-blocking loading (calendar, dashboards)
 
 Use when content should remain interactive while data loads in the background.
@@ -209,7 +216,7 @@ Use this pattern for standalone dashboard screens and list pages that have a vis
   <!-- Stable spinner area: min-w prevents CLS when spinner appears/disappears -->
   <div class="min-w-[1.5rem]" aria-live="polite" aria-atomic="true">
     @if (isLoading()) {
-      <svg class="h-4 w-4 animate-spin" role="status" aria-label="...">...</svg>
+      <app-loading-spinner class="h-4 w-4" role="status" aria-label="{{ 'loading' | translate }}"></app-loading-spinner>
     }
   </div>
 </div>
@@ -245,14 +252,14 @@ Use when a form must not be submitted while its initial data is loading.
 
 Use when a user triggers a save/update/delete and the form should remain visible but clearly indicate progress.
 
-- Place a spinner SVG **inline inside the triggering button**, before the button label.
+- Place `<app-loading-spinner>` **inline inside the triggering button**, before the button label.
 - Set `aria-busy` on the button while the operation is in flight.
 - **Disable form controls** during saving using a `<fieldset [disabled]>` wrapper; prevent duplicate submissions in component logic as well.
 - When multiple action buttons exist (e.g. Save and Delete), track each operation separately so the spinner appears only on the button that was actually clicked.
 
-### 9.4 Spinner SVG
+### 9.4 Spinner component
 
-Use a standard CSS-animated SVG spinner that inherits the button's `currentColor`, set `aria-hidden="true"` since the button or container already has a text label or `aria-label`.
+Use `<app-loading-spinner>` inline in the button before its label, with size classes and `aria-hidden="true"`. The component renders the shared CSS-animated arc with a pale-blue track and teal center dot; its arc inherits the host's `currentColor`.
 
 ### 9.5 CLS prevention
 

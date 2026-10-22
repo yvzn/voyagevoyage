@@ -14,6 +14,7 @@ import {
   selectNoTravelDaysLoadStatus,
 } from './store/no-travel-day.reducer';
 import { LocaleService } from '../locale.service';
+import { LoadingSpinnerComponent } from '../loading-spinner/loading-spinner';
 
 function endAfterStartValidator(group: AbstractControl): ValidationErrors | null {
   const start = group.get('startDate')?.value as string | null;
@@ -24,7 +25,7 @@ function endAfterStartValidator(group: AbstractControl): ValidationErrors | null
 @Component({
   selector: 'app-no-travel-days-page',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe],
+  imports: [ReactiveFormsModule, TranslatePipe, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './no-travel-days-page.html',
 })

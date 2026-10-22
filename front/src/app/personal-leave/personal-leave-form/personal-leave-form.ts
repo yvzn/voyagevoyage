@@ -23,6 +23,7 @@ import {
   UpdatePersonalLeaveRequest,
 } from '../personal-leave.model';
 import { PersonalLeaveActions } from '../store/personal-leave.actions';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 import {
   selectPersonalLeavesCreateStatus,
   selectPersonalLeavesUpdateStatus,
@@ -41,7 +42,7 @@ function endAfterStartValidator(group: AbstractControl): ValidationErrors | null
 @Component({
   selector: 'app-personal-leave-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgClass, TranslatePipe],
+  imports: [ReactiveFormsModule, NgClass, TranslatePipe, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './personal-leave-form.html',
 })

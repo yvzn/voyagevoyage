@@ -15,13 +15,14 @@ import { Trip } from '../../trip/trip.model';
 import { VoucherCategory } from '../../voucher/voucher.model';
 import { VoucherService } from '../../voucher/voucher.service';
 import { getTripsNeedingTrainBooking } from '../train-booking.utils';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 export { getTripsNeedingTrainBooking } from '../train-booking.utils';
 
 @Component({
   selector: 'app-train-booking-dashboard',
   standalone: true,
-  imports: [RouterLink, TranslatePipe, BookingConfirmationDialogComponent],
+  imports: [RouterLink, TranslatePipe, BookingConfirmationDialogComponent, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './train-booking-dashboard.html',
 })

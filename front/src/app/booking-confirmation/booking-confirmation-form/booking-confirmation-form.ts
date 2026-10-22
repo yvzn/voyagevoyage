@@ -19,11 +19,12 @@ import { selectApplyStatus } from '../store/booking-confirmation.reducer';
 import { selectAllTrips } from '../../trip/store/trip.selectors';
 import { Trip, TripStatus } from '../../trip/trip.model';
 import { LocaleService } from '../../locale.service';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 @Component({
   selector: 'app-booking-confirmation-form',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe],
+  imports: [ReactiveFormsModule, TranslatePipe, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './booking-confirmation-form.html',
 })

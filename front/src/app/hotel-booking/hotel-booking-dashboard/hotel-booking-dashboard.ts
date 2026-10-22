@@ -15,13 +15,14 @@ import { Trip } from '../../trip/trip.model';
 import { VoucherCategory } from '../../voucher/voucher.model';
 import { VoucherService } from '../../voucher/voucher.service';
 import { getTripsNeedingHotelBooking } from '../hotel-booking.utils';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 export { getTripsNeedingHotelBooking } from '../hotel-booking.utils';
 
 @Component({
   selector: 'app-hotel-booking-dashboard',
   standalone: true,
-  imports: [RouterLink, TranslatePipe, BookingConfirmationDialogComponent],
+  imports: [RouterLink, TranslatePipe, BookingConfirmationDialogComponent, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './hotel-booking-dashboard.html',
 })

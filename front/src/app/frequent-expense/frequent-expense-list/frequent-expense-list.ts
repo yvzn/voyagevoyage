@@ -6,11 +6,12 @@ import { FrequentExpense, CreateFrequentExpenseRequest, UpdateFrequentExpenseReq
 import { selectAllFrequentExpenses, selectDeleteStatus, selectLoadStatus } from '../store/frequent-expense.selectors';
 import { FrequentExpenseActions } from '../store/frequent-expense.actions';
 import { FrequentExpenseFormComponent } from '../frequent-expense-form/frequent-expense-form';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 @Component({
   selector: 'app-frequent-expense-list',
   standalone: true,
-  imports: [CommonModule, TranslatePipe, DecimalPipe, FrequentExpenseFormComponent],
+  imports: [CommonModule, TranslatePipe, DecimalPipe, FrequentExpenseFormComponent, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './frequent-expense-list.html',
 })

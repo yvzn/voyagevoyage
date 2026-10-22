@@ -29,6 +29,7 @@ import { PersonalLeaveActions } from '../../personal-leave/store/personal-leave.
 import { selectAllPersonalLeaves } from '../../personal-leave/store/personal-leave.selectors';
 import { NoTravelDayActions } from '../../no-travel-days/store/no-travel-day.actions';
 import { selectAllNoTravelDays } from '../../no-travel-days/store/no-travel-day.reducer';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 function endDateAfterStartDate(group: AbstractControl): ValidationErrors | null {
   const start = group.get('startDate')?.value as string;
@@ -42,7 +43,7 @@ function endDateAfterStartDate(group: AbstractControl): ValidationErrors | null 
 @Component({
   selector: 'app-trip-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgClass, TranslatePipe],
+  imports: [ReactiveFormsModule, NgClass, TranslatePipe, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './trip-form.html',
 })

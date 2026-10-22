@@ -4,11 +4,12 @@ import { NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { FrequentExpense, CreateFrequentExpenseRequest, UpdateFrequentExpenseRequest } from '../frequent-expense.model';
 import { ExpenseCategory } from '../../expense/expense.model';
+import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 @Component({
   selector: 'app-frequent-expense-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgClass, TranslatePipe],
+  imports: [ReactiveFormsModule, NgClass, TranslatePipe, LoadingSpinnerComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './frequent-expense-form.html',
 })
