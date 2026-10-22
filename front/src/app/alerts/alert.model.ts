@@ -17,6 +17,8 @@ export interface Alert {
   tripId: string;
   tripStartDate: string;
   tripEndDate: string;
+  expenseId?: string | null;
+  receiptId?: string | null;
   type: AlertType;
   description: string;
   status: AlertStatus;

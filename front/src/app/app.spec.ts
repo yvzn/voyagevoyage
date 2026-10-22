@@ -150,6 +150,28 @@ describe('App', () => {
     expect(compiled.querySelector('article')?.classList.contains('border-rose-400')).toBe(true);
   });
 
+  it('should pass attached expense and receipt identifiers when opening a trip from an alert', async () => {
+    alertsService.getAll.mockReturnValue(of([{
+      ...testAlert,
+      type: AlertType.AtypicalReceipt,
+      expenseId: 'expense-1',
+      receiptId: 'receipt-1',
+    }]));
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    compiled.querySelector<HTMLButtonElement>('[aria-controls="alerts-drawer"]')?.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const openTripLink = compiled.querySelector<HTMLAnchorElement>('#alerts-drawer a');
+    expect(openTripLink?.getAttribute('href')).toBe(
+      '/trip/trip-1?expenseId=expense-1&receiptId=receipt-1',
+    );
+  });
+
   it.each([
     [AlertStatus.Handled, 'alerts.handledFeedback'],
     [AlertStatus.Ignored, 'alerts.ignoredFeedback'],

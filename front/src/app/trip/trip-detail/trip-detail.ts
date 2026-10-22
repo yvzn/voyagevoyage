@@ -56,6 +56,14 @@ export class TripDetailComponent {
     this.route.paramMap.pipe(map((p) => p.get('id') ?? '')),
     { initialValue: '' }
   );
+  private readonly alertExpenseId = toSignal(
+    this.route.queryParamMap.pipe(map((p) => p.get('expenseId'))),
+    { initialValue: null },
+  );
+  private readonly alertReceiptId = toSignal(
+    this.route.queryParamMap.pipe(map((p) => p.get('receiptId'))),
+    { initialValue: null },
+  );
   protected readonly tripId = this.routeParamId;
 
   private readonly allTrips = this.store.selectSignal(selectAllTrips);
@@ -109,6 +117,10 @@ export class TripDetailComponent {
   private readonly allReceiptsByExpenseId = this.store.selectSignal(selectReceiptsByExpenseId);
   protected readonly hasReceiptForExpense = (expenseId: string): boolean =>
     (this.allReceiptsByExpenseId()[expenseId]?.length ?? 0) > 0;
+  protected readonly isAlertedExpense = (expenseId: string): boolean =>
+    this.alertExpenseId() === expenseId ||
+    (!!this.alertReceiptId() &&
+      this.allReceiptsByExpenseId()[expenseId]?.some(receipt => receipt.id === this.alertReceiptId()) === true);
   private readonly lastCreatedExpenseId = this.store.selectSignal(selectExpensesLastCreatedExpenseId);
 
   private readonly allConfirmations = this.store.selectSignal(selectConfirmationsByTripId);

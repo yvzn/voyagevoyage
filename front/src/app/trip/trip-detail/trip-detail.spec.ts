@@ -5,7 +5,7 @@ import { provideRouter } from '@angular/router';
 import { Router } from '@angular/router';
 import { convertToParamMap, ActivatedRoute } from '@angular/router';
 import { By } from '@angular/platform-browser';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { vi } from 'vitest';
 import { TripDetailComponent } from './trip-detail';
 import { ExpenseFormComponent } from '../../expense/expense-form/expense-form';
@@ -46,6 +46,7 @@ const EN_TRANSLATIONS = {
     expensesHeading: 'Expenses',
     addExpenseButton: 'Add expense',
     receiptIndicatorLabel: 'Expense has a receipt attached',
+    alertedExpenseIndicatorLabel: 'This expense is linked to an alert',
     noExpenses: 'No expenses recorded for this trip.',
     notFound: 'Trip not found.',
   },
@@ -127,6 +128,8 @@ const MOCK_TRIP_WITH_BOOKINGS: Trip = {
   },
 };
 
+let alertQueryParamMap = new BehaviorSubject(convertToParamMap({}));
+
 // JSDOM does not implement HTMLDialogElement.showModal(); stub it globally
 beforeEach(() => {
   HTMLDialogElement.prototype.showModal = () => {};
@@ -138,6 +141,7 @@ async function setupModule(
   expenses: Expense[] = [],
   receiptsByExpenseId: Record<string, unknown[]> = {},
 ): Promise<MockStore> {
+  alertQueryParamMap = new BehaviorSubject(convertToParamMap({}));
   await TestBed.configureTestingModule({
     imports: [TripDetailComponent],
     providers: [
@@ -147,6 +151,7 @@ async function setupModule(
         provide: ActivatedRoute,
         useValue: {
           paramMap: of(convertToParamMap({ id: tripId })),
+          queryParamMap: alertQueryParamMap,
         },
       },
       provideMockStore({
@@ -371,6 +376,63 @@ describe('TripDetailComponent — trip found', () => {
 
     const receiptIndicator = fixture.nativeElement.querySelector('[aria-label="Expense has a receipt attached"]');
     expect(receiptIndicator).toBeTruthy();
+  });
+
+  it('should highlight the expense identified by an alert query parameter', async () => {
+    const expenses: Expense[] = [{
+      id: 'expense-1',
+      tripId: 'trip-1',
+      date: '2026-06-10',
+      category: ExpenseCategory.Other,
+      amount: 15,
+      description: 'Luggage',
+    }];
+    const store = TestBed.inject(MockStore);
+    store.overrideSelector(selectAllExpenses, expenses);
+    store.refreshState();
+    alertQueryParamMap.next(convertToParamMap({ expenseId: 'expense-1' }));
+
+    const fixture = TestBed.createComponent(TripDetailComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const alertIndicator = fixture.nativeElement.querySelector(
+      '[aria-label="This expense is linked to an alert"]',
+    );
+    expect(alertIndicator).toBeTruthy();
+    expect(alertIndicator.closest('button')?.classList.contains('bg-rose-50')).toBe(true);
+  });
+
+  it('should highlight an expense when an alert only identifies its receipt', async () => {
+    const expenses: Expense[] = [{
+      id: 'expense-1',
+      tripId: 'trip-1',
+      date: '2026-06-10',
+      category: ExpenseCategory.Other,
+      amount: 15,
+      description: 'Luggage',
+    }];
+    const receiptsByExpenseId = {
+      'expense-1': [{
+        id: 'receipt-1',
+        linkedEntityType: 'expense' as const,
+        linkedEntityId: 'expense-1',
+        fileName: 'receipt.pdf',
+        contentType: 'application/pdf',
+        uploadedAt: '2026-06-10T12:00:00Z',
+      }],
+    };
+    const store = TestBed.inject(MockStore);
+    store.overrideSelector(selectAllExpenses, expenses);
+    store.overrideSelector(selectReceiptsByExpenseId, receiptsByExpenseId);
+    store.refreshState();
+    alertQueryParamMap.next(convertToParamMap({ receiptId: 'receipt-1' }));
+
+    const fixture = TestBed.createComponent(TripDetailComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('[aria-label="This expense is linked to an alert"]')).toBeTruthy();
   });
 
   it('should pass the trip start date to the expense form as defaultDate', async () => {

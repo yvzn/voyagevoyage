@@ -147,6 +147,7 @@
     "addExpenseButton": "Ajouter une dépense",
     "addFrequentExpensesButton": "Dépenses fréquentes",
     "receiptIndicatorLabel": "La dépense comporte un justificatif",
+    "alertedExpenseIndicatorLabel": "Cette dépense est associée à une alerte",
     "noExpenses": "Aucune dépense enregistrée pour ce déplacement.",
     "loading": "Chargement…",
     "notFound": "Déplacement introuvable.",
