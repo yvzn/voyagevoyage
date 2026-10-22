@@ -387,8 +387,19 @@ describe('TripDetailComponent — trip found', () => {
       amount: 15,
       description: 'Luggage',
     }];
+    const receiptsByExpenseId = {
+      'expense-1': [{
+        id: 'receipt-1',
+        linkedEntityType: 'expense' as const,
+        linkedEntityId: 'expense-1',
+        fileName: 'receipt.pdf',
+        contentType: 'application/pdf',
+        uploadedAt: '2026-06-10T12:00:00Z',
+      }],
+    };
     const store = TestBed.inject(MockStore);
     store.overrideSelector(selectAllExpenses, expenses);
+    store.overrideSelector(selectReceiptsByExpenseId, receiptsByExpenseId);
     store.refreshState();
     alertQueryParamMap.next(convertToParamMap({ expenseId: 'expense-1' }));
 
@@ -400,7 +411,13 @@ describe('TripDetailComponent — trip found', () => {
       '[aria-label="This expense is linked to an alert"]',
     );
     expect(alertIndicator).toBeTruthy();
-    expect(alertIndicator.closest('button')?.classList.contains('bg-rose-50')).toBe(true);
+    expect(alertIndicator.classList.contains('bg-rose-50')).toBe(true);
+    const expenseRow = alertIndicator.closest('button');
+    expect(expenseRow?.classList.contains('bg-rose-50')).toBe(false);
+    expect(
+      expenseRow?.querySelector('[aria-label="Expense has a receipt attached"]')
+        ?.compareDocumentPosition(alertIndicator) & Node.DOCUMENT_POSITION_PRECEDING,
+    ).toBeTruthy();
   });
 
   it('should highlight an expense when an alert only identifies its receipt', async () => {
