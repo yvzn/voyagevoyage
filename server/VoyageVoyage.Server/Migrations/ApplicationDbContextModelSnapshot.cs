@@ -401,6 +401,26 @@ namespace VoyageVoyage.Server.Migrations
                     b.Property<bool>("ConsiderVacationDays")
                         .HasColumnType("boolean");
 
+                    b.Property<int>("ExpectedExpenseDestinationMinimumCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(3);
+
+                    b.Property<decimal>("ExpectedExpenseHabitThresholdPercent")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("numeric")
+                        .HasDefaultValue(60m);
+
+                    b.Property<int>("ExpectedExpenseHistoryTripCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(10);
+
+                    b.Property<int>("ExpectedExpenseMinimumSampleSize")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(3);
+
                     b.Property<bool>("IsStrict")
                         .HasColumnType("boolean");
 

@@ -153,7 +153,11 @@ describe('Settings Effects', () => {
         isStrict: true,
         planningHorizonDays: 60,
         publicHolidayRegions: [],
-      schoolHolidayZones: [],
+        schoolHolidayZones: [],
+        expectedExpenseHistoryTripCount: 10,
+        expectedExpenseMinimumSampleSize: 3,
+        expectedExpenseHabitThresholdPercent: 60,
+        expectedExpenseDestinationMinimumCount: 3,
       };
       const updated: TravelConstraints = { ...request };
       mockConstraintsService.update.mockReturnValue(of(updated));
@@ -179,7 +183,11 @@ describe('Settings Effects', () => {
         isStrict: true,
         planningHorizonDays: 60,
         publicHolidayRegions: [],
-      schoolHolidayZones: [],
+        schoolHolidayZones: [],
+        expectedExpenseHistoryTripCount: 10,
+        expectedExpenseMinimumSampleSize: 3,
+        expectedExpenseHabitThresholdPercent: 60,
+        expectedExpenseDestinationMinimumCount: 3,
       };
       mockConstraintsService.update.mockReturnValue(throwError(() => new Error('Server error')));
 

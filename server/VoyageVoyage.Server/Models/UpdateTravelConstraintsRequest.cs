@@ -20,5 +20,9 @@ public record UpdateTravelConstraintsRequest(
     int A1MaxPastTripAgeDays = TravelConstraints.DefaultA1MaxPastTripAgeDays,
     int A2MinCompletionDelayDays = TravelConstraints.DefaultA2MinCompletionDelayDays,
     decimal XAtypicalExpenseThresholdPercent = TravelConstraints.DefaultAtypicalExpenseThresholdPercent,
-    bool ConsiderNoTravelDays = false
+    bool ConsiderNoTravelDays = false,
+    int ExpectedExpenseHistoryTripCount = TravelConstraints.DefaultExpectedExpenseHistoryTripCount,
+    int ExpectedExpenseMinimumSampleSize = TravelConstraints.DefaultExpectedExpenseMinimumSampleSize,
+    decimal ExpectedExpenseHabitThresholdPercent = TravelConstraints.DefaultExpectedExpenseHabitThresholdPercent,
+    int ExpectedExpenseDestinationMinimumCount = TravelConstraints.DefaultExpectedExpenseDestinationMinimumCount
 );

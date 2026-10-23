@@ -110,6 +110,20 @@ describe('ExpenseFormComponent', () => {
     expect(component['form'].get('date')?.value).toBe('2026-06-15');
   });
 
+  it('should pre-fill category and description for an expected expense', async () => {
+    const fixture = TestBed.createComponent(ExpenseFormComponent);
+    fixture.componentRef.setInput('defaultDate', '2026-06-15');
+    fixture.componentRef.setInput('defaultCategory', ExpenseCategory.Hotel);
+    fixture.componentRef.setInput('defaultDescription', 'Hotel Lumière');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    expect(component['form'].get('date')?.value).toBe('2026-06-15');
+    expect(component['form'].get('category')?.value).toBe(ExpenseCategory.Hotel);
+    expect(component['form'].get('description')?.value).toBe('Hotel Lumière');
+  });
+
   it('should dispatch createExpense when tripId is provided on submit', async () => {
     const fixture = TestBed.createComponent(ExpenseFormComponent);
     fixture.componentRef.setInput('tripId', 'trip-1');

@@ -51,6 +51,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<ITripService, TripService>();
 builder.Services.AddScoped<ITravelConstraintsService, TravelConstraintsService>();
 builder.Services.AddScoped<IExpenseService, ExpenseService>();
+builder.Services.AddScoped<IExpectedExpenseService, ExpectedExpenseService>();
 builder.Services.AddScoped<IFrequentExpenseService, FrequentExpenseService>();
 builder.Services.AddScoped<IFiscalRuleService, FiscalRuleService>();
 builder.Services.AddScoped<IPublicHolidayService, PublicHolidayService>();

@@ -53,18 +53,30 @@ public class TravelConstraintsServiceTests
             TrainBookingThresholdDays: 45,
             A1MaxPastTripAgeDays: 365,
             A2MinCompletionDelayDays: 30,
-            XAtypicalExpenseThresholdPercent: 120m);
+            XAtypicalExpenseThresholdPercent: 120m,
+            ExpectedExpenseHistoryTripCount: 12,
+            ExpectedExpenseMinimumSampleSize: 4,
+            ExpectedExpenseHabitThresholdPercent: 75m,
+            ExpectedExpenseDestinationMinimumCount: 5);
 
         var result = await service.UpsertAsync(request);
 
         Assert.Equal(365, result.A1MaxPastTripAgeDays);
         Assert.Equal(30, result.A2MinCompletionDelayDays);
         Assert.Equal(120m, result.XAtypicalExpenseThresholdPercent);
+        Assert.Equal(12, result.ExpectedExpenseHistoryTripCount);
+        Assert.Equal(4, result.ExpectedExpenseMinimumSampleSize);
+        Assert.Equal(75m, result.ExpectedExpenseHabitThresholdPercent);
+        Assert.Equal(5, result.ExpectedExpenseDestinationMinimumCount);
 
         var saved = await db.TravelConstraints.SingleAsync(c => c.UserId == "test-user");
         Assert.Equal(365, saved.A1MaxPastTripAgeDays);
         Assert.Equal(30, saved.A2MinCompletionDelayDays);
         Assert.Equal(120m, saved.XAtypicalExpenseThresholdPercent);
+        Assert.Equal(12, saved.ExpectedExpenseHistoryTripCount);
+        Assert.Equal(4, saved.ExpectedExpenseMinimumSampleSize);
+        Assert.Equal(75m, saved.ExpectedExpenseHabitThresholdPercent);
+        Assert.Equal(5, saved.ExpectedExpenseDestinationMinimumCount);
     }
 
     [Fact]

@@ -58,6 +58,30 @@ public class TravelConstraintsController(ITravelConstraintsService constraintsSe
             return ValidationProblem(ModelState);
         }
 
+        if (request.ExpectedExpenseHistoryTripCount is < 1 or > 50)
+        {
+            ModelState.AddModelError(nameof(request.ExpectedExpenseHistoryTripCount), "validation.expectedExpenseHistoryTripCountOutOfRange");
+            return ValidationProblem(ModelState);
+        }
+
+        if (request.ExpectedExpenseMinimumSampleSize is < 1 or > 50)
+        {
+            ModelState.AddModelError(nameof(request.ExpectedExpenseMinimumSampleSize), "validation.expectedExpenseMinimumSampleSizeOutOfRange");
+            return ValidationProblem(ModelState);
+        }
+
+        if (request.ExpectedExpenseHabitThresholdPercent is <= 0m or > 100m)
+        {
+            ModelState.AddModelError(nameof(request.ExpectedExpenseHabitThresholdPercent), "validation.expectedExpenseHabitThresholdPercentOutOfRange");
+            return ValidationProblem(ModelState);
+        }
+
+        if (request.ExpectedExpenseDestinationMinimumCount is < 1 or > 50)
+        {
+            ModelState.AddModelError(nameof(request.ExpectedExpenseDestinationMinimumCount), "validation.expectedExpenseDestinationMinimumCountOutOfRange");
+            return ValidationProblem(ModelState);
+        }
+
         var constraints = await constraintsService.UpsertAsync(request);
         return Ok(constraints);
     }

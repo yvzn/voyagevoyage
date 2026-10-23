@@ -475,6 +475,114 @@
       }
     </fieldset>
 
+    <fieldset class="mb-6 rounded-lg border border-gray-200 p-4 dark:border-gray-600">
+      <legend class="px-2 text-sm font-semibold text-gray-900 dark:text-white">
+        {{ 'constraints.expectedExpensesSectionLabel' | translate }}
+      </legend>
+
+      <div class="mt-4 grid gap-4 sm:grid-cols-2">
+        <div>
+          <label for="expected-expense-history-trip-count" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+            {{ 'constraints.expectedExpenseHistoryTripCount' | translate }}
+          </label>
+          <input
+            id="expected-expense-history-trip-count"
+            type="number"
+            min="1"
+            max="50"
+            formControlName="expectedExpenseHistoryTripCount"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('expectedExpenseHistoryTripCount')?.invalid && form.get('expectedExpenseHistoryTripCount')?.touched }"
+            [attr.aria-describedby]="form.get('expectedExpenseHistoryTripCount')?.invalid && form.get('expectedExpenseHistoryTripCount')?.touched ? 'expected-expense-history-trip-count-error' : 'expected-expense-history-trip-count-hint'"
+          />
+          <p id="expected-expense-history-trip-count-hint" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            {{ 'constraints.expectedExpenseHistoryTripCountHint' | translate }}
+          </p>
+          @if (form.get('expectedExpenseHistoryTripCount')?.invalid && form.get('expectedExpenseHistoryTripCount')?.touched) {
+            <p id="expected-expense-history-trip-count-error" class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+              {{ 'constraints.expectedExpenseHistoryTripCountError' | translate }}
+            </p>
+          }
+        </div>
+
+        <div>
+          <label for="expected-expense-minimum-sample-size" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+            {{ 'constraints.expectedExpenseMinimumSampleSize' | translate }}
+          </label>
+          <input
+            id="expected-expense-minimum-sample-size"
+            type="number"
+            min="1"
+            max="50"
+            formControlName="expectedExpenseMinimumSampleSize"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('expectedExpenseMinimumSampleSize')?.invalid && form.get('expectedExpenseMinimumSampleSize')?.touched }"
+            [attr.aria-describedby]="form.get('expectedExpenseMinimumSampleSize')?.invalid && form.get('expectedExpenseMinimumSampleSize')?.touched ? 'expected-expense-minimum-sample-size-error' : 'expected-expense-minimum-sample-size-hint'"
+          />
+          <p id="expected-expense-minimum-sample-size-hint" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            {{ 'constraints.expectedExpenseMinimumSampleSizeHint' | translate }}
+          </p>
+          @if (form.get('expectedExpenseMinimumSampleSize')?.invalid && form.get('expectedExpenseMinimumSampleSize')?.touched) {
+            <p id="expected-expense-minimum-sample-size-error" class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+              {{ 'constraints.expectedExpenseMinimumSampleSizeError' | translate }}
+            </p>
+          }
+        </div>
+
+        <div>
+          <label for="expected-expense-habit-threshold-percent" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+            {{ 'constraints.expectedExpenseHabitThresholdPercent' | translate }}
+          </label>
+          <div class="flex items-center gap-2">
+            <input
+              id="expected-expense-habit-threshold-percent"
+              type="number"
+              min="1"
+              max="100"
+              step="1"
+              formControlName="expectedExpenseHabitThresholdPercent"
+              class="block w-28 rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('expectedExpenseHabitThresholdPercent')?.invalid && form.get('expectedExpenseHabitThresholdPercent')?.touched }"
+              [attr.aria-describedby]="form.get('expectedExpenseHabitThresholdPercent')?.invalid && form.get('expectedExpenseHabitThresholdPercent')?.touched ? 'expected-expense-habit-threshold-percent-error' : 'expected-expense-habit-threshold-percent-hint'"
+            />
+            <span class="text-sm text-gray-500 dark:text-gray-400">{{ 'constraints.percentUnit' | translate }}</span>
+          </div>
+          <p id="expected-expense-habit-threshold-percent-hint" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            {{ 'constraints.expectedExpenseHabitThresholdPercentHint' | translate }}
+          </p>
+          @if (form.get('expectedExpenseHabitThresholdPercent')?.invalid && form.get('expectedExpenseHabitThresholdPercent')?.touched) {
+            <p id="expected-expense-habit-threshold-percent-error" class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+              {{ 'constraints.expectedExpenseHabitThresholdPercentError' | translate }}
+            </p>
+          }
+        </div>
+
+        <div>
+          <label for="expected-expense-destination-minimum-count" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+            {{ 'constraints.expectedExpenseDestinationMinimumCount' | translate }}
+          </label>
+          <input
+            id="expected-expense-destination-minimum-count"
+            type="number"
+            min="1"
+            max="50"
+            formControlName="expectedExpenseDestinationMinimumCount"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            [ngClass]="{ 'border-red-500 dark:border-red-500': form.get('expectedExpenseDestinationMinimumCount')?.invalid && form.get('expectedExpenseDestinationMinimumCount')?.touched }"
+            [attr.aria-describedby]="form.get('expectedExpenseDestinationMinimumCount')?.invalid && form.get('expectedExpenseDestinationMinimumCount')?.touched ? 'expected-expense-destination-minimum-count-error' : 'expected-expense-destination-minimum-count-hint'"
+          />
+          <p id="expected-expense-destination-minimum-count-hint" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            {{ 'constraints.expectedExpenseDestinationMinimumCountHint' | translate }}
+          </p>
+          @if (form.get('expectedExpenseDestinationMinimumCount')?.invalid && form.get('expectedExpenseDestinationMinimumCount')?.touched) {
+            <p id="expected-expense-destination-minimum-count-error" class="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+              {{ 'constraints.expectedExpenseDestinationMinimumCountError' | translate }}
+            </p>
+          }
+        </div>
+      </div>
+    </fieldset>
+
     <!-- Success message -->
     @if (isSaved()) {
       <div

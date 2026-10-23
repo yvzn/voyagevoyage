@@ -41,6 +41,19 @@ const EN_TRANSLATIONS = {
     considerVacationDays: 'Exclude vacation days',
     considerVacationDaysHint: 'Personal leave days will not count as allowed travel days.',
     constraintModeLabel: 'Constraint mode',
+    expectedExpensesSectionLabel: 'Expected expense habits',
+    expectedExpenseHistoryTripCount: 'Recent trips analyzed',
+    expectedExpenseHistoryTripCountHint: 'Use up to 50 recent trips with expenses. Default: 10.',
+    expectedExpenseHistoryTripCountError: 'Enter a value between 1 and 50.',
+    expectedExpenseMinimumSampleSize: 'Minimum history sample',
+    expectedExpenseMinimumSampleSizeHint: 'Patterns require this many trips.',
+    expectedExpenseMinimumSampleSizeError: 'Enter a value between 1 and 50.',
+    expectedExpenseHabitThresholdPercent: 'Habit threshold',
+    expectedExpenseHabitThresholdPercentHint: 'A type is expected when it appears in this percentage of trips.',
+    expectedExpenseHabitThresholdPercentError: 'Enter a value between 1 and 100%.',
+    expectedExpenseDestinationMinimumCount: 'Destination-specific sample minimum',
+    expectedExpenseDestinationMinimumCountHint: 'Filter history by destination above this count.',
+    expectedExpenseDestinationMinimumCountError: 'Enter a value between 1 and 50.',
     flexible: 'Flexible',
     flexibleHint: 'Constraints are guidelines; derogations are allowed.',
     strict: 'Strict',
@@ -156,6 +169,10 @@ describe('ConstraintsSettingsComponent — pre-fill', () => {
     expect(component['form'].get('planningHorizonDays')?.value).toBe(60);
     expect(component['form'].get('considerPublicHolidays')?.value).toBe(true);
     expect(component['form'].get('isStrict')?.value).toBe(true);
+    expect(component['form'].get('expectedExpenseHistoryTripCount')?.value).toBe(10);
+    expect(component['form'].get('expectedExpenseMinimumSampleSize')?.value).toBe(3);
+    expect(component['form'].get('expectedExpenseHabitThresholdPercent')?.value).toBe(60);
+    expect(component['form'].get('expectedExpenseDestinationMinimumCount')?.value).toBe(3);
   });
 
   it('should include planning horizon in update request', async () => {
@@ -170,13 +187,23 @@ describe('ConstraintsSettingsComponent — pre-fill', () => {
       isStrict: false,
       considerPublicHolidays: false,
       considerVacationDays: false,
+      expectedExpenseHistoryTripCount: 12,
+      expectedExpenseMinimumSampleSize: 4,
+      expectedExpenseHabitThresholdPercent: 75,
+      expectedExpenseDestinationMinimumCount: 5,
     });
 
     component['onSubmit']();
 
     expect(dispatchSpy).toHaveBeenCalledWith(
       SettingsActions.updateSettings({
-        request: expect.objectContaining({ planningHorizonDays: 90 }),
+        request: expect.objectContaining({
+          planningHorizonDays: 90,
+          expectedExpenseHistoryTripCount: 12,
+          expectedExpenseMinimumSampleSize: 4,
+          expectedExpenseHabitThresholdPercent: 75,
+          expectedExpenseDestinationMinimumCount: 5,
+        }),
       }),
     );
   });
