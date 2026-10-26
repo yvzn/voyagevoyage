@@ -151,7 +151,6 @@ export class TripDetailComponent {
   } | null>(null);
   private readonly noExpenseSlotIds = signal<ReadonlySet<string>>(new Set());
   protected readonly activeExpectedSlotId = signal<string | null>(null);
-  protected readonly expectedSlotSavePending = signal(false);
   protected readonly defaultExpenseDate = signal<string | null>(null);
   protected readonly defaultExpenseCategory = signal<ExpenseCategory | null>(null);
   protected readonly defaultExpenseDescription = signal<string | null>(null);
@@ -266,16 +265,6 @@ export class TripDetailComponent {
 
       this.stableExpectedExpenses.set({ tripSignature, result });
       this.visibleExpectedExpenses.set({ tripSignature, result });
-
-      if (this.expectedSlotSavePending()) {
-        const slotId = this.activeExpectedSlotId();
-        if (slotId && result.days.some((day) =>
-          day.slots.some((slot) => slot.slotId === slotId),
-        )) {
-          this.activeExpectedSlotId.set(null);
-          this.expectedSlotSavePending.set(false);
-        }
-      }
 
       const coveredSlotIds = new Set(
         result.days.flatMap((day) =>
@@ -411,18 +400,11 @@ export class TripDetailComponent {
   protected closeExpenseForm(): void {
     this.isExpenseFormOpen.set(false);
     this.activeExpectedSlotId.set(null);
-    this.expectedSlotSavePending.set(false);
     this.defaultExpenseCategory.set(null);
     this.defaultExpenseDescription.set(null);
   }
 
   protected onExpenseSaved(): void {
-    if (this.activeExpectedSlotId()) {
-      this.isExpenseFormOpen.set(false);
-      this.expectedSlotSavePending.set(true);
-      return;
-    }
-
     this.closeExpenseForm();
     const createdExpenseId = this.lastCreatedExpenseId();
     if (createdExpenseId) {
@@ -503,7 +485,6 @@ export class TripDetailComponent {
 
   protected enterExpectedExpense(slot: ExpectedExpenseSlot, date: string): void {
     this.activeExpectedSlotId.set(slot.slotId);
-    this.expectedSlotSavePending.set(false);
     this.defaultExpenseDate.set(date);
     this.defaultExpenseCategory.set(slot.category);
     this.defaultExpenseDescription.set(slot.detail);

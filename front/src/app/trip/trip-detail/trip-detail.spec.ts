@@ -622,6 +622,31 @@ describe('TripDetailComponent — trip found', () => {
     expect(navigateSpy).toHaveBeenCalledWith(['/expense', 'expense-42']);
   });
 
+  it('should navigate to the created expense after saving an expected expense', async () => {
+    const store = TestBed.inject(MockStore);
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    store.overrideSelector(selectExpensesLastCreatedExpenseId, 'expense-42');
+    store.refreshState();
+
+    const fixture = TestBed.createComponent(TripDetailComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component['enterExpectedExpense']({
+      slotId: 'meal-slot',
+      category: ExpenseCategory.Meal,
+      detail: '',
+      state: 'missing',
+      expenseId: null,
+    }, '2026-06-10');
+    component['onExpenseSaved']();
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/expense', 'expense-42']);
+    expect(component['isExpenseFormOpen']()).toBe(false);
+  });
+
   it('should open the edit form modal when edit button is clicked', async () => {
     const fixture = TestBed.createComponent(TripDetailComponent);
     const component = fixture.componentInstance;
