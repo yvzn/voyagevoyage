@@ -453,83 +453,107 @@
                             <button
                               type="button"
                               (click)="navigateToExpense(expense.id)"
-                              class="flex w-full cursor-pointer items-center justify-between gap-3 px-3 py-3 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-300 dark:hover:bg-gray-750"
+                              class="grid w-full cursor-pointer grid-cols-[2rem_minmax(0,1fr)_5rem] items-center gap-3 px-3 py-3 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-300 dark:hover:bg-gray-750"
                             >
-                              <span class="flex min-w-0 items-start gap-2">
-                                <svg class="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                  <path stroke-linecap="round" stroke-linejoin="round" d="m5 12.5 4.5 4.5L19 7.5" />
-                                </svg>
-                                <span class="flex min-w-0 flex-col">
-                                  <span class="text-sm font-medium text-gray-900 dark:text-white">{{ 'expenseCategory.' + expense.category | translate }}</span>
-                                  @if (expense.description) {
-                                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ expense.description }}</span>
-                                  }
+                              @if (isAlertedExpense(expense.id)) {
+                                <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300" aria-hidden="true">
+                                  <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 18.75a2.25 2.25 0 0 1-4.5 0m9-2.25H5.25c1.2-1.2 2.25-2.4 2.25-6a4.5 4.5 0 1 1 9 0c0 3.6 1.05 4.8 2.25 6Z" />
+                                  </svg>
                                 </span>
-                              </span>
-                              <span class="ml-4 flex shrink-0 items-center gap-3">
+                              } @else {
+                                <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300" aria-hidden="true">
+                                  <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m5 12.5 4.5 4.5L19 7.5" />
+                                  </svg>
+                                </span>
+                              }
+                              <span class="flex min-w-0 flex-col">
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ 'expenseCategory.' + expense.category | translate }}</span>
+                                @if (expense.description) {
+                                  <span class="text-xs text-gray-500 dark:text-gray-400">{{ expense.description }}</span>
+                                }
+                                <span class="mt-1 inline-flex flex-wrap items-center gap-x-2 gap-y-1">
                                 @if (isAlertedExpense(expense.id)) {
-                                  <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300" role="img" aria-label="{{ 'tripDetail.alertedExpenseIndicatorLabel' | translate }}">
-                                    <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                      <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 18.75a2.25 2.25 0 0 1-4.5 0m9-2.25H5.25c1.2-1.2 2.25-2.4 2.25-6a4.5 4.5 0 1 1 9 0c0 3.6 1.05 4.8 2.25 6Z" />
-                                    </svg>
-                                  </span>
+                                  <span class="text-xs font-medium text-rose-700 dark:text-rose-300">{{ 'tripDetail.alertedExpenseStatus' | translate }}</span>
+                                } @else {
+                                  <span class="text-xs font-medium text-green-700 dark:text-green-300">{{ 'tripDetail.expectedExpenseEntered' | translate }}</span>
                                 }
                                 @if (hasReceiptForExpense(expense.id)) {
-                                  <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300" role="img" aria-label="{{ 'tripDetail.receiptIndicatorLabel' | translate }}">
-                                    <svg class="h-4 w-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                  <span class="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400" role="img" [attr.aria-label]="'tripDetail.receiptIndicatorLabel' | translate">
+                                    <svg class="h-3.5 w-3.5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                       <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3.75h6.75c.69 0 1.25.56 1.25 1.25v14.5c0 .69-.56 1.25-1.25 1.25H8.25c-.69 0-1.25-.56-1.25-1.25V5c0-.69.56-1.25 1.25-1.25Zm2.25 6h2.5m-2.5 4h2.5M9 7.5h6" />
                                     </svg>
+                                    {{ 'tripDetail.receiptAttached' | translate }}
                                   </span>
                                 }
-                                <span class="min-w-[4.5rem] whitespace-nowrap text-right text-sm font-semibold text-gray-900 dark:text-white">{{ expense.amount | number: '1.2-2' }}</span>
+                                </span>
                               </span>
+                              <span class="whitespace-nowrap text-right text-sm font-semibold text-gray-900 dark:text-white">{{ expense.amount | number: '1.2-2' }}</span>
                             </button>
                           </li>
                         }
                       }
                       @case ('missing') {
-                        <li class="flex flex-wrap items-center justify-between gap-3                         border-b border-dashed border-gray-200 px-3 py-3 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-750">
-                          <span class="flex min-w-0 flex-col">
-                                                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ 'expenseCategory.' + item.slot.category | translate }}</span>
-                            @if (item.slot.detail) {
-                                                      <span class="text-xs text-gray-400 dark:text-gray-500">{{ item.slot.detail }}</span>
-                            }
-                                                    <span class="text-xs italic text-gray-400 dark:text-gray-500">{{ 'tripDetail.expectedExpenseNotEntered' | translate }}</span>
+                        <li class="grid grid-cols-[2rem_minmax(0,1fr)_5rem] items-center gap-3 border-b border-dashed border-gray-200 px-3 py-3 dark:border-gray-600">
+                          <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300" aria-hidden="true">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                              <circle cx="12" cy="12" r="8.25" />
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5v5l3 1.75" />
+                            </svg>
                           </span>
-                          <span class="flex shrink-0 items-center gap-2">
-                                                    <button type="button" (click)="enterExpectedExpense(item.slot, group.date!)" class="cursor-pointer rounded-lg border border-blue-300 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/20">
+                          <span class="flex min-w-0 flex-col">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ 'expenseCategory.' + item.slot.category | translate }}</span>
+                            @if (item.slot.detail) {
+                              <span class="text-xs text-gray-500 dark:text-gray-400">{{ item.slot.detail }}</span>
+                            }
+                            <span class="mt-1 text-xs font-medium text-amber-700 dark:text-amber-300">{{ 'tripDetail.expectedExpenseNotEntered' | translate }}</span>
+                          </span>
+                          <span class="text-right text-sm text-gray-400 dark:text-gray-500" aria-hidden="true">—</span>
+                          <span class="col-start-2 flex flex-wrap items-center gap-2">
+                            <button type="button" (click)="enterExpectedExpense(item.slot, group.date!)" class="cursor-pointer rounded-lg border border-blue-300 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/20">
                               {{ 'tripDetail.enterExpectedExpenseAmount' | translate }}
                             </button>
-                                                    <button type="button" (click)="markNoExpense(item.slot.slotId)" class="cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-400 dark:hover:bg-gray-700">
+                            <button type="button" (click)="markNoExpense(item.slot.slotId)" class="cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-300 dark:hover:bg-gray-700">
                               {{ 'tripDetail.markNoExpense' | translate }}
                             </button>
                           </span>
                         </li>
                       }
                       @case ('editing') {
-                        <li class="flex items-center justify-between gap-3 border border-blue-300 bg-blue-50 px-3 py-3 hover:bg-gray-50 dark:border-blue-700 dark:bg-blue-900/20 dark:hover:bg-gray-750">
-                          <span class="flex flex-col">
+                        <li class="grid grid-cols-[2rem_minmax(0,1fr)_5rem] items-center gap-3 border border-blue-300 px-3 py-3 dark:border-blue-700">
+                          <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300" aria-hidden="true">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
+                            </svg>
+                          </span>
+                          <span class="flex min-w-0 flex-col">
                             <span class="text-sm font-medium text-gray-900 dark:text-white">{{ 'expenseCategory.' + item.slot.category | translate }}</span>
                             @if (item.slot.detail) {
                               <span class="text-xs text-gray-600 dark:text-gray-400">{{ item.slot.detail }}</span>
                             }
-                            <span class="text-xs text-blue-700 dark:text-blue-300">{{ 'tripDetail.expectedExpenseEditing' | translate }}</span>
+                            <span class="mt-1 text-xs font-medium text-blue-700 dark:text-blue-300">{{ 'tripDetail.expectedExpenseEditing' | translate }}</span>
                           </span>
-                          <button type="button" (click)="cancelExpectedExpenseEntry()" class="cursor-pointer rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                          <span class="text-right text-sm text-gray-400 dark:text-gray-500" aria-hidden="true">—</span>
+                          <button type="button" (click)="cancelExpectedExpenseEntry()" class="col-start-2 w-fit cursor-pointer rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
                             {{ 'tripDetail.cancelExpectedExpenseEntry' | translate }}
                           </button>
                         </li>
                       }
                       @case ('none') {
-                        <li class="flex items-center justify-between gap-3 bg-gray-50 px-3 py-3 hover:bg-gray-100 dark:bg-gray-700/30 dark:hover:bg-gray-700/60">
-                          <span class="flex min-w-0 items-start gap-2 text-gray-500 dark:text-gray-400">
-                            <span class="mt-0.5" aria-hidden="true">—</span>
-                            <span class="flex min-w-0 flex-col">
-                              <span class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ 'expenseCategory.' + item.slot.category | translate }}</span>
-                              <span class="text-xs">{{ 'tripDetail.expectedExpenseMarkedNone' | translate }}</span>
-                            </span>
+                        <li class="grid grid-cols-[2rem_minmax(0,1fr)_5rem] items-center gap-3 px-3 py-3">
+                          <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300" aria-hidden="true">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                              <circle cx="12" cy="12" r="8.25" />
+                              <path stroke-linecap="round" stroke-linejoin="round" d="m9 9 6 6m0-6-6 6" />
+                            </svg>
                           </span>
-                          <button type="button" (click)="undoNoExpense(item.slot.slotId)" class="cursor-pointer rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                          <span class="flex min-w-0 flex-col">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ 'expenseCategory.' + item.slot.category | translate }}</span>
+                            <span class="mt-1 text-xs font-medium text-gray-600 dark:text-gray-300">{{ 'tripDetail.expectedExpenseMarkedNone' | translate }}</span>
+                          </span>
+                          <span class="text-right text-sm text-gray-400 dark:text-gray-500" aria-hidden="true">—</span>
+                          <button type="button" (click)="undoNoExpense(item.slot.slotId)" class="col-start-2 w-fit cursor-pointer rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
                             {{ 'tripDetail.undoNoExpense' | translate }}
                           </button>
                         </li>
@@ -542,8 +566,21 @@
                       <button
                         type="button"
                         (click)="navigateToExpense(expense.id)"
-                        class="flex w-full cursor-pointer items-center justify-between gap-3 px-3 py-3 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-300 dark:hover:bg-gray-750"
+                        class="grid w-full cursor-pointer grid-cols-[2rem_minmax(0,1fr)_5rem] items-center gap-3 px-3 py-3 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-300 dark:hover:bg-gray-750"
                       >
+                        @if (isAlertedExpense(expense.id)) {
+                          <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300" aria-hidden="true">
+                            <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 18.75a2.25 2.25 0 0 1-4.5 0m9-2.25H5.25c1.2-1.2 2.25-2.4 2.25-6a4.5 4.5 0 1 1 9 0c0 3.6 1.05 4.8 2.25 6Z" />
+                            </svg>
+                          </span>
+                        } @else {
+                          <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300" aria-hidden="true">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
+                            </svg>
+                          </span>
+                        }
                         <span class="flex min-w-0 flex-col">
                           <span class="text-sm font-medium text-gray-900 dark:text-white">{{ 'expenseCategory.' + expense.category | translate }}</span>
                           <span class="text-xs text-gray-500 dark:text-gray-400">
@@ -555,24 +592,23 @@
                               {{ expense.description }}
                             }
                           </span>
-                        </span>
-                        <span class="ml-4 flex shrink-0 items-center gap-3">
+                          <span class="mt-1 inline-flex flex-wrap items-center gap-x-2 gap-y-1">
                           @if (isAlertedExpense(expense.id)) {
-                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300" role="img" aria-label="{{ 'tripDetail.alertedExpenseIndicatorLabel' | translate }}">
-                              <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 18.75a2.25 2.25 0 0 1-4.5 0m9-2.25H5.25c1.2-1.2 2.25-2.4 2.25-6a4.5 4.5 0 1 1 9 0c0 3.6 1.05 4.8 2.25 6Z" />
-                              </svg>
-                            </span>
+                            <span class="text-xs font-medium text-rose-700 dark:text-rose-300">{{ 'tripDetail.alertedExpenseStatus' | translate }}</span>
+                          } @else {
+                            <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ 'tripDetail.additionalExpenseStatus' | translate }}</span>
                           }
                           @if (hasReceiptForExpense(expense.id)) {
-                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300" role="img" aria-label="{{ 'tripDetail.receiptIndicatorLabel' | translate }}">
-                              <svg class="h-4 w-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <span class="inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400" role="img" [attr.aria-label]="'tripDetail.receiptIndicatorLabel' | translate">
+                              <svg class="h-3.5 w-3.5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3.75h6.75c.69 0 1.25.56 1.25 1.25v14.5c0 .69-.56 1.25-1.25 1.25H8.25c-.69 0-1.25-.56-1.25-1.25V5c0-.69.56-1.25 1.25-1.25Zm2.25 6h2.5m-2.5 4h2.5M9 7.5h6" />
                               </svg>
+                              {{ 'tripDetail.receiptAttached' | translate }}
                             </span>
                           }
-                          <span class="min-w-[4.5rem] whitespace-nowrap text-right text-sm font-semibold text-gray-900 dark:text-white">{{ expense.amount | number: '1.2-2' }}</span>
+                          </span>
                         </span>
+                        <span class="whitespace-nowrap text-right text-sm font-semibold text-gray-900 dark:text-white">{{ expense.amount | number: '1.2-2' }}</span>
                       </button>
                     </li>
                   }

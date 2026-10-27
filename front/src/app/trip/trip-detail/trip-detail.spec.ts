@@ -53,7 +53,10 @@ const EN_TRANSLATIONS = {
     expensesHeading: 'Expenses',
     addExpenseButton: 'Add expense',
     receiptIndicatorLabel: 'Expense has a receipt attached',
-    alertedExpenseIndicatorLabel: 'This expense is linked to an alert',
+    receiptAttached: 'Receipt attached',
+    alertedExpenseStatus: 'Alert',
+    expectedExpenseEntered: 'Entered',
+    additionalExpenseStatus: 'Expense',
     noExpenses: 'No expenses recorded for this trip.',
     expectedExpensesCovered: '{{covered}} of {{total}} expected expenses covered',
     expectedExpensesMissing: '{{missing}} missing',
@@ -464,13 +467,13 @@ describe('TripDetailComponent — trip found', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const alertIndicator = fixture.nativeElement.querySelector(
-      '[aria-label="This expense is linked to an alert"]',
-    );
+    const alertIndicator = fixture.nativeElement.querySelector('.bg-rose-50');
     expect(alertIndicator).toBeTruthy();
     expect(alertIndicator.classList.contains('bg-rose-50')).toBe(true);
     const expenseRow = alertIndicator.closest('button');
     expect(expenseRow?.classList.contains('bg-rose-50')).toBe(false);
+    expect(expenseRow?.textContent).toContain('Alert');
+    expect(expenseRow?.classList.contains('grid-cols-[2rem_minmax(0,1fr)_5rem]')).toBe(true);
     expect(
       expenseRow?.querySelector('[aria-label="Expense has a receipt attached"]')
         ?.compareDocumentPosition(alertIndicator) & Node.DOCUMENT_POSITION_PRECEDING,
@@ -509,7 +512,8 @@ describe('TripDetailComponent — trip found', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(fixture.nativeElement.querySelector('[aria-label="This expense is linked to an alert"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.bg-rose-50')).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain('Alert');
   });
 
   it('should count a No expense choice as covered and allow undo', async () => {
@@ -536,6 +540,10 @@ describe('TripDetailComponent — trip found', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
+    const expectedRow = fixture.nativeElement.querySelector('li.grid');
+    expect(expectedRow.querySelector('.bg-amber-50')).toBeTruthy();
+    expect(expectedRow.textContent).toContain('Not entered yet');
+
     const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
     buttons.find((button) => button.textContent?.includes('No expense'))?.click();
     fixture.detectChanges();
@@ -544,6 +552,10 @@ describe('TripDetailComponent — trip found', () => {
     expect(fixture.nativeElement.textContent).toContain('1 of 1 expected expenses covered');
     expect(fixture.nativeElement.textContent).toContain('All covered');
     expect(fixture.nativeElement.textContent).toContain('Marked as no expense');
+    const noExpenseRow = fixture.nativeElement.querySelector('li.grid');
+    expect(noExpenseRow.querySelector('.bg-gray-100')).toBeTruthy();
+    expect(noExpenseRow.textContent).not.toContain('Not entered yet');
+    expect(noExpenseRow.classList.contains('bg-gray-50')).toBe(false);
 
     const undo = (Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[])
       .find((button) => button.textContent?.includes('Undo'));
