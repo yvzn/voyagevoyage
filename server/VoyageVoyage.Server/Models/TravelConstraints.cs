@@ -11,6 +11,10 @@ public class TravelConstraints
     public const int DefaultA1MaxPastTripAgeDays = 365;
     public const int DefaultA2MinCompletionDelayDays = 30;
     public const decimal DefaultAtypicalExpenseThresholdPercent = 100m;
+    public const int DefaultExpectedExpenseHistoryTripCount = 10;
+    public const int DefaultExpectedExpenseMinimumSampleSize = 3;
+    public const decimal DefaultExpectedExpenseHabitThresholdPercent = 60m;
+    public const int DefaultExpectedExpenseDestinationMinimumCount = 3;
 
     /// <summary>
     /// Fixed document identifier within the user's partition.
@@ -92,6 +96,18 @@ public class TravelConstraints
     /// Example: 100 means the receipt exceeds the category mean by 100% or more.
     /// </summary>
     public decimal XAtypicalExpenseThresholdPercent { get; set; } = DefaultAtypicalExpenseThresholdPercent;
+
+    /// <summary>Maximum number of recent trips used to learn expected expenses.</summary>
+    public int ExpectedExpenseHistoryTripCount { get; set; } = DefaultExpectedExpenseHistoryTripCount;
+
+    /// <summary>Minimum number of eligible trips required before historical habits are used.</summary>
+    public int ExpectedExpenseMinimumSampleSize { get; set; } = DefaultExpectedExpenseMinimumSampleSize;
+
+    /// <summary>Minimum share of trips in which an expense type must occur to be expected.</summary>
+    public decimal ExpectedExpenseHabitThresholdPercent { get; set; } = DefaultExpectedExpenseHabitThresholdPercent;
+
+    /// <summary>Minimum number of matching-destination trips required to filter the history corpus.</summary>
+    public int ExpectedExpenseDestinationMinimumCount { get; set; } = DefaultExpectedExpenseDestinationMinimumCount;
 
     /// <summary>
     /// Public holiday region identifiers selected by the user (e.g. "france-metropole").

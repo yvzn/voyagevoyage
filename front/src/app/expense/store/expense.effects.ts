@@ -25,6 +25,22 @@ export const loadExpensesEffect = createEffect(
   { functional: true },
 );
 
+export const loadExpectedExpensesEffect = createEffect(
+  (actions$ = inject(Actions), expenseService = inject(ExpenseService)) =>
+    actions$.pipe(
+      ofType(ExpenseActions.loadExpectedExpenses),
+      switchMap(({ tripId }) =>
+        expenseService.getExpected(tripId).pipe(
+          map((result) => ExpenseActions.loadExpectedExpensesSuccess({ tripId, result })),
+          catchError((error: unknown) =>
+            of(ExpenseActions.loadExpectedExpensesFailure({ tripId, error: String(error) })),
+          ),
+        ),
+      ),
+    ),
+  { functional: true },
+);
+
 export const loadExpensesForTripsEffect = createEffect(
   (actions$ = inject(Actions), expenseService = inject(ExpenseService)) =>
     actions$.pipe(

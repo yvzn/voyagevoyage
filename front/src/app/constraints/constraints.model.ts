@@ -26,6 +26,10 @@ export interface TravelConstraints {
   a1MaxPastTripAgeDays?: number;
   a2MinCompletionDelayDays?: number;
   xAtypicalExpenseThresholdPercent?: number;
+  expectedExpenseHistoryTripCount?: number;
+  expectedExpenseMinimumSampleSize?: number;
+  expectedExpenseHabitThresholdPercent?: number;
+  expectedExpenseDestinationMinimumCount?: number;
   publicHolidayRegions: string[];
   schoolHolidayZones: string[];
 }
@@ -42,6 +46,10 @@ export interface UpdateTravelConstraintsRequest {
   a1MaxPastTripAgeDays?: number;
   a2MinCompletionDelayDays?: number;
   xAtypicalExpenseThresholdPercent?: number;
+  expectedExpenseHistoryTripCount: number;
+  expectedExpenseMinimumSampleSize: number;
+  expectedExpenseHabitThresholdPercent: number;
+  expectedExpenseDestinationMinimumCount: number;
   publicHolidayRegions: string[];
   schoolHolidayZones: string[];
 }

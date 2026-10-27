@@ -22,8 +22,15 @@ import {
   selectExpensesLastCreatedExpenseId,
   selectExpensesLoadStatus,
   selectExpensesUpdateStatus,
+  selectExpectedExpenses,
+  selectExpectedExpensesLoadStatus,
+  selectExpectedExpensesTripId,
 } from '../../expense/store/expense.selectors';
-import { Expense, ExpenseCategory } from '../../expense/expense.model';
+import {
+  Expense,
+  ExpenseCategory,
+  ExpectedExpensesResponse,
+} from '../../expense/expense.model';
 import {
   selectReceiptsByExpenseId,
   selectUploadStatus,
@@ -46,8 +53,33 @@ const EN_TRANSLATIONS = {
     expensesHeading: 'Expenses',
     addExpenseButton: 'Add expense',
     receiptIndicatorLabel: 'Expense has a receipt attached',
-    alertedExpenseIndicatorLabel: 'This expense is linked to an alert',
+    receiptAttached: 'Receipt attached',
+    alertedExpenseStatus: 'Alert',
+    expectedExpenseEntered: 'Entered',
+    additionalExpenseStatus: 'Expense',
     noExpenses: 'No expenses recorded for this trip.',
+    expectedExpensesCovered: '{{covered}} of {{total}} expected expenses covered',
+    expectedExpensesMissing: '{{missing}} missing',
+    expectedExpensesAllCovered: 'All covered',
+    expectedExpensesProgress: '{{covered}} of {{total}} expected expenses covered',
+    expectedForTrip: 'Expected for this trip: {{categories}}, based on your bookings and usual expenses.',
+    expectedDayComplete: '{{covered}} of {{total}} · complete',
+    expectedDayMissing: '{{covered}} of {{total}} · {{missing}} missing',
+    expectedExpenseNotEntered: 'Not entered yet',
+    enterExpectedExpenseAmount: 'Enter amount',
+    markNoExpense: 'No expense',
+    expectedExpenseEditing: 'Entering expense',
+    cancelExpectedExpenseEntry: 'Cancel',
+    expectedExpenseMarkedNone: 'Marked as no expense',
+    undoNoExpense: 'Undo',
+    otherDates: 'Other dates',
+    expectedCategory: {
+      train: 'train',
+      hotel: 'hotel',
+      meal: 'meals',
+      metroBus: 'local transport',
+      other: 'other expenses',
+    },
     notFound: 'Trip not found.',
   },
   tripStatus: {
@@ -128,6 +160,23 @@ const MOCK_TRIP_WITH_BOOKINGS: Trip = {
   },
 };
 
+function expectedForExpense(expense: Expense): ExpectedExpensesResponse {
+  return {
+    summary: { total: 1, covered: 1, missing: 0 },
+    days: [{
+      date: expense.date,
+      role: 'first',
+      slots: [{
+        slotId: 'expected-slot-1',
+        category: expense.category,
+        detail: expense.description,
+        state: 'done',
+        expenseId: expense.id,
+      }],
+    }],
+  };
+}
+
 let alertQueryParamMap = new BehaviorSubject(convertToParamMap({}));
 
 // JSDOM does not implement HTMLDialogElement.showModal(); stub it globally
@@ -140,6 +189,7 @@ async function setupModule(
   tripId = 'trip-1',
   expenses: Expense[] = [],
   receiptsByExpenseId: Record<string, unknown[]> = {},
+  expectedExpenses: ExpectedExpensesResponse | null = null,
 ): Promise<MockStore> {
   alertQueryParamMap = new BehaviorSubject(convertToParamMap({}));
   await TestBed.configureTestingModule({
@@ -164,6 +214,9 @@ async function setupModule(
           { selector: selectConstraints, value: null },
           { selector: selectAllExpenses, value: expenses },
           { selector: selectExpensesLoadStatus, value: 'idle' as ApiStatus },
+          { selector: selectExpectedExpenses, value: expectedExpenses },
+          { selector: selectExpectedExpensesTripId, value: expectedExpenses ? tripId : null },
+          { selector: selectExpectedExpensesLoadStatus, value: expectedExpenses ? 'success' as ApiStatus : 'idle' as ApiStatus },
           { selector: selectExpensesCreateStatus, value: 'idle' as ApiStatus },
           { selector: selectExpensesUpdateStatus, value: 'idle' as ApiStatus },
           { selector: selectExpensesLastCreatedExpenseId, value: null },
@@ -307,8 +360,9 @@ describe('TripDetailComponent — trip found', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const list = fixture.nativeElement.querySelector('ul[aria-label="Expenses"]');
-    const listItems = Array.from(list?.querySelectorAll('button') ?? []) as HTMLElement[];
+    const listItems = Array.from(
+      fixture.nativeElement.querySelectorAll('section[aria-labelledby="expenses-heading"] ul button'),
+    ) as HTMLElement[];
     expect(listItems[0]?.textContent).toContain('Earlier trip');
     expect(listItems[1]?.textContent).toContain('Later trip');
   });
@@ -368,6 +422,9 @@ describe('TripDetailComponent — trip found', () => {
 
     store.overrideSelector(selectAllExpenses, expenses);
     store.overrideSelector(selectReceiptsByExpenseId, receiptsByExpenseId);
+    store.overrideSelector(selectExpectedExpenses, expectedForExpense(expenses[0]));
+    store.overrideSelector(selectExpectedExpensesTripId, 'trip-1');
+    store.overrideSelector(selectExpectedExpensesLoadStatus, 'success');
     store.refreshState();
 
     const fixture = TestBed.createComponent(TripDetailComponent);
@@ -400,6 +457,9 @@ describe('TripDetailComponent — trip found', () => {
     const store = TestBed.inject(MockStore);
     store.overrideSelector(selectAllExpenses, expenses);
     store.overrideSelector(selectReceiptsByExpenseId, receiptsByExpenseId);
+    store.overrideSelector(selectExpectedExpenses, expectedForExpense(expenses[0]));
+    store.overrideSelector(selectExpectedExpensesTripId, 'trip-1');
+    store.overrideSelector(selectExpectedExpensesLoadStatus, 'success');
     store.refreshState();
     alertQueryParamMap.next(convertToParamMap({ expenseId: 'expense-1' }));
 
@@ -407,13 +467,13 @@ describe('TripDetailComponent — trip found', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    const alertIndicator = fixture.nativeElement.querySelector(
-      '[aria-label="This expense is linked to an alert"]',
-    );
+    const alertIndicator = fixture.nativeElement.querySelector('.bg-rose-50');
     expect(alertIndicator).toBeTruthy();
     expect(alertIndicator.classList.contains('bg-rose-50')).toBe(true);
     const expenseRow = alertIndicator.closest('button');
     expect(expenseRow?.classList.contains('bg-rose-50')).toBe(false);
+    expect(expenseRow?.textContent).toContain('Alert');
+    expect(expenseRow?.classList.contains('grid-cols-[2rem_minmax(0,1fr)_5rem]')).toBe(true);
     expect(
       expenseRow?.querySelector('[aria-label="Expense has a receipt attached"]')
         ?.compareDocumentPosition(alertIndicator) & Node.DOCUMENT_POSITION_PRECEDING,
@@ -442,6 +502,9 @@ describe('TripDetailComponent — trip found', () => {
     const store = TestBed.inject(MockStore);
     store.overrideSelector(selectAllExpenses, expenses);
     store.overrideSelector(selectReceiptsByExpenseId, receiptsByExpenseId);
+    store.overrideSelector(selectExpectedExpenses, expectedForExpense(expenses[0]));
+    store.overrideSelector(selectExpectedExpensesTripId, 'trip-1');
+    store.overrideSelector(selectExpectedExpensesLoadStatus, 'success');
     store.refreshState();
     alertQueryParamMap.next(convertToParamMap({ receiptId: 'receipt-1' }));
 
@@ -449,7 +512,96 @@ describe('TripDetailComponent — trip found', () => {
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(fixture.nativeElement.querySelector('[aria-label="This expense is linked to an alert"]')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('.bg-rose-50')).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain('Alert');
+  });
+
+  it('should count a No expense choice as covered and allow undo', async () => {
+    const expected: ExpectedExpensesResponse = {
+      summary: { total: 1, covered: 0, missing: 1 },
+      days: [{
+        date: '2026-06-10',
+        role: 'first',
+        slots: [{
+          slotId: 'meal-slot',
+          category: ExpenseCategory.Meal,
+          detail: '',
+          state: 'missing',
+          expenseId: null,
+        }],
+      }],
+    };
+    const store = TestBed.inject(MockStore);
+    store.overrideSelector(selectExpectedExpenses, expected);
+    store.overrideSelector(selectExpectedExpensesTripId, 'trip-1');
+    store.overrideSelector(selectExpectedExpensesLoadStatus, 'success');
+    store.refreshState();
+    const fixture = TestBed.createComponent(TripDetailComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const expectedRow = fixture.nativeElement.querySelector('li.grid');
+    expect(expectedRow.querySelector('.bg-amber-50')).toBeTruthy();
+    expect(expectedRow.textContent).toContain('Not entered yet');
+
+    const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
+    buttons.find((button) => button.textContent?.includes('No expense'))?.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.textContent).toContain('1 of 1 expected expenses covered');
+    expect(fixture.nativeElement.textContent).toContain('All covered');
+    expect(fixture.nativeElement.textContent).toContain('Marked as no expense');
+    const noExpenseRow = fixture.nativeElement.querySelector('li.grid');
+    expect(noExpenseRow.querySelector('.bg-gray-100')).toBeTruthy();
+    expect(noExpenseRow.textContent).not.toContain('Not entered yet');
+    expect(noExpenseRow.classList.contains('bg-gray-50')).toBe(false);
+
+    const undo = (Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[])
+      .find((button) => button.textContent?.includes('Undo'));
+    undo?.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('0 of 1 expected expenses covered');
+    expect(fixture.nativeElement.textContent).toContain('1 missing');
+  });
+
+  it('should prefill the expense modal from an expected slot', async () => {
+    const expected: ExpectedExpensesResponse = {
+      summary: { total: 1, covered: 0, missing: 1 },
+      days: [{
+        date: '2026-06-11',
+        role: 'intermediate',
+        slots: [{
+          slotId: 'train-slot',
+          category: ExpenseCategory.Train,
+          detail: 'Paris → Lyon',
+          state: 'missing',
+          expenseId: null,
+        }],
+      }],
+    };
+    const store = TestBed.inject(MockStore);
+    store.overrideSelector(selectExpectedExpenses, expected);
+    store.overrideSelector(selectExpectedExpensesTripId, 'trip-1');
+    store.overrideSelector(selectExpectedExpensesLoadStatus, 'success');
+    store.refreshState();
+    const fixture = TestBed.createComponent(TripDetailComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const enterAmount = (Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[])
+      .find((button) => button.textContent?.includes('Enter amount'));
+    enterAmount?.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const form = fixture.debugElement.query(By.directive(ExpenseFormComponent)).componentInstance as ExpenseFormComponent;
+    expect(form.defaultDate()).toBe('2026-06-11');
+    expect(form.defaultCategory()).toBe(ExpenseCategory.Train);
+    expect(form.defaultDescription()).toBe('Paris → Lyon');
+    expect(form['form'].get('category')?.value).toBe(ExpenseCategory.Train);
+    expect(form['form'].get('description')?.value).toBe('Paris → Lyon');
   });
 
   it('should pass the trip start date to the expense form as defaultDate', async () => {
@@ -480,6 +632,31 @@ describe('TripDetailComponent — trip found', () => {
     fixture.componentInstance['onExpenseSaved']();
 
     expect(navigateSpy).toHaveBeenCalledWith(['/expense', 'expense-42']);
+  });
+
+  it('should navigate to the created expense after saving an expected expense', async () => {
+    const store = TestBed.inject(MockStore);
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    store.overrideSelector(selectExpensesLastCreatedExpenseId, 'expense-42');
+    store.refreshState();
+
+    const fixture = TestBed.createComponent(TripDetailComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const component = fixture.componentInstance;
+    component['enterExpectedExpense']({
+      slotId: 'meal-slot',
+      category: ExpenseCategory.Meal,
+      detail: '',
+      state: 'missing',
+      expenseId: null,
+    }, '2026-06-10');
+    component['onExpenseSaved']();
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/expense', 'expense-42']);
+    expect(component['isExpenseFormOpen']()).toBe(false);
   });
 
   it('should open the edit form modal when edit button is clicked', async () => {

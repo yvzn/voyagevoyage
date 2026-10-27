@@ -13,7 +13,11 @@ const MOCK_CONSTRAINTS: TravelConstraints = {
   planningHorizonDays: 90,
   trainBookingThresholdDays: 90,
   publicHolidayRegions: [],
-      schoolHolidayZones: [],
+  schoolHolidayZones: [],
+  expectedExpenseHistoryTripCount: 10,
+  expectedExpenseMinimumSampleSize: 3,
+  expectedExpenseHabitThresholdPercent: 60,
+  expectedExpenseDestinationMinimumCount: 3,
 };
 
 describe('ConstraintsService', () => {
@@ -79,6 +83,10 @@ describe('ConstraintsService', () => {
         trainBookingThresholdDays: 90,
         publicHolidayRegions: [],
       schoolHolidayZones: [],
+      expectedExpenseHistoryTripCount: 10,
+      expectedExpenseMinimumSampleSize: 3,
+      expectedExpenseHabitThresholdPercent: 60,
+      expectedExpenseDestinationMinimumCount: 3,
       };
       const updated: TravelConstraints = { ...request };
 

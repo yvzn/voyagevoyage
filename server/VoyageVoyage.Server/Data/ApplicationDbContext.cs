@@ -33,6 +33,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         {
             entity.HasKey(c => c.Id);
             entity.HasIndex(c => c.UserId);
+            entity.Property(c => c.ExpectedExpenseHistoryTripCount)
+                .HasDefaultValue(global::VoyageVoyage.Server.Models.TravelConstraints.DefaultExpectedExpenseHistoryTripCount);
+            entity.Property(c => c.ExpectedExpenseMinimumSampleSize)
+                .HasDefaultValue(global::VoyageVoyage.Server.Models.TravelConstraints.DefaultExpectedExpenseMinimumSampleSize);
+            entity.Property(c => c.ExpectedExpenseHabitThresholdPercent)
+                .HasDefaultValue(global::VoyageVoyage.Server.Models.TravelConstraints.DefaultExpectedExpenseHabitThresholdPercent);
+            entity.Property(c => c.ExpectedExpenseDestinationMinimumCount)
+                .HasDefaultValue(global::VoyageVoyage.Server.Models.TravelConstraints.DefaultExpectedExpenseDestinationMinimumCount);
         });
 
         modelBuilder.Entity<Expense>(entity =>

@@ -1,11 +1,14 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
-import { Expense } from '../expense.model';
+import { Expense, ExpectedExpensesResponse } from '../expense.model';
 import { ExpenseActions } from './expense.actions';
 
 export type ApiStatus = 'idle' | 'loading' | 'success' | 'failure';
 
 export interface ExpenseState {
   expenses: Expense[];
+  expectedExpenses: ExpectedExpensesResponse | null;
+  expectedExpensesTripId: string | null;
+  expectedExpensesLoadStatus: ApiStatus;
   selectedExpense: Expense | null;
   loadStatus: ApiStatus;
   loadByIdStatus: ApiStatus;
@@ -21,6 +24,9 @@ export interface ExpenseState {
 
 const initialState: ExpenseState = {
   expenses: [],
+  expectedExpenses: null,
+  expectedExpensesTripId: null,
+  expectedExpensesLoadStatus: 'idle',
   selectedExpense: null,
   loadStatus: 'idle',
   loadByIdStatus: 'idle',
@@ -52,6 +58,25 @@ export const expensesFeature = createFeature({
       ...state,
       loadStatus: 'failure' as ApiStatus,
       error,
+    })),
+
+    on(ExpenseActions.loadExpectedExpenses, (state, { tripId }) => ({
+      ...state,
+      expectedExpenses: null,
+      expectedExpensesTripId: tripId,
+      expectedExpensesLoadStatus: 'loading' as ApiStatus,
+    })),
+    on(ExpenseActions.loadExpectedExpensesSuccess, (state, { tripId, result }) => ({
+      ...state,
+      expectedExpenses: state.expectedExpensesTripId === tripId ? result : state.expectedExpenses,
+      expectedExpensesLoadStatus:
+        state.expectedExpensesTripId === tripId ? ('success' as ApiStatus) : state.expectedExpensesLoadStatus,
+    })),
+    on(ExpenseActions.loadExpectedExpensesFailure, (state, { tripId }) => ({
+      ...state,
+      expectedExpenses: state.expectedExpensesTripId === tripId ? null : state.expectedExpenses,
+      expectedExpensesLoadStatus:
+        state.expectedExpensesTripId === tripId ? ('failure' as ApiStatus) : state.expectedExpensesLoadStatus,
     })),
 
     // Load by id (expense detail page)
@@ -157,6 +182,9 @@ export const {
   reducer: expensesReducer,
   selectExpensesState,
   selectExpenses,
+  selectExpectedExpenses,
+  selectExpectedExpensesTripId,
+  selectExpectedExpensesLoadStatus,
   selectSelectedExpense,
   selectLoadStatus: selectExpensesLoadStatus,
   selectLoadByIdStatus: selectExpenseLoadByIdStatus,

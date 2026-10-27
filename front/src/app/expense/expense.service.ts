@@ -1,7 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Expense, CreateExpenseRequest, UpdateExpenseRequest } from './expense.model';
+import {
+  Expense,
+  CreateExpenseRequest,
+  UpdateExpenseRequest,
+  ExpectedExpensesResponse,
+} from './expense.model';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +16,10 @@ export class ExpenseService {
 
   getAll(tripId: string): Observable<Expense[]> {
     return this.http.get<Expense[]>(`/api/trips/${tripId}/expenses`);
+  }
+
+  getExpected(tripId: string): Observable<ExpectedExpensesResponse> {
+    return this.http.get<ExpectedExpensesResponse>(`/api/trips/${tripId}/expected-expenses`);
   }
 
   getById(id: string): Observable<Expense> {

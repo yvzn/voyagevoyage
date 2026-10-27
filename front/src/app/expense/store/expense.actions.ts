@@ -1,5 +1,10 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
-import { Expense, CreateExpenseRequest, UpdateExpenseRequest } from '../expense.model';
+import {
+  Expense,
+  CreateExpenseRequest,
+  UpdateExpenseRequest,
+  ExpectedExpensesResponse,
+} from '../expense.model';
 
 export const ExpenseActions = createActionGroup({
   source: 'Expenses',
@@ -8,6 +13,11 @@ export const ExpenseActions = createActionGroup({
     'Load Expenses': props<{ tripId: string }>(),
     'Load Expenses Success': props<{ expenses: Expense[] }>(),
     'Load Expenses Failure': props<{ error: string }>(),
+
+    // Load the expected-expense checklist for a trip
+    'Load Expected Expenses': props<{ tripId: string }>(),
+    'Load Expected Expenses Success': props<{ tripId: string; result: ExpectedExpensesResponse }>(),
+    'Load Expected Expenses Failure': props<{ tripId: string; error: string }>(),
 
     // Load expenses for multiple trips (for calendar view)
     'Load Expenses For Trips': props<{ tripIds: string[] }>(),

@@ -52,6 +52,10 @@ public class TravelConstraintsService(
         existing.A1MaxPastTripAgeDays = request.A1MaxPastTripAgeDays;
         existing.A2MinCompletionDelayDays = request.A2MinCompletionDelayDays;
         existing.XAtypicalExpenseThresholdPercent = request.XAtypicalExpenseThresholdPercent;
+        existing.ExpectedExpenseHistoryTripCount = request.ExpectedExpenseHistoryTripCount;
+        existing.ExpectedExpenseMinimumSampleSize = request.ExpectedExpenseMinimumSampleSize;
+        existing.ExpectedExpenseHabitThresholdPercent = request.ExpectedExpenseHabitThresholdPercent;
+        existing.ExpectedExpenseDestinationMinimumCount = request.ExpectedExpenseDestinationMinimumCount;
         existing.PublicHolidayRegions = request.PublicHolidayRegions;
         existing.SchoolHolidayZones = request.SchoolHolidayZones;
 

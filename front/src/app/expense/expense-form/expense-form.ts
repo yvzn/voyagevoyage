@@ -40,6 +40,10 @@ export class ExpenseFormComponent implements AfterViewInit {
   /** Pre-fill the date field when opening from the calendar. */
   readonly defaultDate = input<string | null>(null);
 
+  /** Prefill the category and description when the form opens from an expected expense. */
+  readonly defaultCategory = input<ExpenseCategory | null>(null);
+  readonly defaultDescription = input<string | null>(null);
+
   readonly saved = output<void>();
   readonly cancelled = output<void>();
 
@@ -90,6 +94,8 @@ export class ExpenseFormComponent implements AfterViewInit {
     effect(() => {
       const e = this.expense();
       const d = this.defaultDate();
+      const category = this.defaultCategory();
+      const description = this.defaultDescription();
       if (e) {
         this.form.setValue({
           date: e.date,
@@ -100,9 +106,9 @@ export class ExpenseFormComponent implements AfterViewInit {
       } else {
         this.form.reset({
           date: d ?? '',
-          category: ExpenseCategory.Other,
+          category: category ?? ExpenseCategory.Other,
           amount: null,
-          description: '',
+          description: description ?? '',
         });
       }
     });

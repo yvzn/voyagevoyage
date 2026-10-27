@@ -29,3 +29,29 @@ export interface UpdateExpenseRequest {
   amount: number;
   description: string;
 }
+
+export type ExpectedExpenseDayRole = 'first' | 'last' | 'intermediate' | 'single';
+export type ExpectedExpenseSlotState = 'done' | 'missing';
+
+export interface ExpectedExpenseSlot {
+  slotId: string;
+  category: ExpenseCategory;
+  detail: string;
+  state: ExpectedExpenseSlotState;
+  expenseId: string | null;
+}
+
+export interface ExpectedExpenseDay {
+  date: string;
+  role: ExpectedExpenseDayRole;
+  slots: ExpectedExpenseSlot[];
+}
+
+export interface ExpectedExpensesResponse {
+  summary: {
+    total: number;
+    covered: number;
+    missing: number;
+  };
+  days: ExpectedExpenseDay[];
+}

@@ -128,6 +128,11 @@ Centralize expense proofs, structure spending data, and streamline frequent expe
   - fields: date, category, amount, description, linked proof
   - link to existing trip
   - statuses: To validate, Validated
+- Expected-expense checklist on trip details:
+  - derive expected daily expenses from train/hotel bookings and recent eligible trip history
+  - configure history count, minimum sample, habit threshold, and destination-filter threshold in travel constraints
+  - reconcile expected items with recorded expenses by date/category/detail; show unmatched expenses normally
+  - keep "No expense" choices in browser memory only; expected items are never expense records
 - Storage and browsing:
   - structured archive by month and year
   - proof preview
@@ -139,6 +144,8 @@ Centralize expense proofs, structure spending data, and streamline frequent expe
 - Upload must be fast and mobile-friendly.
 - Expense form should prefill context from selected trip/day when possible.
 - Missing mandatory fields must be highlighted clearly.
+- The expected-expense checklist is advisory only: users may skip expected items or record any additional expense, and checklist state never affects expense totals, exports, trip status, or expense submission.
+- If expected-item generation is unavailable, retain the existing expense list and actions without a checklist error message.
 
 ## Batch 4 - Expense reports and fiscal rules
 

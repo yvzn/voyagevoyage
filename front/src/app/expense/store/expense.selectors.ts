@@ -2,6 +2,18 @@ import { createSelector } from '@ngrx/store';
 import { selectExpensesState } from './expense.reducer';
 
 export const selectAllExpenses = createSelector(selectExpensesState, (state) => state.expenses);
+export const selectExpectedExpenses = createSelector(
+  selectExpensesState,
+  (state) => state.expectedExpenses,
+);
+export const selectExpectedExpensesTripId = createSelector(
+  selectExpensesState,
+  (state) => state.expectedExpensesTripId,
+);
+export const selectExpectedExpensesLoadStatus = createSelector(
+  selectExpensesState,
+  (state) => state.expectedExpensesLoadStatus,
+);
 export const selectSelectedExpense = createSelector(selectExpensesState, (state) => state.selectedExpense);
 export const selectExpensesLoadStatus = createSelector(selectExpensesState, (state) => state.loadStatus);
 export const selectExpenseLoadByIdStatus = createSelector(selectExpensesState, (state) => state.loadByIdStatus);

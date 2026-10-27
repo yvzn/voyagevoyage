@@ -1,11 +1,11 @@
-import { Component, computed, effect, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked, ChangeDetectionStrategy } from '@angular/core';
 import { NgClass, DecimalPipe } from '@angular/common';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
-import { TripStatus } from '../trip.model';
+import { Trip, TripStatus } from '../trip.model';
 import { TripActions } from '../store/trip.actions';
 import {
   selectAllTrips,
@@ -26,10 +26,19 @@ import {
   selectAllExpenses,
   selectExpensesLastCreatedExpenseId,
   selectExpensesLoadStatus,
+  selectExpectedExpenses,
+  selectExpectedExpensesLoadStatus,
+  selectExpectedExpensesTripId,
 } from '../../expense/store/expense.selectors';
 import { selectReceiptsByExpenseId } from '../../receipt/store/receipt.reducer';
 import { ReceiptActions } from '../../receipt/store/receipt.actions';
-import { ExpenseCategory } from '../../expense/expense.model';
+import {
+  Expense,
+  ExpenseCategory,
+  ExpectedExpenseDayRole,
+  ExpectedExpenseSlot,
+  ExpectedExpensesResponse,
+} from '../../expense/expense.model';
 import { TrainBookingFormComponent } from '../../train-booking/train-booking-form/train-booking-form';
 import { HotelBookingFormComponent } from '../../hotel-booking/hotel-booking-form/hotel-booking-form';
 import { AddFrequentExpensesModalComponent } from '../add-frequent-expenses-modal/add-frequent-expenses-modal';
@@ -37,6 +46,23 @@ import { FrequentExpenseWithDateOverride } from '../../frequent-expense/frequent
 import { LoadingSpinnerComponent } from '../../loading-spinner/loading-spinner';
 
 type BookingType = 'train' | 'hotel';
+type ChecklistDisplayState = 'done' | 'missing' | 'editing' | 'none';
+
+interface ExpectedSlotDisplay {
+  slot: ExpectedExpenseSlot;
+  state: ChecklistDisplayState;
+  expense: Expense | null;
+}
+
+interface ExpenseDayGroup {
+  date: string | null;
+  role: ExpectedExpenseDayRole | null;
+  expectedSlots: ExpectedSlotDisplay[];
+  expenses: Expense[];
+  total: number;
+  covered: number;
+  missing: number;
+}
 
 @Component({
   selector: 'app-trip-detail',
@@ -51,6 +77,7 @@ export class TripDetailComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   protected readonly localeService = inject(LocaleService);
+  private readonly translate = inject(TranslateService);
 
   private readonly routeParamId = toSignal(
     this.route.paramMap.pipe(map((p) => p.get('id') ?? '')),
@@ -111,9 +138,51 @@ export class TripDetailComponent {
   protected readonly clearBookingError = signal<string | null>(null);
 
   protected readonly expenses = this.store.selectSignal(selectAllExpenses);
-  protected readonly sortedExpenses = computed(() =>
-    [...this.expenses()].sort((a, b) => a.date.localeCompare(b.date)),
-  );
+  private readonly expectedExpensesResponse = this.store.selectSignal(selectExpectedExpenses);
+  private readonly expectedExpensesTripId = this.store.selectSignal(selectExpectedExpensesTripId);
+  private readonly expectedExpensesLoadStatus = this.store.selectSignal(selectExpectedExpensesLoadStatus);
+  private readonly stableExpectedExpenses = signal<{
+    tripSignature: string;
+    result: ExpectedExpensesResponse;
+  } | null>(null);
+  private readonly visibleExpectedExpenses = signal<{
+    tripSignature: string;
+    result: ExpectedExpensesResponse;
+  } | null>(null);
+  private readonly noExpenseSlotIds = signal<ReadonlySet<string>>(new Set());
+  protected readonly activeExpectedSlotId = signal<string | null>(null);
+  protected readonly defaultExpenseDate = signal<string | null>(null);
+  protected readonly defaultExpenseCategory = signal<ExpenseCategory | null>(null);
+  protected readonly defaultExpenseDescription = signal<string | null>(null);
+  protected readonly expectedChecklist = computed(() => {
+    const visible = this.visibleExpectedExpenses();
+    const trip = this.trip();
+    return visible && trip && visible.tripSignature === this.getTripSignature(trip)
+      ? visible.result
+      : null;
+  });
+  protected readonly expectedSummary = computed(() => {
+    const groups = this.expenseDayGroups().filter((group) => group.date !== null);
+    const total = groups.reduce((sum, group) => sum + group.total, 0);
+    const covered = groups.reduce((sum, group) => sum + group.covered, 0);
+    return {
+      total,
+      covered,
+      missing: total - covered,
+    };
+  });
+  protected readonly expectedCategoriesText = computed(() => {
+    const slots = this.expectedChecklist()?.days.flatMap((day) => day.slots) ?? [];
+    const categories = [...new Set(slots.map((slot) => slot.category))];
+    const labels = categories.map((category) =>
+      this.translate.instant(`tripDetail.expectedCategory.${category}`),
+    );
+    return new Intl.ListFormat(this.localeService.currentLocale(), {
+      style: 'long',
+      type: 'conjunction',
+    }).format(labels);
+  });
+  protected readonly expenseDayGroups = computed(() => this.buildExpenseDayGroups());
   private readonly allReceiptsByExpenseId = this.store.selectSignal(selectReceiptsByExpenseId);
   protected readonly hasReceiptForExpense = (expenseId: string): boolean =>
     (this.allReceiptsByExpenseId()[expenseId]?.length ?? 0) > 0;
@@ -146,6 +215,70 @@ export class TripDetailComponent {
   private deletePending = false;
 
   constructor() {
+    let lastRequestedTripId = '';
+    let lastRequestedTripSignature = '';
+    let lastRequestedExpenses: Expense[] | null = null;
+
+    effect(() => {
+      const trip = this.trip();
+      const tripId = this.tripId();
+      const loadStatus = this.expensesLoadStatus();
+      const currentExpenses = this.expenses();
+      const tripSignature = trip ? this.getTripSignature(trip) : '';
+      if (
+        !trip ||
+        !tripId ||
+        loadStatus !== 'success' ||
+        (tripId === lastRequestedTripId &&
+          tripSignature === lastRequestedTripSignature &&
+          currentExpenses === lastRequestedExpenses)
+      )
+        return;
+
+      lastRequestedTripId = tripId;
+      lastRequestedTripSignature = tripSignature;
+      lastRequestedExpenses = currentExpenses;
+      this.store.dispatch(ExpenseActions.loadExpectedExpenses({ tripId }));
+    });
+
+    effect(() => {
+      const trip = this.trip();
+      const tripId = this.tripId();
+      const responseTripId = this.expectedExpensesTripId();
+      const status = this.expectedExpensesLoadStatus();
+      const response = this.expectedExpensesResponse();
+      if (!trip || !tripId || responseTripId !== tripId)
+        return;
+
+      if (status === 'failure') {
+        this.visibleExpectedExpenses.set(null);
+        return;
+      }
+      if (status !== 'success' || !response)
+        return;
+
+      const tripSignature = this.getTripSignature(trip);
+      const previous = untracked(() => this.stableExpectedExpenses());
+      const result = previous?.tripSignature === tripSignature
+        ? this.mergeExpectedExpenses(previous.result, response)
+        : response;
+
+      this.stableExpectedExpenses.set({ tripSignature, result });
+      this.visibleExpectedExpenses.set({ tripSignature, result });
+
+      const coveredSlotIds = new Set(
+        result.days.flatMap((day) =>
+          day.slots.filter((slot) => slot.state === 'done').map((slot) => slot.slotId),
+        ),
+      );
+      if (coveredSlotIds.size > 0) {
+        const current = untracked(() => this.noExpenseSlotIds());
+        const next = new Set([...current].filter((slotId) => !coveredSlotIds.has(slotId)));
+        if (next.size !== current.size)
+          this.noExpenseSlotIds.set(next);
+      }
+    });
+
     effect(() => {
       const ds = this.deleteStatus();
       if (this.deletePending) {
@@ -220,6 +353,16 @@ export class TripDetailComponent {
     }).format(new Date(Date.UTC(year, month - 1, day)));
   }
 
+  protected formatTripDay(dateStr: string): string {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Intl.DateTimeFormat(this.localeService.currentLocale(), {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'UTC',
+    }).format(new Date(Date.UTC(year, month - 1, day)));
+  }
+
   protected formatDateTime(dateTimeStr: string): string {
     return new Intl.DateTimeFormat(this.localeService.currentLocale(), {
       year: 'numeric',
@@ -247,11 +390,18 @@ export class TripDetailComponent {
   }
 
   protected openExpenseForm(): void {
+    this.activeExpectedSlotId.set(null);
+    this.defaultExpenseDate.set(this.trip()?.startDate ?? null);
+    this.defaultExpenseCategory.set(null);
+    this.defaultExpenseDescription.set(null);
     this.isExpenseFormOpen.set(true);
   }
 
   protected closeExpenseForm(): void {
     this.isExpenseFormOpen.set(false);
+    this.activeExpectedSlotId.set(null);
+    this.defaultExpenseCategory.set(null);
+    this.defaultExpenseDescription.set(null);
   }
 
   protected onExpenseSaved(): void {
@@ -331,6 +481,212 @@ export class TripDetailComponent {
 
   protected navigateToExpense(expenseId: string): void {
     this.router.navigate(['/expense', expenseId]);
+  }
+
+  protected enterExpectedExpense(slot: ExpectedExpenseSlot, date: string): void {
+    this.activeExpectedSlotId.set(slot.slotId);
+    this.defaultExpenseDate.set(date);
+    this.defaultExpenseCategory.set(slot.category);
+    this.defaultExpenseDescription.set(slot.detail);
+    this.isExpenseFormOpen.set(true);
+  }
+
+  protected markNoExpense(slotId: string): void {
+    this.noExpenseSlotIds.update((current) => new Set(current).add(slotId));
+  }
+
+  protected undoNoExpense(slotId: string): void {
+    this.noExpenseSlotIds.update((current) => {
+      const next = new Set(current);
+      next.delete(slotId);
+      return next;
+    });
+  }
+
+  protected cancelExpectedExpenseEntry(): void {
+    this.closeExpenseForm();
+  }
+
+  private buildExpenseDayGroups(): ExpenseDayGroup[] {
+    const trip = this.trip();
+    if (!trip)
+      return [];
+
+    const tripExpenses = this.expenses()
+      .filter((expense) => expense.tripId === trip.id);
+    const expectedByDate = new Map(
+      (this.expectedChecklist()?.days ?? []).map((day) => [day.date, day]),
+    );
+    const actualByDate = new Map<string, Expense[]>();
+    for (const expense of tripExpenses) {
+      const group = actualByDate.get(expense.date) ?? [];
+      group.push(expense);
+      actualByDate.set(expense.date, group);
+    }
+
+    const groups: ExpenseDayGroup[] = [];
+    const tripDates: string[] = [];
+    const start = new Date(`${trip.startDate}T00:00:00Z`).getTime();
+    const end = new Date(`${trip.endDate}T00:00:00Z`).getTime();
+    for (let timestamp = start; timestamp <= end; timestamp += 24 * 60 * 60 * 1000) {
+      tripDates.push(new Date(timestamp).toISOString().slice(0, 10));
+    }
+
+    for (const date of tripDates) {
+      const expectedDay = expectedByDate.get(date);
+      const slots = [...(expectedDay?.slots ?? [])].sort((left, right) =>
+        this.categoryLabel(left.category).localeCompare(this.categoryLabel(right.category), this.localeService.currentLocale()),
+      );
+      const remainingExpenses = this.sortExpensesByCategory(actualByDate.get(date) ?? []);
+      const matchedBySlotId = new Map<string, Expense>();
+
+      for (const slot of slots.filter((item) => item.state === 'done')) {
+        const expense = remainingExpenses.find((item) => item.id === slot.expenseId);
+        if (expense) {
+          matchedBySlotId.set(slot.slotId, expense);
+        }
+      }
+
+      const consumedIds = new Set([...matchedBySlotId.values()].map((expense) => expense.id));
+      const missingSlots = slots
+        .filter((slot) => !matchedBySlotId.has(slot.slotId))
+        .sort((left, right) => {
+          const leftHasExact = remainingExpenses.some((expense) =>
+            !consumedIds.has(expense.id) &&
+            expense.category === left.category &&
+            this.normalizeDetail(expense.description) === this.normalizeDetail(left.detail),
+          );
+          const rightHasExact = remainingExpenses.some((expense) =>
+            !consumedIds.has(expense.id) &&
+            expense.category === right.category &&
+            this.normalizeDetail(expense.description) === this.normalizeDetail(right.detail),
+          );
+          return Number(rightHasExact) - Number(leftHasExact);
+        });
+
+      for (const slot of missingSlots) {
+        const candidates = remainingExpenses.filter((expense) =>
+          !consumedIds.has(expense.id) && expense.category === slot.category,
+        );
+        const exact = candidates.find((expense) =>
+          this.normalizeDetail(expense.description) === this.normalizeDetail(slot.detail),
+        );
+        const matchedExpense = exact ?? candidates[0];
+        if (matchedExpense) {
+          matchedBySlotId.set(slot.slotId, matchedExpense);
+          consumedIds.add(matchedExpense.id);
+        }
+      }
+
+      const expectedSlots = slots.map((slot): ExpectedSlotDisplay => {
+        const expense = matchedBySlotId.get(slot.slotId) ?? null;
+        if (expense)
+          return { slot, state: 'done', expense };
+        if (this.activeExpectedSlotId() === slot.slotId)
+          return { slot, state: 'editing', expense: null };
+        if (this.noExpenseSlotIds().has(slot.slotId))
+          return { slot, state: 'none', expense: null };
+        return { slot, state: 'missing', expense: null };
+      });
+
+      const total = expectedSlots.length;
+      const covered = expectedSlots.filter((item) =>
+        item.state === 'done' || item.state === 'none',
+      ).length;
+      groups.push({
+        date,
+        role: expectedDay?.role ?? null,
+        expectedSlots,
+        expenses: this.sortExpensesByCategory(
+          (actualByDate.get(date) ?? []).filter((expense) => !consumedIds.has(expense.id)),
+        ),
+        total,
+        covered,
+        missing: total - covered,
+      });
+    }
+
+    const otherDateExpenses = tripExpenses
+      .filter((expense) => expense.date < trip.startDate || expense.date > trip.endDate)
+      .sort((left, right) =>
+        left.date.localeCompare(right.date) ||
+        this.categoryLabel(left.category).localeCompare(this.categoryLabel(right.category), this.localeService.currentLocale()),
+      );
+    if (otherDateExpenses.length > 0) {
+      groups.push({
+        date: null,
+        role: null,
+        expectedSlots: [],
+        expenses: otherDateExpenses,
+        total: 0,
+        covered: 0,
+        missing: 0,
+      });
+    }
+
+    return groups;
+  }
+
+  private sortExpensesByCategory(expenses: Expense[]): Expense[] {
+    return [...expenses].sort((left, right) =>
+      this.categoryLabel(left.category).localeCompare(this.categoryLabel(right.category), this.localeService.currentLocale()) ||
+      left.description.localeCompare(right.description, this.localeService.currentLocale()),
+    );
+  }
+
+  private categoryLabel(category: ExpenseCategory): string {
+    return this.translate.instant(`expenseCategory.${category}`);
+  }
+
+  private normalizeDetail(value: string): string {
+    return value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toLocaleLowerCase()
+      .replace(/\s+/g, ' ');
+  }
+
+  private getTripSignature(trip: Trip): string {
+    return JSON.stringify([
+      trip.id,
+      trip.startDate,
+      trip.endDate,
+      trip.destination,
+      trip.status,
+      trip.trainBooking,
+      trip.hotelBooking,
+    ]);
+  }
+
+  private mergeExpectedExpenses(
+    previous: ExpectedExpensesResponse,
+    current: ExpectedExpensesResponse,
+  ): ExpectedExpensesResponse {
+    const previousDays = new Map(previous.days.map((day) => [day.date, day]));
+    const days = current.days.map((day) => {
+      const oldDay = previousDays.get(day.date);
+      if (!oldDay)
+        return day;
+
+      const currentSlots = new Map(day.slots.map((slot) => [slot.slotId, slot]));
+      const mergedSlots = [
+        ...day.slots,
+        ...oldDay.slots
+          .filter((slot) => !currentSlots.has(slot.slotId))
+          .map((slot) => ({
+            ...slot,
+            state: 'missing' as const,
+            expenseId: null,
+          })),
+      ];
+      return { ...day, slots: mergedSlots };
+    });
+
+    return {
+      summary: current.summary,
+      days,
+    };
   }
 
   protected requestDelete(): void {

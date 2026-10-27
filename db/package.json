@@ -1,0 +1,17 @@
+{
+	"name": "voyagevoyage-dev-db",
+	"version": "1.0.0",
+	"private": "true",
+	"scripts": {
+		"azurite": "azurite --location ./storage/data --debug ./storage/azurite.log --skipApiVersionCheck",
+		"postresql": "pg_ctl start -D ./storage/pgdata -l ./storage/pgsql.log",
+		"start": "npm run postresql && npm run azurite",
+		"stop": "pg_ctl stop -D ./storage/pgdata",
+		"init": "pg_ctl init -D ./storage/pgdata -o \"--locale=en_US.UTF-8 --encoding=UTF8\""
+	},
+	"author": "Yvan Razafindramanana",
+	"license": "MIT",
+	"dependencies": {
+		"azurite": "^3.29.0"
+	}
+}
