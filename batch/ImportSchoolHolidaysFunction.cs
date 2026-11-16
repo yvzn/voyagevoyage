@@ -1,6 +1,8 @@
 using batch.Data;
 using batch.Models;
 using batch.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -8,8 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace batch;
 
 /// <summary>
-/// Timer-triggered Azure Function that imports school holidays for all users.
-/// Runs on the 1st of every month at midnight UTC.
+/// HTTP-triggered Azure Function that imports school holidays for all users.
 /// Performs a full replace (delete + re-insert) of system-imported school holidays for all zones.
 /// </summary>
 public class ImportSchoolHolidaysFunction(
@@ -17,26 +18,12 @@ public class ImportSchoolHolidaysFunction(
     IDbContextFactory<BatchDbContext> dbContextFactory,
     ILogger<ImportSchoolHolidaysFunction> logger)
 {
-    /// <summary>CRON expression: run at 00:00:00 on the 1st of every month.</summary>
-    private const string CronSchedule = "0 0 0 1 * *";
-
     [Function("ImportSchoolHolidays")]
-    public async Task Run(
-#if DEBUG
-        [TimerTrigger(CronSchedule, RunOnStartup = true)]
-#else
-        [TimerTrigger(CronSchedule, RunOnStartup = false)]
-#endif
-        TimerInfo timer,
+    public async Task<IActionResult> Run(
+        [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest request,
         CancellationToken cancellationToken)
     {
-#if DEBUG
-        await Task.Delay(15_000, cancellationToken); // Simulate some startup delay in debug mode.
-#endif
-
-        logger.LogInformation(
-            "ImportSchoolHolidays triggered. IsPastDue: {IsPastDue}",
-            timer.IsPastDue);
+        logger.LogInformation("ImportSchoolHolidays triggered.");
 
         foreach (var zone in FranceSchoolHolidayApiService.Zones)
         {
@@ -44,6 +31,7 @@ public class ImportSchoolHolidaysFunction(
         }
 
         logger.LogInformation("ImportSchoolHolidays completed.");
+        return new OkResult();
     }
 
     private async Task ImportZoneAsync(string zone, CancellationToken cancellationToken)
@@ -58,7 +46,7 @@ public class ImportSchoolHolidaysFunction(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to fetch school holidays for zone '{Zone}'.", zone);
-            return;
+            throw;
         }
 
         await using var db = await dbContextFactory.CreateDbContextAsync(cancellationToken);

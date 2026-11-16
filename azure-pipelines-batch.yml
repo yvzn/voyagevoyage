@@ -12,6 +12,7 @@ trigger:
   paths:
     include:
     - batch
+    - batch.Tests
 
 pool:
   vmImage: ubuntu-latest
@@ -19,6 +20,12 @@ pool:
 jobs:
 - job: CI
   steps:
+  - task: DotNetCoreCLI@2
+    displayName: Test batch
+    inputs:
+      command: 'test'
+      projects: 'batch.Tests/*.csproj'
+      arguments: '--configuration Release'
   - task: DotNetCoreCLI@2
     inputs:
       command: 'build'

@@ -1,4 +1,5 @@
-using System.Text.Json;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -13,19 +14,12 @@ public class DetectTripAnomaliesFunction(
     ApplicationDbContext db,
     ILogger<DetectTripAnomaliesFunction> logger)
 {
-    private const string CronSchedule = "0 0 0 1,15 * *";
-
     [Function("DetectTripAnomalies")]
-    public async Task Run(
-#if DEBUG
-        [TimerTrigger(CronSchedule, RunOnStartup = true)]
-#else
-        [TimerTrigger(CronSchedule, RunOnStartup = false)]
-#endif
-        TimerInfo timer,
+    public async Task<IActionResult> Run(
+        [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest request,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("DetectTripAnomalies triggered. IsPastDue: {IsPastDue}", timer.IsPastDue);
+        logger.LogInformation("DetectTripAnomalies triggered.");
 
         var userIds = await db.Trips
             .AsNoTracking()
@@ -44,6 +38,7 @@ public class DetectTripAnomaliesFunction(
         await Task.WhenAll(analysisTasks);
 
         logger.LogInformation("DetectTripAnomalies completed for {UserCount} users.", userIds.Count);
+        return new OkResult();
     }
 
     private sealed class BatchCurrentUserService(string userId) : ICurrentUserService
