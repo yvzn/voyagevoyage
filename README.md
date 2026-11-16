@@ -71,8 +71,8 @@ Create an Azure DevOps pipeline from `azure-pipelines-batch-schedule.yml` on `ma
 authorize the `voyagevoyage-deployment` variable group. Set `functionAppUrl` to the
 HTTPS base URL of the deployed function app and `functionAppKey` to a **secret** host
 key that can invoke all three functions. Rotate the pipeline secret when the host key
-changes. The pipeline invokes all three jobs at 00:00 UTC on the first of each month
-and anomaly detection again at 00:00 UTC on the 15th. A manual run invokes all three.
+changes. The pipeline invokes all three jobs at 00:00 UTC on the first of each month.
+A manual run also invokes all three.
 Scheduled runs must be enabled in Azure DevOps; deploying the function app alone does
 not create the pipeline. Remove any UI-defined schedules, which override YAML schedules.
 Coordinate enabling the pipeline with deployment to avoid missed or duplicate runs

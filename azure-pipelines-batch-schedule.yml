@@ -8,12 +8,6 @@ schedules:
       include:
         - main
     always: true
-  - cron: '0 0 15 * *'
-    displayName: Midmonth
-    branches:
-      include:
-        - main
-    always: true
 
 variables:
   - group: 'voyagevoyage-deployment'
@@ -35,15 +29,6 @@ jobs:
       - checkout: none
       - bash: |
           set -u
-          if [[ "$BUILD_REASON" == Schedule ]]; then
-            if [[ "$SCHEDULE_NAME" == Midmonth && "$FUNCTION_NAME" != DetectTripAnomalies ]]; then
-              echo "Skipping monthly import."
-              exit 0
-            elif [[ "$SCHEDULE_NAME" != Monthly && "$SCHEDULE_NAME" != Midmonth ]]; then
-              echo "Unknown schedule; refusing to run."
-              exit 1
-            fi
-          fi
           if [[ "$FUNCTION_APP_URL" != https://* || -z "$FUNCTION_KEY" || "$FUNCTION_KEY" == '$('* ]]; then
             echo "Configure functionAppUrl as an HTTPS URL and functionAppKey as a secret pipeline variable."
             exit 1
@@ -68,5 +53,3 @@ jobs:
           FUNCTION_APP_URL: $(functionAppUrl)
           FUNCTION_KEY: $(functionAppKey)
           FUNCTION_NAME: $(functionName)
-          BUILD_REASON: $(Build.Reason)
-          SCHEDULE_NAME: $(Build.CronSchedule.DisplayName)
