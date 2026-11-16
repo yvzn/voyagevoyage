@@ -62,6 +62,28 @@ dotnet build -c Release
 func start
 ```
 
+The batch jobs are HTTP POST endpoints protected by Azure Functions keys:
+`/api/DetectTripAnomalies`, `/api/ImportPublicHolidays`, and `/api/ImportSchoolHolidays`.
+They no longer run automatically when the local host starts. Azure Functions Core Tools
+disables key authorization locally by default.
+
+Create an Azure DevOps pipeline from `azure-pipelines-batch-schedule.yml` on `main` and
+authorize the `voyagevoyage-deployment` variable group. Set `functionAppUrl` to the
+HTTPS base URL of the deployed function app and `functionAppKey` to a **secret** host
+key that can invoke all three functions. Rotate the pipeline secret when the host key
+changes. The pipeline invokes all three jobs at 00:00 UTC on the first of each month.
+A manual run also invokes all three.
+Scheduled runs must be enabled in Azure DevOps; deploying the function app alone does
+not create the pipeline. Remove any UI-defined schedules, which override YAML schedules.
+Coordinate enabling the pipeline with deployment to avoid missed or duplicate runs
+during the transition. HTTP invocations do not have the timer trigger's singleton
+lock, so avoid overlapping manual and scheduled runs.
+
+Calls wait for completion and fail the pipeline on an HTTP error or timeout. Azure
+Functions HTTP responses are subject to the platform's approximately 230-second
+load-balancer timeout; a timed-out job may still be running, so check function logs
+before manually retrying.
+
 ## Documentation
 
 - [Functional documentation](docs/FUNCTIONAL_DOCUMENTATION.md)

@@ -1,0 +1,55 @@
+trigger: none
+pr: none
+
+schedules:
+  - cron: '0 0 1 * *'
+    displayName: Monthly
+    branches:
+      include:
+        - main
+    always: true
+
+variables:
+  - group: 'voyagevoyage-deployment'
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+  - job: Invoke
+    strategy:
+      matrix:
+        Anomalies:
+          functionName: DetectTripAnomalies
+        PublicHolidays:
+          functionName: ImportPublicHolidays
+        SchoolHolidays:
+          functionName: ImportSchoolHolidays
+    steps:
+      - checkout: none
+      - bash: |
+          set -u
+          if [[ "$FUNCTION_APP_URL" != https://* || -z "$FUNCTION_KEY" || "$FUNCTION_KEY" == '$('* ]]; then
+            echo "Configure functionAppUrl as an HTTPS URL and functionAppKey as a secret pipeline variable."
+            exit 1
+          fi
+
+          echo "Invoking $FUNCTION_NAME"
+          if status=$(curl --silent --show-error --max-time 240 \
+            --output /dev/null --write-out '%{http_code}' \
+            --request POST --header "x-functions-key: $FUNCTION_KEY" \
+            "${FUNCTION_APP_URL%/}/api/$FUNCTION_NAME"); then
+            if [[ "$status" == 2?? ]]; then
+              echo "$FUNCTION_NAME completed (HTTP $status)."
+              exit 0
+            fi
+            echo "$FUNCTION_NAME failed (HTTP $status)."
+          else
+            echo "$FUNCTION_NAME request failed."
+          fi
+          exit 1
+        displayName: Invoke batch function
+        env:
+          FUNCTION_APP_URL: $(functionAppUrl)
+          FUNCTION_KEY: $(functionAppKey)
+          FUNCTION_NAME: $(functionName)
